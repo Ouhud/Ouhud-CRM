@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}✏️ Segment bearbeiten{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;margin:0 auto;">
+  <h1 style="font-size:1.4rem;font-weight:700;margin-bottom:1rem;">✏️ Segment bearbeiten</h1>
+
+  <form method="post" action="/dashboard/segments/edit/{{ segment.id }}" style="display:flex;flex-direction:column;gap:.8rem;">
+    <label>
+      Name:
+      <input type="text" name="name" value="{{ segment.name }}" required
+             style="width:100%;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
+    </label>
+    <label>
+      Beschreibung:
+      <textarea name="description" style="width:100%;padding:.6rem;border:1px solid #ccc;border-radius:6px;">{{ segment.description or '' }}</textarea>
+    </label>
+    <div style="display:flex;gap:.5rem;">
+      <button type="submit" style="background:#3b82f6;color:white;padding:.6rem 1rem;border:none;border-radius:6px;cursor:pointer;">💾 Speichern</button>
+      <a href="/dashboard/segments" style="background:#6b7280;color:white;padding:.6rem 1rem;border-radius:6px;text-decoration:none;">⬅️ Zurück</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

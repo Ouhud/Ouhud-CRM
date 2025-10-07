@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}🏢 Firmenprofil{% endblock %}
+
+{% block content %}
+<style>
+    .company-settings {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-top: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    label {
+        display: block;
+        font-weight: 500;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+    }
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.6rem;
+        margin-top: 0.3rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: #4f46e5;
+        outline: none;
+    }
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 0.5rem;
+        font-weight: normal;
+    }
+    .logo-preview {
+        margin-top: 1rem;
+        text-align: center;
+    }
+    .logo-preview img {
+        max-height: 80px;
+        max-width: 250px;
+        object-fit: contain;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 4px;
+        background: #f9fafb;
+    }
+    button {
+        margin-top: 1.8rem;
+        background-color: #4f46e5;
+        color: white;
+        padding: 0.8rem 1.2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+    }
+    button:hover {
+        background-color: #4338ca;
+    }
+</style>
+
+<div class="company-settings">
+    <h1>🏢 Firmenprofil verwalten</h1>
+
+    <form action="/dashboard/company" method="post" enctype="multipart/form-data">
+        <!-- 📝 Allgemeine Firmendaten -->
+        <h2>Allgemeine Daten</h2>
+
+        <label>Firmenname*:
+            <input type="text" name="company_name" value="{{ settings.company_name if settings else '' }}" required>
+        </label>
+
+        <label>Adresse:
+            <input type="text" name="address" value="{{ settings.address if settings else '' }}">
+        </label>
+
+        <label>Stadt:
+            <input type="text" name="city" value="{{ settings.city if settings else '' }}">
+        </label>
+
+        <label>Land:
+            <input type="text" name="country" value="{{ settings.country if settings else '' }}">
+        </label>
+
+        <label>E-Mail:
+            <input type="email" name="email" value="{{ settings.email if settings else '' }}">
+        </label>
+
+        <label>Telefon:
+            <input type="text" name="phone" value="{{ settings.phone if settings else '' }}">
+        </label>
+
+        <label>IBAN:
+            <input type="text" name="iban" value="{{ settings.iban if settings else '' }}">
+        </label>
+
+        <label>BIC:
+            <input type="text" name="bic" value="{{ settings.bic if settings else '' }}">
+        </label>
+
+        <!-- 🌍 Währungsauswahl -->
+        <label>Währung:
+            {% set cc = (settings.currency_code if settings else 'EUR') %}
+            <select name="currency_code">
+                <option value="EUR" {% if cc == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                <option value="CHF" {% if cc == 'CHF' %}selected{% endif %}>CHF (Fr.)</option>
+                <option value="USD" {% if cc == 'USD' %}selected{% endif %}>USD ($)</option>
+                <option value="GBP" {% if cc == 'GBP' %}selected{% endif %}>GBP (£)</option>
+            </select>
+        </label>
+
+        <!-- 🖼 Logo -->
+        <h2>Firmenlogo</h2>
+        <input type="file" name="logo" accept="image/*">
+        {% if settings and settings.logo_path %}
+        <div class="logo-preview">
+            <p>Aktuelles Logo:</p>
+            <img src="{{ settings.logo_path }}" alt="Logo">
+        </div>
+        {% endif %}
+
+        <!-- 💳 Zahlungsarten -->
+        <h2>Zahlungsarten</h2>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="enable_sepa" value="1" {% if settings and settings.enable_sepa %}checked{% endif %}> 🇪🇺 SEPA-QR aktivieren</label>
+            <label><input type="checkbox" name="enable_twint" value="1" {% if settings and settings.enable_twint %}checked{% endif %}> 🇨🇭 TWINT-QR aktivieren</label>
+            <label><input type="checkbox" name="enable_online_payment" value="1" {% if settings and settings.enable_online_payment %}checked{% endif %}> 🌐 Online-Zahlung aktivieren</label>
+        </div>
+
+        <!-- 📜 Impressum -->
+        <h2>Rechtlicher Hinweis / Impressum</h2>
+        <textarea name="legal_notice" rows="5">{{ settings.legal_notice if settings and settings.legal_notice else '' }}</textarea>
+
+        <!-- 💾 Speichern -->
+        <button type="submit">💾 Änderungen speichern</button>
+    </form>
+</div>
+{% endblock %}

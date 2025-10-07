@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>🔐 Anmeldung | Ouhud CRM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #6d28d9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .login-container img {
+      height: 60px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      color: #4f46e5;
+      margin-bottom: 0.5rem;
+      font-size: 1.4rem;
+    }
+
+    p.desc {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #4f46e5;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.25s;
+    }
+
+    button:hover {
+      background-color: #4338ca;
+    }
+
+    a {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #4f46e5;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* 🔴 Fehlermeldung */
+    .error-box {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <img src="/static/logo_ouhud.png" alt="Ouhud Logo">
+    <h1>Willkommen bei Ouhud CRM</h1>
+    <p class="desc">Melden Sie sich an, um Kunden, Rechnungen und Praxisdaten sicher zu verwalten.</p>
+
+    <!-- 🔴 FEHLERMELDUNG ANZEIGEN -->
+    {% if error_message %}
+    <div class="error-box">
+      {{ error_message }}
+    </div>
+    {% endif %}
+
+    <!-- 📝 LOGIN-FORMULAR -->
+    <form method="post" action="/auth/login">
+      <input type="text" name="username" placeholder="E-Mail oder Benutzername" required>
+      <input type="password" name="password" placeholder="Passwort" required>
+      <button type="submit">Anmelden</button>
+    </form>
+
+    <a href="/auth/forgot-password">🔑 Passwort vergessen?</a>
+  </div>
+</body>
+</html>

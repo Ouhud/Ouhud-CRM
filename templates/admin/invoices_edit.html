@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}✏️ Rechnung bearbeiten{% endblock %}
+
+{% block content %}
+
+<!-- 🧭 Kopfbereich -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+  <div>
+    <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">✏️ Rechnung bearbeiten</h1>
+    <p style="margin:0;color:#6b7280">Bearbeite Kundendaten, Beträge und Positionen mit Live-Berechnung.</p>
+  </div>
+  <a href="/dashboard/invoices"
+     style="text-decoration:none;color:#4f46e5;font-weight:500;">← Zurück zur Übersicht</a>
+</div>
+
+<!-- 🏢 Firmeninformationen -->
+<div style="background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:1.2rem;margin-top:1.2rem;display:flex;justify-content:space-between;align-items:start;gap:1rem;flex-wrap:wrap;">
+  <div>
+    <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:.3rem;">{{ company.company_name }}</h2>
+    <p style="font-size:.9rem;color:#374151;line-height:1.4;">
+      {{ company.address }}<br>
+      {{ company.city }}, {{ company.country }}<br>
+      {{ company.email }}{% if company.phone %} | {{ company.phone }}{% endif %}<br>
+      {% if company.vat_number %}USt-IdNr.: {{ company.vat_number }}<br>{% endif %}
+      {% if company.iban %}IBAN: {{ company.iban }}{% endif %}
+    </p>
+  </div>
+  {% if company.logo_path %}
+    <img src="{{ company.logo_path }}" alt="Logo" style="max-height:64px;object-fit:contain;">
+  {% endif %}
+</div>
+
+<!-- 📝 Rechnungsdaten Formular -->
+<form action="/dashboard/invoices/edit/{{ invoice.id }}" method="post"
+      style="background:#fff;margin-top:1.2rem;padding:1.4rem 1.6rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);display:grid;gap:1rem;max-width:800px;">
+  
+  <!-- Kunde & Rechnungsnummer -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div>
+      <label for="customer_id" style="font-weight:600;margin-bottom:.25rem;display:block;">👤 Kunde</label>
+      <select name="customer_id" id="customer_id" required
+              style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+        {% for c in customers %}
+          <option value="{{ c.id }}" {% if invoice.customer_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="invoice_number" style="font-weight:600;margin-bottom:.25rem;display:block;"># Rechnungsnummer</label>
+      <input type="text" name="invoice_number" id="invoice_number" value="{{ invoice.invoice_number }}" required
+             style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    </div>
+  </div>
+
+  <!-- Betrag & Fälligkeit -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div>
+      <label for="total_amount" style="font-weight:600;margin-bottom:.25rem;display:block;">💰 Gesamtbetrag ({{ company.currency_code or 'EUR' }})</label>
+      <input type="number" step="0.01" name="total_amount" id="total_amount"
+             value="{{ '%.2f'|format(invoice.total_amount) }}" required
+             style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;font-family:monospace;"
+             readonly>
+    </div>
+    <div>
+      <label for="due_date" style="font-weight:600;margin-bottom:.25rem;display:block;">📅 Fälligkeitsdatum</label>
+      <input type="date" name="due_date" id="due_date" value="{{ invoice.due_date }}" required
+             style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div>
+    <label for="status" style="font-weight:600;margin-bottom:.25rem;display:block;">📌 Status</label>
+    <select name="status" id="status" required
+            style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+      <option value="draft" {% if invoice.status == 'draft' %}selected{% endif %}>📝 Entwurf</option>
+      <option value="sent" {% if invoice.status == 'sent' %}selected{% endif %}>📤 Gesendet</option>
+      <option value="paid" {% if invoice.status == 'paid' %}selected{% endif %}>✅ Bezahlt</option>
+      <option value="cancelled" {% if invoice.status == 'cancelled' %}selected{% endif %}>🚫 Storniert</option>
+    </select>
+  </div>
+
+  <!-- Aktionen -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem;">
+    <a href="/dashboard/invoices" style="text-decoration:none;color:#555;">← Abbrechen</a>
+    <button type="submit"
+            style="background:#4f46e5;color:#fff;border:none;padding:.65rem 1.2rem;border-radius:8px;cursor:pointer;font-weight:600;">
+      💾 Änderungen speichern
+    </button>
+  </div>
+</form>
+
+<!-- 📋 Rechnungspositionen -->
+<div style="background:#fff;margin-top:1.5rem;padding:1.4rem 1.6rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);max-width:1000px;">
+  <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:1rem;">📌 Rechnungspositionen</h2>
+
+  <!-- ➕ Position hinzufügen -->
+  <form action="/dashboard/invoices/items/add/{{ invoice.id }}" method="post"
+        style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem;">
+    <input type="text" name="description" placeholder="Beschreibung" required
+           style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    <input type="number" name="quantity" value="1" min="1" required
+           style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    <input type="number" step="0.01" name="unit_price" placeholder="Preis (€)" required
+           style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    <select name="tax_rate" required
+            style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+      <option value="0">0 %</option>
+      <option value="7">7 %</option>
+      <option value="19">19 %</option>
+    </select>
+    <div style="grid-column:1/-1;text-align:right;margin-top:.5rem;">
+      <button type="submit"
+              style="background:#10b981;color:#fff;border:none;padding:.55rem 1rem;border-radius:8px;cursor:pointer;">
+        ➕ Position hinzufügen
+      </button>
+    </div>
+  </form>
+
+  <!-- 📝 Positionen-Tabelle -->
+  <div style="overflow-x:auto;">
+    <table id="items-table" style="width:100%;border-collapse:collapse;">
+      <thead style="background:#f4f6f8;">
+        <tr>
+          <th style="padding:.65rem;text-align:left;">Beschreibung</th>
+          <th style="padding:.65rem;text-align:left;">Menge</th>
+          <th style="padding:.65rem;text-align:left;">Einzelpreis</th>
+          <th style="padding:.65rem;text-align:left;">MwSt. (%)</th>
+          <th style="padding:.65rem;text-align:right;">Gesamt</th>
+          <th style="padding:.65rem;text-align:right;">Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in invoice.items %}
+        <tr class="item-row" data-id="{{ item.id }}">
+          <td style="padding:.55rem;">{{ item.description }}</td>
+          <td style="padding:.55rem;" class="qty">{{ item.quantity }}</td>
+          <td style="padding:.55rem;" class="price">{{ "%.2f"|format(item.unit_price) }}</td>
+          <td style="padding:.55rem;" class="tax">{{ item.tax_rate }}</td>
+          <td style="padding:.55rem;text-align:right;" class="line-total">
+            {{ "%.2f"|format(item.quantity * item.unit_price * (1 + item.tax_rate / 100)) }}
+          </td>
+          <td style="padding:.55rem;text-align:right;">
+            <a href="/dashboard/invoices/items/delete/{{ item.id }}/{{ invoice.id }}"
+               onclick="return confirm('Position wirklich löschen?');"
+               style="background:#ef4444;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;">
+              🗑
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" style="padding:1rem;text-align:center;color:#6b7280;">📭 Keine Positionen vorhanden.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Summenzeile -->
+  <div style="margin-top:1rem;text-align:right;font-size:1rem;">
+    <p><strong>Netto:</strong> <span id="net-total">0.00</span> {{ company.currency_code or 'EUR' }}</p>
+    <p><strong>MwSt.:</strong> <span id="tax-total">0.00</span> {{ company.currency_code or 'EUR' }}</p>
+    <p style="font-size:1.1rem;font-weight:700;">💰 Gesamt: <span id="grand-total">0.00</span> {{ company.currency_code or 'EUR' }}</p>
+  </div>
+</div>
+
+<!-- 🧮 Live Berechnung Script -->
+<script>
+  function updateTotals() {
+    let net = 0;
+    let tax = 0;
+
+    document.querySelectorAll('#items-table tbody tr.item-row').forEach(row => {
+      const qty = parseFloat(row.querySelector('.qty').textContent) || 0;
+      const price = parseFloat(row.querySelector('.price').textContent) || 0;
+      const taxRate = parseFloat(row.querySelector('.tax').textContent) || 0;
+
+      const lineNet = qty * price;
+      const lineTax = lineNet * (taxRate / 100);
+
+      net += lineNet;
+      tax += lineTax;
+
+      row.querySelector('.line-total').textContent = (lineNet + lineTax).toFixed(2);
+    });
+
+    document.getElementById('net-total').textContent = net.toFixed(2);
+    document.getElementById('tax-total').textContent = tax.toFixed(2);
+    document.getElementById('grand-total').textContent = (net + tax).toFixed(2);
+    document.getElementById('total_amount').value = (net + tax).toFixed(2);
+  }
+
+  document.addEventListener('DOMContentLoaded', updateTotals);
+</script>
+
+{% endblock %}

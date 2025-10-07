@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}👤 Admin-Profil{% endblock %}
+
+{% block content %}
+<style>
+  .profile-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .profile-container h1 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .profile-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+  }
+
+  .profile-label {
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  .profile-value {
+    color: #111827;
+  }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    text-decoration: none;
+    color: #4f46e5;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="profile-container">
+  <h1>👤 Administrator-Profil</h1>
+
+  <div class="profile-row">
+    <div class="profile-label">Benutzername:</div>
+    <div class="profile-value">{{ user.username }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">E-Mail:</div>
+    <div class="profile-value">{{ user.email }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Vorname:</div>
+    <div class="profile-value">{{ user.first_name or "-" }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Nachname:</div>
+    <div class="profile-value">{{ user.last_name or "-" }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Telefon:</div>
+    <div class="profile-value">{{ user.phone or "-" }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Adresse:</div>
+    <div class="profile-value">{{ user.address or "-" }}</div>
+  </div>
+
+  <div class="profile-row">
+    <div class="profile-label">Geburtsdatum:</div>
+    <div class="profile-value">{{ user.birthday or "-" }}</div>
+  </div>
+
+  <a href="/admin" class="back-link">⬅️ Zurück zum Admin-Dashboard</a>
+</div>
+{% endblock %}

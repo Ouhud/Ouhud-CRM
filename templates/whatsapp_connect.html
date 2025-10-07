@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}🔌 WhatsApp verbinden{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --success: #16a34a;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --bg: #f8fafc;
+  }
+  .card {
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 4px 18px rgba(0,0,0,.04);
+  }
+  .header {padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+  .content {padding:1.25rem;}
+  .title {font-weight:700;font-size:1.2rem;color:var(--text);}
+  .desc {color:var(--muted);margin-top:.25rem;}
+
+  .form-grid {
+    display:grid;gap:.9rem;margin-top:1rem;
+  }
+  .form-grid label {font-size:.9rem;color:var(--muted);}
+  .form-grid input[type="text"]{
+    width:100%;padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;font-size:.95rem;
+  }
+  .btn {
+    appearance:none;border:1px solid var(--success);background:var(--success);color:#fff;
+    padding:.7rem 1.1rem;border-radius:8px;cursor:pointer;font-size:.95rem;
+  }
+  .tip {
+    background:#eef2ff;border:1px solid #c7d2fe;color:#1e3a8a;border-radius:10px;
+    padding:.9rem 1rem;margin-top:1rem;font-size:.9rem;
+  }
+  .links {margin-top:.75rem;}
+  .links a {color:var(--primary);text-decoration:none;}
+  .links a:hover {text-decoration:underline;}
+</style>
+
+<div class="dashboard-container" style="max-width:700px;margin:0 auto;">
+  <div class="card">
+    <div class="header">
+      <div class="title">🔌 WhatsApp Business API verbinden</div>
+      <div class="desc">Trage hier die Zugangsdaten aus deinem Meta for Developers Dashboard ein.</div>
+    </div>
+    <div class="content">
+      <form method="post" action="/dashboard/whatsapp/save_credentials" class="form-grid">
+        <div>
+          <label>📞 Phone Number ID</label>
+          <input type="text" name="phone_number_id" placeholder="z. B. 123456789012345" required>
+        </div>
+        <div>
+          <label>🏢 Business ID</label>
+          <input type="text" name="business_id" placeholder="z. B. 987654321098765" required>
+        </div>
+        <div>
+          <label>🔑 Access Token</label>
+          <input type="text" name="access_token" placeholder="EAAGm0PX4ZCpsBA..." required>
+        </div>
+        <button type="submit" class="btn">✅ Speichern & verbinden</button>
+      </form>
+
+      <div class="tip">
+        <strong>Hinweis:</strong> Nach dem Speichern prüft das System automatisch den Status.
+        Anschließend kannst du im <a href="/dashboard/whatsapp">WhatsApp Chat</a> Nachrichten empfangen und senden.
+      </div>
+
+      <div class="links">
+        ➕ Zugangsdaten findest du im
+        <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer">Meta for Developers Dashboard</a>.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

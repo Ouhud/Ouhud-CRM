@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}🏦 Bankimport – CAMT.053{% endblock %}
+{% block content %}
+<h1>🏦 CAMT.053 Bankdatei importieren</h1>
+<p>Lade eine CAMT.053 XML-Datei deiner Bank hoch, um Zahlungseingänge automatisch mit Rechnungen abzugleichen.</p>
+
+<form action="/dashboard/bank-import" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".xml" required>
+    <button type="submit">📥 Datei hochladen</button>
+</form>
+
+{% if matched %}
+    <h3 style="color:green;">✅ Verbuchte Rechnungen:</h3>
+    <ul>
+        {% for inv in matched %}
+            <li>{{ inv }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if unmatched %}
+    <h3 style="color:red;">⚠️ Nicht zuordenbare Zahlungen:</h3>
+    <ul>
+        {% for p in unmatched %}
+            <li>{{ p.reference }} – {{ p.amount }} {{ p.type }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

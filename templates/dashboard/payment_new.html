@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}➕ Neue Zahlung{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.6rem;font-weight:800;margin-bottom:1rem;">➕ Neue Zahlung</h1>
+
+<form method="post" action="/dashboard/payments/create"
+      style="background:#fff;padding:1.5rem;border-radius:12px;max-width:500px;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+  
+  <!-- Rechnungsauswahl -->
+  <label for="invoice_id" style="display:block;margin-top:.8rem;font-weight:600;">Rechnung:</label>
+  <select id="invoice_id" name="invoice_id" required
+          style="width:100%;padding:.5rem;border:1px solid #e5e7eb;border-radius:8px;">
+    {% for inv in invoices %}
+      <option value="{{ inv.id }}">#{{ inv.invoice_number }} – {{ inv.customer_name }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Betrag -->
+  <label for="amount" style="display:block;margin-top:.8rem;font-weight:600;">Betrag (€):</label>
+  <input type="number" step="0.01" id="amount" name="amount" required
+         style="width:100%;padding:.5rem;border:1px solid #e5e7eb;border-radius:8px;">
+
+  <!-- Datum -->
+  <label for="date_" style="display:block;margin-top:.8rem;font-weight:600;">Datum:</label>
+  <input type="date" id="date_" name="date_" required
+         style="width:100%;padding:.5rem;border:1px solid #e5e7eb;border-radius:8px;">
+
+  <!-- Zahlungsmethode -->
+  <label for="method" style="display:block;margin-top:.8rem;font-weight:600;">Methode:</label>
+  <select id="method" name="method" required
+          style="width:100%;padding:.5rem;border:1px solid #e5e7eb;border-radius:8px;">
+    <option value="Überweisung">Überweisung</option>
+    <option value="Bar">Bar</option>
+    <option value="Kreditkarte">Kreditkarte</option>
+    <option value="PayPal">PayPal</option>
+  </select>
+
+  <!-- Notiz -->
+  <label for="note" style="display:block;margin-top:.8rem;font-weight:600;">Notiz (optional):</label>
+  <textarea id="note" name="note" rows="3"
+            style="width:100%;padding:.5rem;border:1px solid #e5e7eb;border-radius:8px;"></textarea>
+
+  <button type="submit"
+          style="margin-top:1rem;background:#4f46e5;color:#fff;padding:.6rem 1rem;border:none;border-radius:8px;cursor:pointer;">
+    💾 Zahlung speichern
+  </button>
+</form>
+{% endblock %}

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Ouhud CRM{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* 🌐 Globales Layout */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 🟦 Sidebar */
+    .sidebar {
+      width: 250px;
+      background-color: #4f46e5;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+    }
+
+    /* 🏢 Logo */
+    .sidebar .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      padding: 1.5rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar .logo img {
+      height: 36px;
+      width: auto;
+    }
+
+    /* 🧭 Navigation */
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.4rem;
+      flex-grow: 1;
+    }
+
+    .sidebar nav .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin: 1rem 0 0.2rem 0.5rem;
+    }
+
+    .sidebar nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* 👤 Benutzerbereich unten */
+    .user-box {
+      margin-top: auto;
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-avatar {
+      background: white;
+      color: #4f46e5;
+      font-weight: bold;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .user-info strong {
+      display: block;
+      font-size: 0.95rem;
+      color: white;
+    }
+
+    .user-info a {
+      color: #cbd5e1;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+
+    .user-info a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .logout-link {
+      display: block;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .logout-link:hover {
+      color: #ffffff;
+    }
+
+    /* 📄 Hauptinhalt */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 2rem;
+      width: calc(100% - 250px);
+    }
+
+    /* 📱 Mobile Ansicht */
+    @media (max-width: 850px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar .logo span,
+      .sidebar nav .section-title {
+        display: none;
+      }
+
+      .sidebar nav a {
+        justify-content: center;
+        font-size: 0;
+      }
+
+      .sidebar nav a::before {
+        font-size: 1.4rem;
+      }
+
+      .main-content {
+        margin-left: 60px;
+        padding: 1rem;
+        width: calc(100% - 60px);
+      }
+
+      .user-info strong,
+      .user-info a {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🟦 Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/static/logo_ouhud.png" alt="Ouhud Logo">
+      <span>Ouhud CRM</span>
+    </div>
+
+    <nav>
+      <!-- 🏠 Dashboard -->
+      <a href="/dashboard/">🏠 Dashboard</a>
+
+      <!-- 👤 Kunden & Vertrieb -->
+      <div class="section-title">Kunden & Vertrieb</div>
+      <a href="/dashboard/customers">🧑‍💼 Kontakte</a>
+      <a href="/dashboard/leads">🚀 Leads / Opportunities</a>
+      <a href="/dashboard/history">📜 Kundenhistorie</a>
+
+      <!-- 🧠 Marketing -->
+      <div class="section-title">Marketing</div>
+      <a href="/dashboard/campaigns">📢 Kampagnen & Newsletter</a>
+      <a href="/dashboard/segments">🎯 Zielgruppen / Segmentierung</a>
+      <a href="/dashboard/forms">📝 Landing Pages & Formulare</a>
+
+      <!-- 📅 Planung -->
+      <div class="section-title">Planung</div>
+      <a href="/dashboard/calendar">📅 Kalender & Aufgaben</a>
+
+      <!-- 💰 Produkte & Finanzen -->
+      <div class="section-title">Produkte & Finanzen</div>
+      <a href="/dashboard/products">📦 Produkte</a>
+      <a href="/dashboard/orders">🛍 Bestellungen</a>
+      <a href="/dashboard/invoices">🧾 Rechnungen</a>
+      <a href="/dashboard/payments/">💳 Zahlungen</a>
+      <a href="/dashboard/invoices/reminders">⏰ Mahnungen</a>
+
+      <!-- 📊 Analyse & Kommunikation -->
+      <div class="section-title">Analyse & Kommunikation</div>
+      <a href="/dashboard/reports">📈 Berichte & Analysen</a>
+      <a href="/dashboard/inbox">📨 Kommunikation / Inbox</a>
+      <a href="/dashboard/chat" class="{% if request.url.path.startswith('/dashboard/chat') %}active{% endif %}">
+  💬 Interner Chat
+</a>
+<a href="/dashboard/whatsapp" class="{% if request.url.path.startswith('/dashboard/whatsapp') %}active{% endif %}">
+  📲 WhatsApp Chat
+</a>
+      <a href="/dashboard/calls">📞 Anrufhistorie</a>
+
+      <!-- ⚙️ Automatisierung -->
+      <div class="section-title">Automatisierung</div>
+      <a href="/dashboard/workflows">🛠 Workflows</a>
+      <a href="/dashboard/automation/designer">🧭 Prozess-Designer</a>
+      <a href="/dashboard/documents">📑 Dokumente</a>
+
+      <!-- 🔐 System & Verwaltung -->
+      <div class="section-title">System & Verwaltung</div>
+      <a href="/dashboard/users">👥 Benutzer & Rollen</a>
+      <a href="/dashboard/audit">📝 Audit-Logs</a>
+      <a href="/dashboard/integrations">🔌 Integrationen & API</a>
+      <a href="/dashboard/privacy">🔐 Datenschutz & DSGVO</a>
+      <a href="/dashboard/settings">🌍 Einstellungen</a>
+      <a href="/admin/">⚡ Administration</a>
+
+        <!-- 🧠 Ouhud KI -->
+        <div class="section-title">Ouhud KI</div>
+        <a href="/dashboard/ai/leads">📈 Lead Scoring & Empfehlungen</a>
+        <a href="/dashboard/ai/assistant">🤖 Ouhud KI-Assistent</a>
+
+    <!-- 👤 Benutzerbereich -->
+    <div class="user-box">
+      {% if user %}
+        <div class="user-info">
+          <div class="user-avatar">{{ user.username[0]|upper if user.username else "?" }}</div>
+          <div>
+            <strong>{{ user.username.split('@')[0] }}</strong>
+            <a href="/dashboard/settings">⚙️ Profil</a>
+          </div>
+        </div>
+        <a href="/auth/logout" class="logout-link">🚪 Logout</a>
+      {% else %}
+        <a href="/auth/login" class="logout-link">🔐 Login</a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- 📄 Hauptinhalt -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

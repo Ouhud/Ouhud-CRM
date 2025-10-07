@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}💳 Zahlungen{% endblock %}
+
+{% block content %}
+<!-- Kopfbereich mit Button -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+  <div>
+    <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">💳 Zahlungen</h1>
+    <p style="margin:0;color:#6b7280">Verwalte alle Zahlungseingänge und Erstattungen.</p>
+  </div>
+  <div>
+    <a href="/dashboard/payments/new"
+       style="background:#4f46e5;color:#fff;padding:.55rem .9rem;border-radius:8px;text-decoration:none;">
+      ➕ Neue Zahlung
+    </a>
+  </div>
+</div>
+
+<!-- Filter -->
+<form method="get" action="/dashboard/payments" 
+      style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:1rem 0;">
+  <input type="text" name="q" placeholder="🔎 Suche (Rechnung, Methode, Notiz)…"
+         style="flex:1 1 260px;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+  <button type="submit"
+          style="background:#4f46e5;color:#fff;border:none;padding:.55rem .9rem;border-radius:8px;cursor:pointer;">
+    Filtern
+  </button>
+</form>
+
+<!-- Zahlungen Tabelle -->
+{% if payments|length == 0 %}
+  <div style="background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+    📭 Keine Zahlungen vorhanden.
+  </div>
+{% else %}
+  <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead style="background:#f4f6f8;">
+        <tr>
+          <th style="padding:.65rem .8rem;text-align:left;">#</th>
+          <th style="padding:.65rem .8rem;text-align:left;">Rechnung</th>
+          <th style="padding:.65rem .8rem;text-align:right;">Betrag</th>
+          <th style="padding:.65rem .8rem;text-align:left;">Methode</th>
+          <th style="padding:.65rem .8rem;text-align:center;">Datum</th>
+          <th style="padding:.65rem .8rem;text-align:center;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+          <tr style="border-top:1px solid #eef2f7;">
+            <td style="padding:.65rem .8rem;">{{ p.id }}</td>
+            <td style="padding:.65rem .8rem;">
+              {% if p.invoice %}
+                #{{ p.invoice.invoice_number }}
+              {% else %}
+                –
+              {% endif %}
+            </td>
+            <td style="padding:.65rem .8rem;text-align:right;font-family:monospace;font-weight:600;">
+              {{ "%.2f"|format(p.amount) }} €
+            </td>
+            <td style="padding:.65rem .8rem;">{{ p.method }}</td>
+            <td style="padding:.65rem .8rem;text-align:center;">
+              {{ p.date.strftime('%d.%m.%Y') }}
+            </td>
+            <td style="padding:.65rem .8rem;text-align:center;">
+              {% if p.status == 'received' %}
+                <span style="background:#dcfce7;color:#065f46;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">✅ Erhalten</span>
+              {% elif p.status == 'pending' %}
+                <span style="background:#fef3c7;color:#92400e;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">⏳ Offen</span>
+              {% elif p.status == 'refunded' %}
+                <span style="background:#fee2e2;color:#991b1b;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">💸 Erstattung</span>
+              {% else %}
+                <span style="background:#e5e7eb;color:#374151;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">❔ Unbekannt</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

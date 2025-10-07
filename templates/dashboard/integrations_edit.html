@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}✏️ Integration bearbeiten{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;margin:0 auto;">
+  <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">✏️ Integration bearbeiten</h1>
+
+  <form method="post" action="/dashboard/integrations/edit/{{ integration.id }}" style="display:flex;flex-direction:column;gap:.8rem;">
+    <!-- 🟦 Name -->
+    <label>
+      Name:
+      <input type="text" name="name" value="{{ integration.name }}" required
+             style="width:100%;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
+    </label>
+
+    <!-- 🟨 Typ -->
+    <label>
+      Typ:
+      <select name="type" style="width:100%;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
+        <option value="whatsapp" {% if integration.type == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
+        <option value="stripe" {% if integration.type == 'stripe' %}selected{% endif %}>Stripe</option>
+        <option value="mailgun" {% if integration.type == 'mailgun' %}selected{% endif %}>Mailgun</option>
+        <option value="custom" {% if integration.type == 'custom' %}selected{% endif %}>Benutzerdefiniert</option>
+      </select>
+    </label>
+
+    <!-- 🟩 API-Key -->
+    <label>
+      API-Key:
+      <input type="text" name="api_key" value="{{ integration.api_key or '' }}"
+             style="width:100%;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
+    </label>
+
+    <!-- 🟧 Aktiv -->
+    <label style="display:flex;align-items:center;gap:.5rem;">
+      <input type="checkbox" name="is_active" {% if integration.is_active %}checked{% endif %}>
+      Aktiv
+    </label>
+
+    <!-- 🟦 Aktionen -->
+    <div style="display:flex;gap:.5rem;margin-top:1rem;">
+      <button type="submit" style="background:#3b82f6;color:white;padding:.6rem 1rem;border:none;border-radius:6px;cursor:pointer;">💾 Speichern</button>
+      <a href="/dashboard/integrations" style="background:#6b7280;color:white;padding:.6rem 1rem;border-radius:6px;text-decoration:none;">⬅️ Zurück</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

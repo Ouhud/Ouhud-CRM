@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Kunde bearbeiten' if customer else 'Neuer Kunde' }}{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    h2 {
+        margin-top: 0;
+        font-size: 1.5rem;
+        color: #333;
+        text-align: center;
+    }
+
+    form label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+        color: #444;
+    }
+
+    form input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+    }
+
+    form input:focus {
+        border-color: #4f46e5;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn {
+        display: inline-block;
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        background-color: #4338ca;
+    }
+
+    .btn-secondary {
+        background-color: #e5e7eb;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background-color: #d1d5db;
+    }
+
+    input[readonly] {
+        background-color: #f3f4f6;
+        color: #555;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="form-container">
+    <h2>
+        {% if customer %}
+            ✏️ Kunde bearbeiten
+        {% else %}
+            ➕ Neuer Kunde
+        {% endif %}
+    </h2>
+
+    <form method="post" action="{% if customer %}/dashboard/customers/edit/{{ customer.id }}{% else %}/dashboard/customers/create{% endif %}">
+        
+        <!-- 🧾 Kundennummer (automatisch generiert) -->
+        <label for="customer_number">Kundennummer:</label>
+        <input type="text" id="customer_number" name="customer_number"
+               value="{{ customer.customer_number if customer else '(wird automatisch vergeben)' }}" readonly>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ customer.name if customer else '' }}" required>
+
+        <label for="email">E-Mail:</label>
+        <input type="email" id="email" name="email" value="{{ customer.email if customer else '' }}" required>
+
+        <label for="address">Adresse:</label>
+        <input type="text" id="address" name="address" value="{{ customer.address if customer else '' }}">
+
+        <label for="city">Stadt:</label>
+        <input type="text" id="city" name="city" value="{{ customer.city if customer else '' }}">
+
+        <label for="country">Land:</label>
+        <input type="text" id="country" name="country" value="{{ customer.country if customer else '' }}" required>
+
+        <label for="phone">Telefon:</label>
+        <input type="text" id="phone" name="phone" value="{{ customer.phone if customer else '' }}">
+
+        <div class="form-actions">
+            <a href="/dashboard/customers" class="btn btn-secondary">⬅ Zurück</a>
+            <button type="submit" class="btn">💾 Speichern</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

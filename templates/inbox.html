@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}📨 Kommunikation / Inbox{% endblock %}
+
+{% block content %}
+<style>
+  .inbox-container { max-width: 1100px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.05); padding: 1rem; }
+  .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .toolbar input[type="text"] { padding: .5rem .7rem; border: 1px solid #ddd; border-radius: 8px; min-width: 240px; }
+  .toolbar select, .toolbar button, .toolbar a { padding: .5rem .7rem; border-radius: 8px; }
+  .toolbar button { background: #4f46e5; color: #fff; border: none; cursor: pointer; }
+  .toolbar a.ghost { background: #eef2ff; color: #4f46e5; text-decoration: none; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: .65rem; border-top: 1px solid #eee; text-align: left; vertical-align: top; }
+  th { background: #f4f6f8; }
+  .pill { display: inline-flex; align-items: center; gap: .3rem; font-size: .8rem; border-radius: 20px; padding: .2rem .6rem; }
+  .pill.read { background: #e5f6ff; color: #0369a1; }
+  .pill.unread { background: #fee2e2; color: #b91c1c; }
+  .pill.archived { background: #f1f5f9; color: #334155; }
+  .actions form { display: inline; }
+  .actions button { background: transparent; color: #4f46e5; border: none; cursor: pointer; }
+  .actions .danger { color: #ef4444; }
+  details summary { cursor: pointer; color: #4f46e5; }
+  .empty { padding: 1.2rem; text-align: center; }
+  .badge { background: #eef2ff; color: #4f46e5; border-radius: 999px; padding: .15rem .5rem; font-size: .8rem; }
+</style>
+
+<div class="inbox-container">
+  <h1 style="font-size:1.6rem;font-weight:700;margin-bottom:.6rem;">📨 Kommunikation / Inbox</h1>
+
+  <!-- 🔍 Toolbar mit Suche, Filter & Quick-Create -->
+  <div class="toolbar">
+    <form method="get" action="/dashboard/inbox" style="display:flex;gap:.5rem;align-items:center;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Suche Betreff/Absender/Text …">
+      <select name="show" style="border:1px solid #ddd;">
+        <option value="open" {% if show=='open' %}selected{% endif %}>Offen ({{ open_count }})</option>
+        <option value="archived" {% if show=='archived' %}selected{% endif %}>Archiv ({{ archived_count }})</option>
+        <option value="all" {% if show=='all' %}selected{% endif %}>Alle</option>
+      </select>
+      <button type="submit">🔎 Filtern</button>
+      <a class="ghost" href="/dashboard/inbox">Zurücksetzen</a>
+    </form>
+
+    <!-- ➕ Neue Nachricht erstellen (intern) -->
+    <details style="margin-left:auto;">
+      <summary>➕ Nachricht</summary>
+      <form method="post" action="/dashboard/inbox/create" style="margin-top:.5rem;display:grid;gap:.4rem;">
+        <input name="sender_name" placeholder="Absendername" required>
+        <input name="sender_email" placeholder="E-Mail" required>
+        <input name="subject" placeholder="Betreff" required>
+        <textarea name="content" rows="3" placeholder="Nachricht" required></textarea>
+        <button type="submit">Speichern</button>
+      </form>
+    </details>
+  </div>
+
+  <div class="card">
+    {% if messages|length == 0 %}
+      <div class="empty">📭 Keine Nachrichten gefunden.</div>
+    {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th>Absender</th>
+            <th>Betreff & Vorschau</th>
+            <th>Empfangen</th>
+            <th>Status</th>
+            <th style="text-align:center;">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in messages %}
+          <tr>
+            <td>
+              <div><strong>{{ m.sender_name }}</strong></div>
+              <div style="color:#64748b;font-size:.9rem;">{{ m.sender_email }}</div>
+              {% if m.customer %}
+                <div class="badge">👤 Kunde: {{ m.customer.name }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <div><strong>{{ m.subject }}</strong></div>
+              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                {{ m.content }}
+              </div>
+              <details>
+                <summary>Voll anzeigen</summary>
+                <pre style="white-space:pre-wrap">{{ m.content }}</pre>
+              </details>
+            </td>
+            <td>{{ m.received_at.strftime('%Y-%m-%d %H:%M') if m.received_at else "—" }}</td>
+            <td>
+              {% if m.is_archived %}
+                <span class="pill archived">🗄 Archiviert</span>
+              {% else %}
+                <span class="pill {{ 'read' if m.is_read else 'unread' }}">
+                  {{ 'Gelesen' if m.is_read else 'Ungelesen' }}
+                </span>
+              {% endif %}
+            </td>
+            <td class="actions" style="text-align:center;white-space:nowrap;">
+              <form method="post" action="/dashboard/inbox/{{ m.id }}/toggle-read">
+                <button title="Gelesen umschalten">{{ '👁️‍🗨️' if m.is_read else '👁️' }}</button>
+              </form>
+              <form method="post" action="/dashboard/inbox/{{ m.id }}/toggle-archive">
+                <button title="{{ 'Wiederherstellen' if m.is_archived else 'Archivieren' }}">
+                  {{ '📂' if m.is_archived else '🗄️' }}
+                </button>
+              </form>
+              <details style="display:inline-block;">
+                <summary title="Antworten">✉️</summary>
+                <form method="post" action="/dashboard/inbox/{{ m.id }}/reply" style="margin-top:.4rem;display:grid;gap:.3rem;">
+                  <textarea name="body" rows="3" placeholder="Antworttext …" required></textarea>
+                  <button type="submit">Senden</button>
+                </form>
+              </details>
+              <form method="post" action="/dashboard/inbox/{{ m.id }}/delete" onsubmit="return confirm('Nachricht löschen?')">
+                <button class="danger" title="Löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

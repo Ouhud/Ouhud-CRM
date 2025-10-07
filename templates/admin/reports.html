@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}📈 Berichte{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width:900px; margin:auto;">
+    <h1 style="text-align:center;">📊 Monatsumsatz</h1>
+    <p style="text-align:center; color:#666;">Umsatzentwicklung des aktuellen Jahres</p>
+
+    <canvas id="revenueChart" width="800" height="400"></canvas>
+
+    <div style="margin-top:2rem; background:#f9fafb; padding:1rem; border-radius:8px;">
+        <strong>ℹ️ Hinweis:</strong> Die Daten basieren auf den gespeicherten Rechnungen.
+        Wenn du Testdaten hinzufügen willst, erstelle einfach Rechnungen mit verschiedenen Monaten.
+    </div>
+</div>
+
+<!-- 📊 Chart.js einbinden -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const months = {{ months | tojson }};
+    const revenues = {{ revenues | tojson }};
+
+    const monthLabels = months.map(m => new Date(2025, m - 1, 1).toLocaleString('de-DE', { month: 'short' }));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Umsatz (CHF)',
+                data: revenues,
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            interaction: { mode: 'nearest', intersect: false },
+            scales: {
+                x: { title: { display: true, text: 'Monat' } },
+                y: { title: { display: true, text: 'CHF' }, beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}

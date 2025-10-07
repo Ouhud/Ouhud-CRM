@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}📞 Anrufe & Telefoneinstellungen{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;">
+  <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:1rem;">📞 Telefonie</h1>
+
+  <!-- 🧭 Tabs -->
+  <div style="display:flex;gap:1rem;margin-bottom:1rem;border-bottom:2px solid #e5e7eb;">
+    <button class="tab-btn active" data-tab="calls">📋 Anrufliste</button>
+    <button class="tab-btn" data-tab="settings">⚙️ Telefoneinstellungen</button>
+  </div>
+
+  <!-- 📋 TAB: Anrufliste -->
+  <div id="tab-calls" class="tab-content active">
+    <!-- 🔍 Filter -->
+    <form method="get" action="/dashboard/calls" 
+          style="display:grid;grid-template-columns:1fr 180px 100px;gap:.5rem;margin-bottom:1rem;">
+      <input type="text" name="q" 
+             placeholder="🔍 Nach Nummer oder Name suchen..." 
+             value="{{ request.query_params.get('q','') }}"
+             style="padding:.5rem;border:1px solid #ccc;border-radius:6px;">
+      <select name="status" style="padding:.5rem;border:1px solid #ccc;border-radius:6px;">
+        <option value="">Alle Status</option>
+        <option value="completed">✅ Erfolgreich</option>
+        <option value="missed">❌ Verpasst</option>
+        <option value="rejected">🚫 Abgelehnt</option>
+      </select>
+      <button type="submit" 
+              style="background:#4f46e5;color:#fff;padding:.5rem 1rem;border:none;border-radius:6px;">
+        Filtern
+      </button>
+    </form>
+
+    <!-- 📞 Tabelle -->
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;background:#fff;min-width:750px;">
+        <thead style="background:#f3f4f6;">
+          <tr>
+            <th style="padding:.5rem;">#</th>
+            <th style="padding:.5rem;">Richtung</th>
+            <th style="padding:.5rem;">Nummer</th>
+            <th style="padding:.5rem;">Name</th>
+            <th style="padding:.5rem;">Zeit</th>
+            <th style="padding:.5rem;">Dauer</th>
+            <th style="padding:.5rem;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if calls %}
+            {% for call in calls %}
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:.5rem;">{{ call.id }}</td>
+              <td style="padding:.5rem;">
+                {% if call.direction == 'inbound' %}
+                  📥 Eingehend
+                {% else %}
+                  📤 Ausgehend
+                {% endif %}
+              </td>
+              <td style="padding:.5rem;">{{ call.phone_number }}</td>
+              <td style="padding:.5rem;">{{ call.contact_name or '-' }}</td>
+              <td style="padding:.5rem;">{{ call.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+              <td style="padding:.5rem;">{{ call.duration or 0 }} s</td>
+              <td style="padding:.5rem;">
+                {% if call.status == 'completed' %}
+                  <span style="background:#dcfce7;color:#166534;padding:.2rem .5rem;border-radius:6px;">✅ Erfolgreich</span>
+                {% elif call.status == 'missed' %}
+                  <span style="background:#fee2e2;color:#991b1b;padding:.2rem .5rem;border-radius:6px;">❌ Verpasst</span>
+                {% else %}
+                  <span style="background:#e5e7eb;color:#374151;padding:.2rem .5rem;border-radius:6px;">🚫 Abgelehnt</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="7" style="text-align:center;padding:1rem;color:#666;">
+                📭 Keine Anrufe gefunden.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ➕ Formular -->
+    <h2 style="font-size:1.2rem;font-weight:600;margin-top:2rem;">➕ Neuen Anruf eintragen</h2>
+    <form method="post" action="/dashboard/calls/add" 
+          style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;">
+      <input type="text" name="phone_number" placeholder="Nummer" required>
+      <select name="direction">
+        <option value="inbound">📥 Eingehend</option>
+        <option value="outbound">📤 Ausgehend</option>
+      </select>
+      <input type="text" name="contact_name" placeholder="Name (optional)">
+      <input type="number" name="duration" placeholder="Sekunden" min="0">
+      <select name="status">
+        <option value="completed">✅ Erfolgreich</option>
+        <option value="missed">❌ Verpasst</option>
+        <option value="rejected">🚫 Abgelehnt</option>
+      </select>
+      <button type="submit" 
+              style="background:#4f46e5;color:#fff;padding:.5rem 1rem;border:none;border-radius:6px;">
+        ➕ Hinzufügen
+      </button>
+    </form>
+  </div>
+
+  <!-- ⚙️ TAB: Telefoneinstellungen -->
+  <div id="tab-settings" class="tab-content" style="display:none;">
+    <form method="post" action="/dashboard/calls/settings/save" style="display:flex;flex-direction:column;gap:.8rem;">
+      <label>
+        Anbieter:
+        <select name="provider" required>
+          <option value="twilio" {% if settings and settings.provider == 'twilio' %}selected{% endif %}>Twilio</option>
+          <option value="fritzbox" {% if settings and settings.provider == 'fritzbox' %}selected{% endif %}>FritzBox</option>
+          <option value="placetel" {% if settings and settings.provider == 'placetel' %}selected{% endif %}>Placetel</option>
+          <option value="custom" {% if settings and settings.provider == 'custom' %}selected{% endif %}>Custom</option>
+        </select>
+      </label>
+
+      <label>API-URL:
+        <input type="text" name="api_url" value="{{ settings.api_url if settings else '' }}" required>
+      </label>
+
+      <label>API-Key / Token:
+        <input type="text" name="api_key" value="{{ settings.api_key if settings else '' }}">
+      </label>
+
+      <label>SIP-Benutzername:
+        <input type="text" name="sip_user" value="{{ settings.sip_user if settings else '' }}">
+      </label>
+
+      <label>SIP-Passwort:
+        <input type="password" name="sip_password" value="{{ settings.sip_password if settings else '' }}">
+      </label>
+
+      <div style="display:flex;gap:.5rem;">
+        <button type="submit" style="background:#4f46e5;color:#fff;padding:.5rem 1rem;border:none;border-radius:6px;">
+          💾 Speichern
+        </button>
+        <a href="/dashboard/calls/settings/test" style="background:#10b981;color:#fff;padding:.5rem 1rem;border-radius:6px;text-decoration:none;">
+          🔌 Verbindung testen
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.getAttribute('data-tab');
+      contents.forEach(c => c.style.display = c.id === 'tab-' + target ? 'block' : 'none');
+    });
+  });
+</script>
+
+<style>
+  .tab-btn {
+    background:none;
+    border:none;
+    padding:.5rem;
+    font-size:1rem;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  .tab-btn.active {
+    border-bottom-color:#4f46e5;
+    font-weight:600;
+    color:#4f46e5;
+  }
+</style>
+{% endblock %}

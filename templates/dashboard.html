@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Ouhud CRM{% endblock %}
+
+{% block content %}
+<style>
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .dashboard-header img.logo {
+    max-width: 140px;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  }
+  .dashboard-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+  .dashboard-header p {
+    color: #555;
+    font-size: 1rem;
+  }
+
+  .welcome-text {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: #374151;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  }
+  .stat-card h3 {
+    font-size: 1.1rem;
+    color: #4f46e5;
+    margin: 0.4rem 0;
+  }
+  .stat-card .icon {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  .stat-card p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #111827;
+    margin: 0;
+  }
+</style>
+
+<div class="dashboard-header">
+  {% if company and company.logo_path %}
+    <img src="{{ company.logo_path }}" alt="Logo {{ company.company_name }}" class="logo">
+  {% endif %}
+  {% if company %}
+    <h1>{{ company.company_name }}</h1>
+    <p>{{ company.city }}</p>
+  {% else %}
+    <h1>🏢 Willkommen bei Ouhud CRM</h1>
+  {% endif %}
+</div>
+
+<div class="welcome-text">
+  Willkommen zurück, <strong>{{ user.first_name or user.username }}</strong> 👋
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="icon">👥</div>
+    <h3>Kunden</h3>
+    <p>{{ stats.customers }}</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="icon">🧾</div>
+    <h3>Rechnungen</h3>
+    <p>{{ stats.invoices }}</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="icon">💰</div>
+    <h3>Gesamtumsatz</h3>
+    <p>{{ stats.total_sum }} {{ company.currency_code if company else "€" }}</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="icon">⚠️</div>
+    <h3>Überfällig</h3>
+    <p>{{ stats.overdue }}</p>
+  </div>
+
+  <div class="stat-card">
+    <div class="icon">📬</div>
+    <h3>Mahnungen</h3>
+    <p>{{ stats.reminders }}</p>
+  </div>
+</div>
+{% endblock %}

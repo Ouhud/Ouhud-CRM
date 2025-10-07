@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}💬 Team-Chat – Intern (Pro){% endblock %}
+
+{% block content %}
+<style>
+  .chat-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 650px;
+  }
+
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .8rem 1rem;
+    background: #4f46e5;
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .chat-header h1 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .chat-status {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  .presence {
+    font-size: 0.8rem;
+    color: #e0e7ff;
+    margin-top: 0.2rem;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f9fafb;
+  }
+
+  .message {
+    margin-bottom: .75rem;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .message.agent {
+    justify-content: flex-end;
+  }
+
+  .message .bubble {
+    padding: .6rem .9rem;
+    border-radius: 12px;
+    max-width: 70%;
+    word-wrap: break-word;
+    font-size: 0.95rem;
+  }
+
+  .message.agent .bubble {
+    background: #4f46e5;
+    color: white;
+  }
+
+  .message.customer .bubble {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  .message .meta {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-top: 0.2rem;
+    text-align: right;
+  }
+
+  .chat-input {
+    display: flex;
+    padding: .8rem;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+  }
+
+  .chat-input input {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: .6rem .9rem;
+  }
+
+  .chat-input button {
+    margin-left: .5rem;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: .6rem 1rem;
+    cursor: pointer;
+  }
+
+  .chat-input button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+</style>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <div>
+      <h1>💬 Team-Chat (Pro)</h1>
+      <div class="presence" id="presence">👤 Online: 0</div>
+    </div>
+    <div class="chat-status" id="chat-status">Verbindung wird hergestellt…</div>
+  </div>
+
+  <div id="chat-messages" class="chat-messages"></div>
+
+  <form id="chat-form" class="chat-input">
+    <input id="chat-text" type="text" placeholder="Nachricht eingeben…" autocomplete="off" />
+    <button type="submit">Senden</button>
+  </form>
+</div>
+
+<script>
+  const chatMessages = document.getElementById('chat-messages');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-text');
+  const chatStatus = document.getElementById('chat-status');
+  const presenceBox = document.getElementById('presence');
+
+  let ws;
+  let reconnectAttempts = 0;
+  const MAX_RECONNECT_ATTEMPTS = 10;
+  let pingInterval;
+  let pongTimeout;
+
+  // Nachrichten aus DB laden
+  async function loadChatHistory() {
+    const res = await fetch('/dashboard/chat/history');
+    const messages = await res.json();
+    chatMessages.innerHTML = '';
+    messages.forEach(msg => {
+      renderMessage(msg.sender, msg.text, msg.sender === 'Ich');
+    });
+  }
+
+  function connectWebSocket() {
+    ws = new WebSocket(`ws://${window.location.host}/dashboard/chat/ws`);
+
+    ws.onopen = () => {
+      chatStatus.textContent = '🟢 Verbunden';
+      chatStatus.style.color = '#dcfce7';
+      reconnectAttempts = 0;
+      startHeartbeat();
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'message') {
+        renderMessage(data.sender, data.text, data.sender === 'Ich');
+      } else if (data.type === 'presence') {
+        updatePresence(data.online);
+      } else if (data.type === 'pong') {
+        clearTimeout(pongTimeout);
+      }
+    };
+
+    ws.onclose = () => {
+      stopHeartbeat();
+      chatStatus.textContent = '🔴 Verbindung getrennt – erneut verbinden...';
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts++;
+        setTimeout(connectWebSocket, 3000);
+      } else {
+        chatStatus.textContent = '❌ Verbindung fehlgeschlagen. Bitte Seite neu laden.';
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error('WebSocket Fehler:', err);
+      ws.close();
+    };
+  }
+
+  function renderMessage(sender, text, isAgent) {
+    const time = new Date().toLocaleTimeString();
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${isAgent ? 'agent' : 'customer'}`;
+    msgDiv.innerHTML = `
+      <div>
+        <div class="bubble">${text}</div>
+        <div class="meta">${sender} • ${time}</div>
+      </div>
+    `;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function updatePresence(count) {
+    presenceBox.textContent = `👤 Online: ${count}`;
+  }
+
+  // 💓 Ping/Pong Mechanismus
+  function startHeartbeat() {
+    pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'ping' }));
+        pongTimeout = setTimeout(() => {
+          console.warn('⚠️ Pong Timeout → Verbindung schließen');
+          ws.close();
+        }, 5000);
+      }
+    }, 30000); // alle 30 Sekunden
+  }
+
+  function stopHeartbeat() {
+    clearInterval(pingInterval);
+    clearTimeout(pongTimeout);
+  }
+
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: 'message', text }));
+    renderMessage('Ich', text, true);
+    chatInput.value = '';
+  });
+
+  loadChatHistory();
+  connectWebSocket();
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+<!-- app/templates/payment/pay_invoice.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Rechnung {{ invoice.invoice_number }} bezahlen</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; background: #f5f5f5; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.8rem; margin-bottom: 1rem; }
+        .amount { font-size: 1.5rem; font-weight: bold; margin-top: 0.5rem; color: #2c3e50; }
+        .qrcodes { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .qrbox { text-align: center; }
+        .qrbox img { width: 140px; height: 140px; border: 1px solid #ddd; padding: 5px; background: white; }
+        .footer { text-align: center; font-size: 0.85rem; color: #666; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Rechnung {{ invoice.invoice_number }}</h1>
+        <p>Kunde: <strong>{{ customer.name }}</strong><br>
+           E-Mail: {{ customer.email }}</p>
+        <p>Fällig am: {{ invoice.due_date }}</p>
+        <div class="amount">Betrag: {{ "%.2f"|format(invoice.total_amount) }} CHF</div>
+
+        <h2>Zahlungsoptionen</h2>
+        <div class="qrcodes">
+            <div class="qrbox">
+                <img src="/static/qrcodes/link_{{ invoice.invoice_number }}.png" alt="Online bezahlen">
+                <div>🌐 Online-Zahlung</div>
+            </div>
+            <div class="qrbox">
+                <img src="/static/qrcodes/sepa_{{ invoice.invoice_number }}.png" alt="SEPA">
+                <div>🇪🇺 SEPA Überweisung</div>
+            </div>
+            <div class="qrbox">
+                <img src="/static/qrcodes/twint_{{ invoice.invoice_number }}.png" alt="TWINT">
+                <div>🇨🇭 TWINT / QR-Rechnung</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        © {{ datetime.utcnow().year }} Hamza Dev GmbH – Sichere Online-Zahlung
+    </div>
+</body>
+</html>

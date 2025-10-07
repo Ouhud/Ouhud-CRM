@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}🧾 Rechnungen{% endblock %}
+
+{% block content %}
+
+  <!-- Kopfbereich -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+    <div>
+      <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">🧾 Rechnungen</h1>
+      <p style="margin:0;color:#6b7280">Verwalte alle Rechnungen zentral an einem Ort.</p>
+    </div>
+    <a href="/dashboard/invoices/create"
+       style="text-decoration:none;background:#4f46e5;color:#fff;padding:.55rem .9rem;border-radius:8px;display:inline-flex;align-items:center;gap:.4rem;">
+      ➕ Neue Rechnung
+    </a>
+  </div>
+
+  <!-- Filter & Suchleiste -->
+  <form method="get" action="/dashboard/invoices"
+        style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:1rem 0;">
+    <input type="text" name="q" placeholder="🔎 Kunde oder Nummer suchen..."
+           style="flex:1 1 260px;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+
+    <select name="due" style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+      <option value="">📅 Alle Fälligkeiten</option>
+      <option value="overdue">⏰ Überfällig</option>
+      <option value="upcoming">🟡 Demnächst fällig</option>
+    </select>
+
+    <select name="status" style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+      <option value="">📝 Alle Status</option>
+      <option value="draft">📝 Entwurf</option>
+      <option value="sent">📤 Gesendet</option>
+      <option value="paid">✅ Bezahlt</option>
+      <option value="cancelled">🚫 Storniert</option>
+      <option value="overdue">⏰ Überfällig</option>
+    </select>
+
+    <button type="submit"
+            style="background:#4f46e5;color:#fff;border:none;padding:.55rem .9rem;border-radius:8px;cursor:pointer;">
+      Filtern
+    </button>
+  </form>
+
+  <!-- Rechnungsübersicht -->
+  {% if invoices|length == 0 %}
+    <div style="background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+      📭 Keine Rechnungen vorhanden.
+    </div>
+  {% else %}
+    <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="background:#f4f6f8;">
+          <tr>
+            <th style="padding:.65rem .8rem;text-align:left;">#</th>
+            <th style="padding:.65rem .8rem;text-align:left;">Rechnungsnummer</th>
+            <th style="padding:.65rem .8rem;text-align:left;">Kunde</th>
+            <th style="padding:.65rem .8rem;text-align:right;">Betrag</th>
+            <th style="padding:.65rem .8rem;text-align:center;">Fällig am</th>
+            <th style="padding:.65rem .8rem;text-align:center;">Status</th>
+            <th style="padding:.65rem .8rem;text-align:center;">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoices %}
+            <tr style="border-top:1px solid #eef2f7;">
+              <td style="padding:.65rem .8rem;">{{ inv.id }}</td>
+              <td style="padding:.65rem .8rem;font-family:monospace;">{{ inv.invoice_number }}</td>
+              <td style="padding:.65rem .8rem;">{{ inv.customer.name if inv.customer else "—" }}</td>
+              <td style="padding:.65rem .8rem;text-align:right;font-family:monospace;font-weight:600;">
+                {{ "%.2f"|format(inv.total_amount) }} {{ company_settings.currency_code or "€" if company_settings else "€" }}
+              </td>
+              <td style="padding:.65rem .8rem;text-align:center;">
+                {{ inv.due_date.strftime("%d.%m.%Y") if inv.due_date else "—" }}
+              </td>
+              <td style="padding:.65rem .8rem;text-align:center;">
+                {% set s = inv.status or '' %}
+                {% set bg = '#e5e7eb' %}
+                {% set fg = '#374151' %}
+                {% if s == 'paid' %}{% set bg = '#dcfce7' %}{% set fg = '#065f46' %}{% endif %}
+                {% if s == 'sent' %}{% set bg = '#dbeafe' %}{% set fg = '#1e40af' %}{% endif %}
+                {% if s == 'cancelled' %}{% set bg = '#fee2e2' %}{% set fg = '#991b1b' %}{% endif %}
+                {% if s == 'overdue' %}{% set bg = '#fef3c7' %}{% set fg = '#92400e' %}{% endif %}
+                <span style="display:inline-block;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;background:{{ bg }};color:{{ fg }};">
+                  {% if s == 'paid' %}✅ Bezahlt{% elif s == 'sent' %}📤 Gesendet{% elif s == 'cancelled' %}🚫 Storniert{% elif s == 'overdue' %}⏰ Überfällig{% else %}📝 Entwurf{% endif %}
+                </span>
+              </td>
+              <td style="padding:.55rem .8rem;text-align:center;white-space:nowrap;">
+                <a href="/dashboard/invoices/pdf/{{ inv.id }}" target="_blank"
+                   style="background:#3b82f6;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;margin-right:.3rem;">
+                  📄 PDF
+                </a>
+                <a href="/dashboard/invoices/edit/{{ inv.id }}"
+                   style="background:#6366f1;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;margin-right:.3rem;">
+                  ✏️ Bearbeiten
+                </a>
+                <a href="/dashboard/invoices/delete/{{ inv.id }}"
+                   onclick="return confirm('Rechnung wirklich löschen?');"
+                   style="background:#ef4444;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;">
+                  🗑 Löschen
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+{% endblock %}

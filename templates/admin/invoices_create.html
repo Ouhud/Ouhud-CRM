@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}🧾 Neue Rechnung erstellen{% endblock %}
+
+{% block content %}
+
+<!-- Kopfbereich -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+  <div>
+    <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">🧾 Neue Rechnung erstellen</h1>
+    <p style="margin:0;color:#6b7280">Erfasse eine neue Kundenrechnung mit allen relevanten Daten.</p>
+  </div>
+  <a href="/dashboard/invoices"
+     style="text-decoration:none;color:#4f46e5;font-weight:500;">← Zurück zur Übersicht</a>
+</div>
+
+<!-- Formular-Container -->
+<form action="/dashboard/invoices/create" method="post"
+      style="background:#fff;margin-top:1.2rem;padding:1.4rem 1.6rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);display:grid;gap:1rem;max-width:800px;">
+
+  <!-- Kunde & Rechnungsnummer -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div>
+      <label for="customer_id" style="font-weight:600;display:block;margin-bottom:.25rem;">👤 Kunde</label>
+      <select name="customer_id" required
+              style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+        <option value="">– Bitte wählen –</option>
+        {% for c in customers %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="invoice_number" style="font-weight:600;display:block;margin-bottom:.25rem;"># Rechnungsnummer</label>
+      <input type="text" name="invoice_number" value="{{ next_number }}" required
+             style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    </div>
+  </div>
+
+  <!-- Fälligkeitsdatum & Nettobetrag -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div>
+      <label for="due_date" style="font-weight:600;display:block;margin-bottom:.25rem;">📅 Fälligkeitsdatum</label>
+      <input type="date" name="due_date" required
+             style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;">
+    </div>
+    <div>
+      <label for="total_amount" style="font-weight:600;display:block;margin-bottom:.25rem;">💰 Nettobetrag ({{ company.currency_code or 'EUR' }})</label>
+      <input type="number" step="0.01" min="0" name="total_amount" required
+             style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;font-family:monospace;">
+    </div>
+  </div>
+
+  <!-- MwSt.-Satz -->
+  <div>
+    <label for="tax_rate" style="font-weight:600;display:block;margin-bottom:.25rem;">🧾 MwSt.-Satz</label>
+    <select name="tax_rate"
+            style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+      <option value="0">0 % (steuerfrei)</option>
+      <option value="7">7 % (ermäßigt)</option>
+      <option value="19" selected>19 % (Standard)</option>
+    </select>
+  </div>
+
+  <!-- Optionale Notiz -->
+  <div>
+    <label for="note" style="font-weight:600;display:block;margin-bottom:.25rem;">📝 Notiz (optional)</label>
+    <textarea name="note" rows="3"
+              style="width:100%;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;resize:vertical;"></textarea>
+  </div>
+
+  <!-- Aktionen -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem;">
+    <a href="/dashboard/invoices"
+       style="text-decoration:none;color:#555;">← Abbrechen</a>
+    <button type="submit"
+            style="background:#4f46e5;color:#fff;border:none;padding:.65rem 1.2rem;border-radius:8px;cursor:pointer;font-weight:600;">
+      💾 Rechnung erstellen
+    </button>
+  </div>
+</form>
+
+{% endblock %}

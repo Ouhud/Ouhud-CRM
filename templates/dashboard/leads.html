@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}🚀 Leads & Opportunities{% endblock %}
+
+{% block content %}
+
+  <!-- Kopf -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+    <div>
+      <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">🚀 Leads & Opportunities</h1>
+      <p style="margin:0;color:#6b7280">Erfasse neue Leads, pflege den Status und wandle sie in Kunden um.</p>
+    </div>
+    <a href="#new-lead" style="text-decoration:none;background:#4f46e5;color:#fff;padding:.55rem .9rem;border-radius:8px;display:inline-flex;align-items:center;gap:.4rem;">
+      ➕ Neuen Lead anlegen
+    </a>
+  </div>
+
+  <!-- Status-Banner -->
+  {% if success %}
+    <div style="background:#d1fae5;color:#065f46;padding:.7rem 1rem;border-radius:10px;margin:1rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+      ✅ {{ success }}
+    </div>
+  {% endif %}
+  {% if error %}
+    <div style="background:#fee2e2;color:#991b1b;padding:.7rem 1rem;border-radius:10px;margin:1rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);">
+      ⚠️ {{ error }}
+    </div>
+  {% endif %}
+
+  <!-- Toolbar: Suche + Filter -->
+  <form method="get" action="/dashboard/leads" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:1rem 0;">
+    <input name="q" value="{{ request.query_params.get('q','') }}"
+           placeholder="🔎 Suchen (Name, E-Mail, Firma)…"
+           style="flex:1 1 260px;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+    <select name="status" style="padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+      <option value="">Alle Status</option>
+      {% for s in LeadStatus %}
+        <option value="{{ s.value }}" {% if request.query_params.get('status')==s.value %}selected{% endif %}>{{ s.value }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" style="background:#4f46e5;color:#fff;border:none;padding:.55rem .9rem;border-radius:8px;cursor:pointer;">
+      Filtern
+    </button>
+  </form>
+
+  <!-- Neueingabe -->
+  <section id="new-lead"
+    style="background:#fff;padding:1rem 1.1rem;border-radius:12px;margin:0 0 1.2rem 0;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+    <h2 style="margin:.1rem 0 1rem 0;font-size:1.05rem;">➕ Neuen Lead anlegen</h2>
+    <form method="post" action="/dashboard/leads/create"
+          style="display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:.8rem;">
+      <input type="text" name="name" placeholder="Name *" required
+             style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
+      <input type="email" name="email" placeholder="E-Mail"
+             style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
+      <input type="text" name="phone" placeholder="Telefon"
+             style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
+      <input type="text" name="company" placeholder="Firma"
+             style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
+      <select name="status" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
+        {% for s in LeadStatus %}
+          <option value="{{ s.value }}">{{ s.value }}</option>
+        {% endfor %}
+      </select>
+      <div></div>
+      <button type="submit"
+              style="grid-column:1/-1;background:#4f46e5;color:#fff;border:none;padding:.65rem 1rem;border-radius:10px;cursor:pointer;">
+        💾 Lead speichern
+      </button>
+    </form>
+  </section>
+
+  <!-- Liste -->
+  {% if leads|length == 0 %}
+    <div style="background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+      📭 Noch keine Leads vorhanden.
+    </div>
+  {% else %}
+    <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.05);">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="background:#f4f6f8;">
+          <tr>
+            <th style="padding:.65rem 0.8rem;text-align:left;">#</th>
+            <th style="padding:.65rem 0.8rem;text-align:left;">Name</th>
+            <th style="padding:.65rem 0.8rem;text-align:left;">E-Mail</th>
+            <th style="padding:.65rem 0.8rem;text-align:left;">Firma</th>
+            <th style="padding:.65rem 0.8rem;text-align:left;">Status</th>
+            <th style="padding:.65rem 0.8rem;text-align:center;">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+            <tr style="border-top:1px solid #eef2f7;">
+              <td style="padding:.65rem 0.8rem;">{{ lead.id }}</td>
+              <td style="padding:.65rem 0.8rem;">{{ lead.name }}</td>
+              <td style="padding:.65rem 0.8rem;">{{ lead.email or '—' }}</td>
+              <td style="padding:.65rem 0.8rem;">{{ lead.company or '—' }}</td>
+              <td style="padding:.65rem 0.8rem;">
+                {% set v = (lead.status or '') %}
+                {% set badge_bg = '#e5e7eb' %}
+                {% set badge_fg = '#374151' %}
+                {% if 'Neu' in v %}{% set badge_bg = '#dbeafe' %}{% set badge_fg = '#1e40af' %}{% endif %}
+                {% if 'Kontakt' in v or 'Kontaktaufnahme' in v %}{% set badge_bg = '#fef3c7' %}{% set badge_fg = '#92400e' %}{% endif %}
+                {% if 'Qualifiziert' in v %}{% set badge_bg = '#dcfce7' %}{% set badge_fg = '#065f46' %}{% endif %}
+                {% if 'Verloren' in v %}{% set badge_bg = '#fee2e2' %}{% set badge_fg = '#991b1b' %}{% endif %}
+                <span style="display:inline-block;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;background:{{ badge_bg }};color:{{ badge_fg }};">
+                  {{ lead.status }}
+                </span>
+              </td>
+              <td style="padding:.55rem 0.8rem;text-align:center;white-space:nowrap;">
+                <!-- Umwandeln (Route optional implementieren) -->
+                <form method="post" action="/dashboard/leads/{{ lead.id }}/convert" style="display:inline;">
+                  <button type="submit"
+                          title="In Kunden umwandeln"
+                          style="background:#10b981;color:#fff;border:none;padding:.38rem .6rem;border-radius:8px;cursor:pointer;margin-right:.3rem;">
+                    🔁 Umwandeln
+                  </button>
+                </form>
+
+                <!-- Bearbeiten (Platzhalter/Link) -->
+                <a href="/dashboard/leads/{{ lead.id }}/edit"
+                   style="text-decoration:none;background:#3b82f6;color:#fff;padding:.38rem .6rem;border-radius:8px;margin-right:.3rem;">
+                  ✏️ Bearbeiten
+                </a>
+
+                <!-- Löschen -->
+                <form method="post" action="/dashboard/leads/{{ lead.id }}/delete"
+                      onsubmit="return confirm('Diesen Lead wirklich löschen?');"
+                      style="display:inline;">
+                  <button type="submit"
+                          style="background:#ef4444;color:#fff;border:none;padding:.38rem .6rem;border-radius:8px;cursor:pointer;">
+                    🗑 Löschen
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+{% endblock %}

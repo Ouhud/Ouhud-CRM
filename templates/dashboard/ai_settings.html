@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}⚙️ KI-Einstellungen{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">⚙️ KI-Einstellungen</h1>
+
+<form method="post" action="/dashboard/ai/settings/save" style="max-width:600px;">
+  <label>🤖 Name des Assistenten</label>
+  <input type="text" name="assistant_name" value="{{ settings.assistant_name }}" required style="width:100%;margin-bottom:1rem;">
+
+  <label>🔑 API-Key</label>
+  <input type="password" name="api_key" value="{{ settings.api_key or '' }}" style="width:100%;margin-bottom:1rem;">
+
+  <label>🌐 Provider</label>
+  <select name="api_provider" style="width:100%;margin-bottom:1rem;">
+    <option value="openai" {% if settings.api_provider == 'openai' %}selected{% endif %}>OpenAI</option>
+    <option value="azure" {% if settings.api_provider == 'azure' %}selected{% endif %}>Azure</option>
+    <option value="local" {% if settings.api_provider == 'local' %}selected{% endif %}>Lokal</option>
+  </select>
+
+  <label><input type="checkbox" name="active" value="true" {% if settings.active %}checked{% endif %}> Aktivieren</label>
+  <br><br>
+
+  <button type="submit" style="padding:.5rem 1rem;background:#4f46e5;color:white;border:none;border-radius:8px;">💾 Speichern</button>
+</form>
+{% endblock %}

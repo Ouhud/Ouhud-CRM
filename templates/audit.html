@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}📊 Audit Log{% endblock %}
+
+{% block content %}
+<style>
+  .filter-bar {
+    display: grid;
+    grid-template-columns: 1fr 180px 130px;
+    gap: .5rem;
+    margin-bottom: 1rem;
+  }
+  .filter-bar input,
+  .filter-bar select {
+    padding: .5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  .filter-bar button {
+    background: #4f46e5;
+    color: #fff;
+    padding: .5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  table.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    min-width: 850px;
+  }
+  table.audit-table thead {
+    background: #f3f4f6;
+  }
+  table.audit-table th,
+  table.audit-table td {
+    text-align: left;
+    padding: .5rem;
+    font-size: .9rem;
+  }
+  table.audit-table tbody tr:nth-child(even) {
+    background: #f9fafb;
+  }
+  table.audit-table tbody tr:hover {
+    background: #eef2ff;
+  }
+  .details-cell {
+    white-space: pre-wrap;
+    max-width: 400px;
+    word-break: break-word;
+  }
+
+  @media (max-width: 800px) {
+    .filter-bar {
+      grid-template-columns: 1fr;
+    }
+    table.audit-table {
+      font-size: .85rem;
+      min-width: 600px;
+    }
+  }
+</style>
+
+<div style="max-width:1100px;margin:0 auto;">
+  <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:1rem;">📊 Audit Log</h1>
+
+  <!-- 🔍 Filterleiste -->
+  <form method="get" action="/dashboard/audit" class="filter-bar">
+    <input type="text" name="q" placeholder="🔍 Nach Benutzer oder Aktion suchen…" value="{{ request.query_params.get('q','') }}">
+    <select name="action">
+      <option value="">Alle Aktionen</option>
+      <option value="login" {% if request.query_params.get('action') == 'login' %}selected{% endif %}>Login</option>
+      <option value="update" {% if request.query_params.get('action') == 'update' %}selected{% endif %}>Update</option>
+      <option value="delete" {% if request.query_params.get('action') == 'delete' %}selected{% endif %}>Löschen</option>
+    </select>
+    <button type="submit">Filtern</button>
+  </form>
+
+  <!-- 📋 Audit Tabelle -->
+  <div style="overflow-x:auto;">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Zeit</th>
+          <th>Benutzer</th>
+          <th>Aktion</th>
+          <th>Details</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if logs %}
+          {% for log in logs %}
+          <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+            <td>{{ log.user or '-' }}</td>
+            <td style="font-weight:600;">{{ log.action }}</td>
+            <td class="details-cell">{{ log.details or '' }}</td>
+            <td>{{ log.ip_address or '-' }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" style="text-align:center;padding:1rem;">📭 Keine Audit-Einträge vorhanden.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

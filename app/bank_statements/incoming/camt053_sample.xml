@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>2025-TEST-MULTI</MsgId>
+      <CreDtTm>2025-10-03T10:00:00</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>STATEMENT-99999</Id>
+      <ElctrncSeqNb>1</ElctrncSeqNb>
+      <CreDtTm>2025-10-03T10:00:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DE44500105175407324931</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </Acct>
+
+      <!-- Zahlung für Rechnung 2025-0001 -->
+      <Ntry>
+        <Amt Ccy="EUR">500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <BookgDt><Dt>2025-10-03</Dt></BookgDt>
+        <ValDt><Dt>2025-10-03</Dt></ValDt>
+        <RmtInf><Ustrd>Zahlung für Rechnung 2025-0001</Ustrd></RmtInf>
+      </Ntry>
+
+      <!-- Zahlung für Rechnung 2025-0002 -->
+      <Ntry>
+        <Amt Ccy="EUR">750.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <BookgDt><Dt>2025-10-03</Dt></BookgDt>
+        <ValDt><Dt>2025-10-03</Dt></ValDt>
+        <RmtInf><Ustrd>Rechnung 2025-0002 bezahlt</Ustrd></RmtInf>
+      </Ntry>
+
+      <!-- Zahlung für Rechnung 2025-0003 -->
+      <Ntry>
+        <Amt Ccy="EUR">1200.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <BookgDt><Dt>2025-10-03</Dt></BookgDt>
+        <ValDt><Dt>2025-10-03</Dt></ValDt>
+        <RmtInf><Ustrd>Zahlung RE-2025-0003 Danke</Ustrd></RmtInf>
+      </Ntry>
+
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

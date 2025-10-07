@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}🛍 Öffentliche Bestellung{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width:600px; margin:2rem auto;">
+    <h2 style="text-align:center; font-size:1.6rem; margin-bottom:1rem;">🛍 Öffentliche Bestellung</h2>
+
+    {% if error %}
+    <div style="background:#fee2e2; color:#b91c1c; padding:0.75rem; border-radius:6px; margin-bottom:1rem; text-align:center;">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/public/order" class="order-form" style="display:flex; flex-direction:column; gap:1rem;">
+        <!-- 🧍 Name -->
+        <div>
+            <label for="name">Name *</label><br>
+            <input type="text" id="name" name="name" required style="width:100%; padding:0.5rem;">
+        </div>
+
+        <!-- 📧 E-Mail -->
+        <div>
+            <label for="email">E-Mail *</label><br>
+            <input type="email" id="email" name="email" required style="width:100%; padding:0.5rem;">
+        </div>
+
+        <!-- 🛍 Produkt (dynamisch aus DB) -->
+        <div>
+            <label for="product">Produkt *</label><br>
+            <select id="product" name="product" required style="width:100%; padding:0.5rem;">
+                <option value="">-- Bitte wählen --</option>
+                {% for p in products %}
+                    <option value="{{ p.name }}">
+                        {{ p.name }} — {{ "%.2f"|format(p.price) }} {{ company.currency_code if company else "CHF" }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- 🔢 Menge -->
+        <div>
+            <label for="quantity">Menge *</label><br>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" required style="width:100%; padding:0.5rem;">
+        </div>
+
+        <!-- 📩 Absenden -->
+        <div style="text-align:center; margin-top:1rem;">
+            <button type="submit"
+                    style="background:#4f46e5; color:white; padding:0.6rem 1.2rem; border:none; border-radius:8px; font-size:1rem;">
+                ✅ Bestellung absenden
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

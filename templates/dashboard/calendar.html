@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}📅 Kalender & Aufgaben{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">📅 Kalender & Aufgaben</h1>
+<p style="color:#555;margin-bottom:1rem;">
+  Verwalte hier deine Termine, Meetings und Aufgaben. Klicke in den Kalender, um neue Einträge zu erstellen.
+</p>
+
+<!-- 📅 Kalender-Container -->
+<div id="calendar" style="background:white;padding:1rem;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);"></div>
+
+<!-- FullCalendar.js + CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calendar');
+
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',        // Monatsansicht als Standard
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+    },
+    locale: 'de',                       // 🇩🇪 Deutsche Sprache
+    selectable: true,
+    editable: true,                     // Drag & Drop aktivieren
+    eventSources: [
+      {
+        url: '/dashboard/calendar/events', // 🔄 Backend-Rückgabe (JSON)
+        method: 'GET',
+        failure: () => { alert('Fehler beim Laden der Termine'); }
+      }
+    ],
+    select: async function (info) {
+      const title = prompt('📌 Titel für neuen Termin:');
+      if (title) {
+        const event = {
+          title: title,
+          start: info.startStr,
+          end: info.endStr
+        };
+
+        const response = await fetch('/dashboard/calendar/events', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(event)
+        });
+
+        if (response.ok) {
+          calendar.refetchEvents();
+        } else {
+          alert('Fehler beim Erstellen des Termins.');
+        }
+      }
+      calendar.unselect();
+    },
+    eventDrop: async function (info) {
+      // 📝 Termin per Drag & Drop verschoben → speichern
+      const event = {
+        id: info.event.id,
+        start: info.event.startStr,
+        end: info.event.endStr
+      };
+      await fetch(`/dashboard/calendar/events/${event.id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(event)
+      });
+    },
+    eventClick: function (info) {
+      if (confirm(`Termin "${info.event.title}" löschen?`)) {
+        fetch(`/dashboard/calendar/events/${info.event.id}`, {
+          method: 'DELETE'
+        }).then(() => calendar.refetchEvents());
+      }
+    }
+  });
+
+  calendar.render();
+});
+</script>
+{% endblock %}

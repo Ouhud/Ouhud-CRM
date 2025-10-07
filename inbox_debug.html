@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>📨 Kommunikation / Inbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* 🌐 Globales Layout */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 🟦 Sidebar */
+    .sidebar {
+      width: 250px;
+      background-color: #4f46e5;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+    }
+
+    /* 🏢 Logo */
+    .sidebar .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      padding: 1.5rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar .logo img {
+      height: 36px;
+      width: auto;
+    }
+
+    /* 🧭 Navigation */
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.4rem;
+      flex-grow: 1;
+    }
+
+    .sidebar nav .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin: 1rem 0 0.2rem 0.5rem;
+    }
+
+    .sidebar nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* 👤 Benutzerbereich unten */
+    .user-box {
+      margin-top: auto;
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-avatar {
+      background: white;
+      color: #4f46e5;
+      font-weight: bold;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .user-info strong {
+      display: block;
+      font-size: 0.95rem;
+      color: white;
+    }
+
+    .user-info a {
+      color: #cbd5e1;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+
+    .user-info a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .logout-link {
+      display: block;
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .logout-link:hover {
+      color: #ffffff;
+    }
+
+    /* 📄 Hauptinhalt */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 2rem;
+      width: calc(100% - 250px);
+    }
+
+    /* 📱 Mobile Ansicht */
+    @media (max-width: 850px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar .logo span,
+      .sidebar nav .section-title {
+        display: none;
+      }
+
+      .sidebar nav a {
+        justify-content: center;
+        font-size: 0;
+      }
+
+      .sidebar nav a::before {
+        font-size: 1.4rem;
+      }
+
+      .main-content {
+        margin-left: 60px;
+        padding: 1rem;
+        width: calc(100% - 60px);
+      }
+
+      .user-info strong,
+      .user-info a {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🟦 Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/static/logo_ouhud.png" alt="Ouhud Logo">
+      <span>Ouhud CRM</span>
+    </div>
+
+    <nav>
+      <a href="/dashboard/">🏠 Dashboard</a>
+
+      <div class="section-title">Kunden & Vertrieb</div>
+      <a href="/dashboard/customers">🧑‍💼 Kontakte</a>
+      <a href="/dashboard/leads">🚀 Leads / Opportunities</a>
+      <a href="/dashboard/history">📜 Kundenhistorie</a>
+
+      <div class="section-title">Planung</div>
+      <a href="/dashboard/calendar">📅 Kalender & Aufgaben</a>
+
+      <div class="section-title">Produkte & Finanzen</div>
+      <a href="/dashboard/products">📦 Produkte</a>
+      <a href="/dashboard/orders">🛍 Bestellungen</a>
+      <a href="/dashboard/invoices">🧾 Rechnungen</a>
+      <a href="/dashboard/payments/">💳 Zahlungen</a>
+      <a href="/dashboard/invoices/reminders">⏰ Mahnungen</a>
+
+      <div class="section-title">Analyse & Kommunikation</div>
+      <a href="/dashboard/reports">📈 Berichte & Analysen</a>
+      <a href="/dashboard/inbox">📨 Kommunikation / Inbox</a>
+      <a href="/dashboard/chat">💬 Chat / WhatsApp</a>
+      <a href="/dashboard/calls">📞 Anrufhistorie</a>
+
+      <div class="section-title">Automatisierung</div>
+      <a href="/dashboard/workflows">🛠 Workflows</a>
+      <a href="/dashboard/documents">📑 Dokumente</a>
+
+      <div class="section-title">System</div>
+      <a href="/dashboard/settings">🌍 Einstellungen</a>
+      <a href="/admin/">🔐 Administration</a>
+    </nav>
+
+    <!-- 👤 Benutzerbereich -->
+    <div class="user-box">
+      
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <div>
+            <strong>admin</strong>
+            <a href="/dashboard/settings">⚙️ Profil</a>
+          </div>
+        </div>
+        <a href="/auth/logout" class="logout-link">🚪 Logout</a>
+      
+    </div>
+  </aside>
+
+  <!-- 📄 Hauptinhalt -->
+  <main class="main-content">
+    
+<style>
+  .inbox-container { max-width: 1100px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.05); padding: 1rem; }
+  .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .toolbar input[type="text"] { padding: .5rem .7rem; border: 1px solid #ddd; border-radius: 8px; min-width: 240px; }
+  .toolbar select, .toolbar button, .toolbar a { padding: .5rem .7rem; border-radius: 8px; }
+  .toolbar button { background: #4f46e5; color: #fff; border: none; cursor: pointer; }
+  .toolbar a.ghost { background: #eef2ff; color: #4f46e5; text-decoration: none; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: .65rem; border-top: 1px solid #eee; text-align: left; vertical-align: top; }
+  th { background: #f4f6f8; }
+  .pill { display: inline-flex; align-items: center; gap: .3rem; font-size: .8rem; border-radius: 20px; padding: .2rem .6rem; }
+  .pill.read { background: #e5f6ff; color: #0369a1; }
+  .pill.unread { background: #fee2e2; color: #b91c1c; }
+  .pill.archived { background: #f1f5f9; color: #334155; }
+  .actions form { display: inline; }
+  .actions button { background: transparent; color: #4f46e5; border: none; cursor: pointer; }
+  .actions .danger { color: #ef4444; }
+  details summary { cursor: pointer; color: #4f46e5; }
+  .empty { padding: 1.2rem; text-align: center; }
+  .badge { background: #eef2ff; color: #4f46e5; border-radius: 999px; padding: .15rem .5rem; font-size: .8rem; }
+</style>
+
+<div class="inbox-container">
+  <h1 style="font-size:1.6rem;font-weight:700;margin-bottom:.6rem;">📨 Kommunikation / Inbox</h1>
+
+  <!-- 🔍 Toolbar mit Suche, Filter & Quick-Create -->
+  <div class="toolbar">
+    <form method="get" action="/dashboard/inbox" style="display:flex;gap:.5rem;align-items:center;">
+      <input type="text" name="q" value="" placeholder="Suche Betreff/Absender/Text …">
+      <select name="show" style="border:1px solid #ddd;">
+        <option value="open" selected>Offen (5)</option>
+        <option value="archived" >Archiv (0)</option>
+        <option value="all" >Alle</option>
+      </select>
+      <button type="submit">🔎 Filtern</button>
+      <a class="ghost" href="/dashboard/inbox">Zurücksetzen</a>
+    </form>
+
+    <!-- ➕ Neue Nachricht erstellen (intern) -->
+    <details style="margin-left:auto;">
+      <summary>➕ Nachricht</summary>
+      <form method="post" action="/dashboard/inbox/create" style="margin-top:.5rem;display:grid;gap:.4rem;">
+        <input name="sender_name" placeholder="Absendername" required>
+        <input name="sender_email" placeholder="E-Mail" required>
+        <input name="subject" placeholder="Betreff" required>
+        <textarea name="content" rows="3" placeholder="Nachricht" required></textarea>
+        <button type="submit">Speichern</button>
+      </form>
+    </details>
+  </div>
+
+  <div class="card">
+    
+      <table>
+        <thead>
+          <tr>
+            <th>Absender</th>
+            <th>Betreff & Vorschau</th>
+            <th>Empfangen</th>
+            <th>Status</th>
+            <th style="text-align:center;">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>
+              <div><strong>Max Mustermann</strong></div>
+              <div style="color:#64748b;font-size:.9rem;">max@test.de</div>
+              
+            </td>
+            <td>
+              <div><strong>Test per Script 12:35:28</strong></div>
+              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                Hallo, dies ist ein automatischer Test Sat Oct  4 12:35:28 CEST 2025
+              </div>
+              <details>
+                <summary>Voll anzeigen</summary>
+                <pre style="white-space:pre-wrap">Hallo, dies ist ein automatischer Test Sat Oct  4 12:35:28 CEST 2025</pre>
+              </details>
+            </td>
+            <td>2025-10-04 10:35</td>
+            <td>
+              
+                <span class="pill unread">
+                  Ungelesen
+                </span>
+              
+            </td>
+            <td class="actions" style="text-align:center;white-space:nowrap;">
+              <form method="post" action="/dashboard/inbox/5/toggle-read">
+                <button title="Gelesen umschalten">👁️</button>
+              </form>
+              <form method="post" action="/dashboard/inbox/5/toggle-archive">
+                <button title="Archivieren">
+                  🗄️
+                </button>
+              </form>
+              <details style="display:inline-block;">
+                <summary title="Antworten">✉️</summary>
+                <form method="post" action="/dashboard/inbox/5/reply" style="margin-top:.4rem;display:grid;gap:.3rem;">
+                  <textarea name="body" rows="3" placeholder="Antworttext …" required></textarea>
+                  <button type="submit">Senden</button>
+                </form>
+              </details>
+              <form method="post" action="/dashboard/inbox/5/delete" onsubmit="return confirm('Nachricht löschen?')">
+                <button class="danger" title="Löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div><strong>Max Mustermann</strong></div>
+              <div style="color:#64748b;font-size:.9rem;">max@test.de</div>
+              
+            </td>
+            <td>
+              <div><strong>Test per Script 12:34:34</strong></div>
+              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                Hallo, dies ist ein automatischer Test Sat Oct  4 12:34:34 CEST 2025
+              </div>
+              <details>
+                <summary>Voll anzeigen</summary>
+                <pre style="white-space:pre-wrap">Hallo, dies ist ein automatischer Test Sat Oct  4 12:34:34 CEST 2025</pre>
+              </details>
+            </td>
+            <td>2025-10-04 10:34</td>
+            <td>
+              
+                <span class="pill unread">
+                  Ungelesen
+                </span>
+              
+            </td>
+            <td class="actions" style="text-align:center;white-space:nowrap;">
+              <form method="post" action="/dashboard/inbox/4/toggle-read">
+                <button title="Gelesen umschalten">👁️</button>
+              </form>
+              <form method="post" action="/dashboard/inbox/4/toggle-archive">
+                <button title="Archivieren">
+                  🗄️
+                </button>
+              </form>
+              <details style="display:inline-block;">
+                <summary title="Antworten">✉️</summary>
+                <form method="post" action="/dashboard/inbox/4/reply" style="margin-top:.4rem;display:grid;gap:.3rem;">
+                  <textarea name="body" rows="3" placeholder="Antworttext …" required></textarea>
+                  <button type="submit">Senden</button>
+                </form>
+              </details>
+              <form method="post" action="/dashboard/inbox/4/delete" onsubmit="return confirm('Nachricht löschen?')">
+                <button class="danger" title="Löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div><strong>Max Mustermann</strong></div>
+              <div style="color:#64748b;font-size:.9rem;">max@test.de</div>
+              
+            </td>
+            <td>
+              <div><strong>Test per Script 12:32:43</strong></div>
+              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                Hallo, dies ist ein automatischer Test Sat Oct  4 12:32:43 CEST 2025
+              </div>
+              <details>
+                <summary>Voll anzeigen</summary>
+                <pre style="white-space:pre-wrap">Hallo, dies ist ein automatischer Test Sat Oct  4 12:32:43 CEST 2025</pre>
+              </details>
+            </td>
+            <td>2025-10-04 10:32</td>
+            <td>
+              
+                <span class="pill unread">
+                  Ungelesen
+                </span>
+              
+            </td>
+            <td class="actions" style="text-align:center;white-space:nowrap;">
+              <form method="post" action="/dashboard/inbox/3/toggle-read">
+                <button title="Gelesen umschalten">👁️</button>
+              </form>
+              <form method="post" action="/dashboard/inbox/3/toggle-archive">
+                <button title="Archivieren">
+                  🗄️
+                </button>
+              </form>
+              <details style="display:inline-block;">
+                <summary title="Antworten">✉️</summary>
+                <form method="post" action="/dashboard/inbox/3/reply" style="margin-top:.4rem;display:grid;gap:.3rem;">
+                  <textarea name="body" rows="3" placeholder="Antworttext …" required></textarea>
+                  <button type="submit">Senden</button>
+                </form>
+              </details>
+              <form method="post" action="/dashboard/inbox/3/delete" onsubmit="return confirm('Nachricht löschen?')">
+                <button class="danger" title="Löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div><strong>Max Mustermann</strong></div>
+              <div style="color:#64748b;font-size:.9rem;">max@test.de</div>
+              
+            </td>
+            <td>
+              <div><strong>Testnachricht per curl</strong></div>
+              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                Hallo, das ist ein Testinhalt.
+              </div>
+              <details>
+                <summary>Voll anzeigen</summary>
+                <pre style="white-space:pre-wrap">Hallo, das ist ein Testinhalt.</pre>
+              </details>
+            </td>
+            <td>2025-10-04 10:19</td>
+            <td>
+              
+                <span class="pill unread">
+                  Ungelesen
+                </span>
+              
+            </td>
+            <td class="actions" style="text-align:center;white-space:nowrap;">
+              <form method="post" action="/dashboard/inbox/2/toggle-read">
+                <button title="Gelesen umschalten">👁️</button>
+              </form>
+              <form method="post" action="/dashboard/inbox/2/toggle-archive">
+                <button title="Archivieren">
+                  🗄️
+                </button>
+              </form>
+              <details style="display:inline-block;">
+                <summary title="Antworten">✉️</summary>
+                <form method="post" action="/dashboard/inbox/2/reply" style="margin-top:.4rem;display:grid;gap:.3rem;">
+                  <textarea name="body" rows="3" placeholder="Antworttext …" required></textarea>
+                  <button type="submit">Senden</button>
+                </form>
+              </details>
+              <form method="post" action="/dashboard/inbox/2/delete" onsubmit="return confirm('Nachricht löschen?')">
+                <button class="danger" title="Löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <div><strong>Hamza</strong></div>
+              <div style="color:#64748b;font-size:.9rem;">info@mehmalat</div>
+              
+            </td>
+            <td>
+              <div><strong>kolegen</strong></div>
+              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                gggggggggggg
+              </div>
+              <details>
+                <summary>Voll anzeigen</summary>
+                <pre style="white-space:pre-wrap">gggggggggggg</pre>
+              </details>
+            </td>
+            <td>2025-10-04 10:10</td>
+            <td>
+              
+                <span class="pill read">
+                  Gelesen
+                </span>
+              
+            </td>
+            <td class="actions" style="text-align:center;white-space:nowrap;">
+              <form method="post" action="/dashboard/inbox/1/toggle-read">
+                <button title="Gelesen umschalten">👁️‍🗨️</button>
+              </form>
+              <form method="post" action="/dashboard/inbox/1/toggle-archive">
+                <button title="Archivieren">
+                  🗄️
+                </button>
+              </form>
+              <details style="display:inline-block;">
+                <summary title="Antworten">✉️</summary>
+                <form method="post" action="/dashboard/inbox/1/reply" style="margin-top:.4rem;display:grid;gap:.3rem;">
+                  <textarea name="body" rows="3" placeholder="Antworttext …" required></textarea>
+                  <button type="submit">Senden</button>
+                </form>
+              </details>
+              <form method="post" action="/dashboard/inbox/1/delete" onsubmit="return confirm('Nachricht löschen?')">
+                <button class="danger" title="Löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          
+        </tbody>
+      </table>
+    
+  </div>
+</div>
+
+  </main>
+</body>
+</html>
