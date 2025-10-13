@@ -1,119 +1,226 @@
-{% extends "base.html" %}
+{% extends "base_dashboard.html" %}
 {% block title %}Dashboard – Ouhud CRM{% endblock %}
 
 {% block content %}
+<h1 style="color:#0D2A78;margin-bottom:0.5rem;">Dashboard</h1>
+<p>Willkommen im Ouhud CRM – Überblick über aktuelle Kennzahlen und Entwicklungen.</p>
+
+<!-- 🌟 KPI-Karten -->
+<div class="kpi-grid">
+  <div class="kpi-card"><h3>Gesamtumsatz</h3><p>{{ stats.total_sum | round(2) }} {{ company.currency_code or 'EUR' }}</p></div>
+  <div class="kpi-card"><h3>Kunden</h3><p>{{ stats.customers }}</p></div>
+  <div class="kpi-card"><h3>Rechnungen</h3><p>{{ stats.invoices }}</p></div>
+  <div class="kpi-card"><h3>Überfällig</h3><p>{{ stats.overdue }}</p></div>
+</div>
+
+<!-- 🧩 Dashboard-Gitter -->
+<div class="dashboard-grid">
+  <div class="card chart-card">
+    <h2>📈 Umsatzentwicklung</h2>
+    <canvas id="umsatzChart"></canvas>
+  </div>
+
+  <div class="card chart-card">
+    <h2>👥 Kundenübersicht</h2>
+    <canvas id="kundenChart"></canvas>
+  </div>
+
+  <div class="card chart-card">
+    <h2>🚀 Leads nach Status</h2>
+    <canvas id="leadsChart"></canvas>
+  </div>
+
+  <div class="card chart-card">
+    <h2>🧾 Offene Rechnungen nach Fälligkeit</h2>
+    <canvas id="invoiceChart"></canvas>
+  </div>
+
+  <div class="card chart-card">
+    <h2>📦 Top-Produkte nach Umsatz</h2>
+    <canvas id="productChart"></canvas>
+  </div>
+
+  <div class="card chart-card">
+    <h2>💳 Zahlungseingänge pro Monat</h2>
+    <canvas id="paymentChart"></canvas>
+  </div>
+</div>
+
 <style>
-  .dashboard-header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  .dashboard-header img.logo {
-    max-width: 140px;
-    height: auto;
-    border-radius: 10px;
-    margin-bottom: 0.5rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-  }
-  .dashboard-header h1 {
-    margin: 0;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-  .dashboard-header p {
-    color: #555;
-    font-size: 1rem;
-  }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.kpi-card {
+  background: linear-gradient(135deg,#0D2A78,#1E40AF);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+.kpi-card h3 {font-size:0.9rem;margin:0;}
+.kpi-card p {font-size:1.5rem;margin:0.3rem 0 0;font-weight:bold;}
 
-  .welcome-text {
-    text-align: center;
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-    color: #374151;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.2rem;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .stat-card {
-    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
-    border-radius: 12px;
-    padding: 1.2rem;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-  }
-  .stat-card h3 {
-    font-size: 1.1rem;
-    color: #4f46e5;
-    margin: 0.4rem 0;
-  }
-  .stat-card .icon {
-    font-size: 2rem;
-    margin-bottom: 0.3rem;
-  }
-  .stat-card p {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #111827;
-    margin: 0;
-  }
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(340px,1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+h2 {
+  font-size:1rem;
+  margin-bottom:0.8rem;
+  color:#0D2A78;
+}
+.chart-card {
+  height:320px;
+  display:flex;
+  flex-direction:column;
+}
+.chart-card canvas {
+  width:100%!important;
+  height:240px!important;
+}
 </style>
+{% endblock %}
+{% block scripts %}
+<!-- 📊 Chart.js laden -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-<div class="dashboard-header">
-  {% if company and company.logo_path %}
-    <img src="{{ company.logo_path }}" alt="Logo {{ company.company_name }}" class="logo">
-  {% endif %}
-  {% if company %}
-    <h1>{{ company.company_name }}</h1>
-    <p>{{ company.city }}</p>
-  {% else %}
-    <h1>🏢 Willkommen bei Ouhud CRM</h1>
-  {% endif %}
-</div>
+<script>
+function renderDashboardCharts() {
+  console.log("📈 Dashboard Charts werden gerendert...");
 
-<div class="welcome-text">
-  Willkommen zurück, <strong>{{ user.first_name or user.username }}</strong> 👋
-</div>
+  // 🟢 1️⃣ Umsatzentwicklung
+  new Chart(document.getElementById("umsatzChart"), {
+    type: "line",
+    data: {
+      labels: {{ chart_data.months | tojson }},
+      datasets: [{
+        label: "Umsatz ({{ company.currency_code or 'EUR' }})",
+        data: {{ chart_data.revenues | tojson }},
+        borderColor: "#0D2A78",
+        backgroundColor: "rgba(13,42,120,0.1)",
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 
-<div class="stats-grid">
-  <div class="stat-card">
-    <div class="icon">👥</div>
-    <h3>Kunden</h3>
-    <p>{{ stats.customers }}</p>
-  </div>
+  // 🟢 2️⃣ Kundenübersicht
+  new Chart(document.getElementById("kundenChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Aktiv", "Neu", "Inaktiv"],
+      datasets: [{
+        data: [120, 30, 15],
+        backgroundColor: ["#0D2A78", "#1E40AF", "#93C5FD"],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      cutout: "70%",
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
 
-  <div class="stat-card">
-    <div class="icon">🧾</div>
-    <h3>Rechnungen</h3>
-    <p>{{ stats.invoices }}</p>
-  </div>
+  // 🟢 3️⃣ Leads nach Status
+  new Chart(document.getElementById("leadsChart"), {
+    type: "bar",
+    data: {
+      labels: Object.keys({{ chart_data.leads | tojson }}),
+      datasets: [{
+        label: "Leads",
+        data: Object.values({{ chart_data.leads | tojson }}),
+        backgroundColor: "#0D2A78",
+        borderRadius: 6
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
 
-  <div class="stat-card">
-    <div class="icon">💰</div>
-    <h3>Gesamtumsatz</h3>
-    <p>{{ stats.total_sum }} {{ company.currency_code if company else "€" }}</p>
-  </div>
+  // 🟢 4️⃣ Offene Rechnungen nach Fälligkeit
+  new Chart(document.getElementById("invoiceChart"), {
+    type: "bar",
+    data: {
+      labels: ["0–30 Tage", "31–60 Tage", "61–90 Tage", ">90 Tage"],
+      datasets: [{
+        label: "Rechnungen",
+        data: [10, 6, 3, 2],
+        backgroundColor: "#F59E0B",
+        borderRadius: 6
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
 
-  <div class="stat-card">
-    <div class="icon">⚠️</div>
-    <h3>Überfällig</h3>
-    <p>{{ stats.overdue }}</p>
-  </div>
+  // 🟢 5️⃣ Top-Produkte nach Umsatz
+  new Chart(document.getElementById("productChart"), {
+    type: "bar",
+    data: {
+      labels: {{ chart_data.products | tojson }},
+      datasets: [{
+        label: "Umsatz ({{ company.currency_code or 'EUR' }})",
+        data: {{ chart_data.product_sales | tojson }},
+        backgroundColor: "#10B981"
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
 
-  <div class="stat-card">
-    <div class="icon">📬</div>
-    <h3>Mahnungen</h3>
-    <p>{{ stats.reminders }}</p>
-  </div>
-</div>
+  // 🟢 6️⃣ Zahlungseingänge pro Monat
+  new Chart(document.getElementById("paymentChart"), {
+    type: "line",
+    data: {
+      labels: {{ chart_data.payments["labels"] | tojson }},
+      datasets: [{
+        label: "Zahlungen ({{ company.currency_code or 'EUR' }})",
+        data: {{ chart_data.payments["values"] | tojson }},
+        borderColor: "#0D9488",
+        backgroundColor: "rgba(13,148,136,0.1)",
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+// 🚀 Initialisierung nach Laden der Seite
+document.addEventListener("DOMContentLoaded", renderDashboardCharts);
+</script>
 {% endblock %}

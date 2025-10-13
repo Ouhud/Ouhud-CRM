@@ -1,28 +1,22 @@
-{% extends "base_dashboard.html" %}
-{% block title %}👥 Kunden & Kontakte – Ouhud CRM{% endblock %}
-
-{% block content %}
 <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">👥 Kunden & Kontakte</h1>
 
-<!-- 🔍 Suchfeld + Neu -->
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
   <form method="get" action="/dashboard/customers" style="display:flex;gap:0.5rem;">
-    <input type="text" name="q" placeholder="🔍 Suchen nach Name oder E-Mail..."
-           value="{{ q or '' }}"
+    <input type="text" name="q" placeholder="🔍 Suchen nach Name oder E-Mail..." 
+           value="{{ q or '' }}" 
            style="padding:0.5rem 0.7rem;border-radius:6px;border:1px solid #ccc;min-width:240px;">
-    <button type="submit"
+    <button type="submit" 
             style="background:#4f46e5;color:white;border:none;padding:0.5rem 0.9rem;border-radius:6px;cursor:pointer;">
       Suchen
     </button>
   </form>
 
-  <a href="/dashboard/customers/new"
+  <a href="/dashboard/customers/new" 
      style="background:#10b981;color:white;padding:0.6rem 1rem;border-radius:6px;text-decoration:none;display:flex;align-items:center;gap:0.4rem;">
     ➕ Neuer Kunde
   </a>
 </div>
 
-<!-- 📋 Kundenliste -->
 {% if customers and customers|length > 0 %}
   <table style="width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.05);">
     <thead style="background:#f4f6f8;">
@@ -38,22 +32,22 @@
     </thead>
     <tbody>
       {% for c in customers %}
-      <tr style="border-top:1px solid #eee;">
-        <td style="padding:0.6rem;">{{ c.id }}</td>
-        <td style="padding:0.6rem;font-weight:500;">{{ c.name }}</td>
-        <td style="padding:0.6rem;">{{ c.email }}</td>
-        <td style="padding:0.6rem;">{{ c.address }}</td>
-        <td style="padding:0.6rem;">{{ c.city }}</td>
-        <td style="padding:0.6rem;">{{ c.phone or '—' }}</td>
-        <td style="padding:0.6rem;text-align:center;">
-          <a href="/dashboard/customers/{{ c.id }}/edit"
-             style="color:#4f46e5;text-decoration:none;margin-right:0.5rem;">✏️ Bearbeiten</a>
-          <form action="/dashboard/customers/{{ c.id }}/delete" method="post" style="display:inline;">
-            <button type="submit"
-                    style="color:#ef4444;background:none;border:none;cursor:pointer;">🗑 Löschen</button>
-          </form>
-        </td>
-      </tr>
+        <tr style="border-top:1px solid #eee;">
+          <td style="padding:0.6rem;">{{ c.id }}</td>
+          <td style="padding:0.6rem;font-weight:500;">{{ c.name }}</td>
+          <td style="padding:0.6rem;">{{ c.email }}</td>
+          <td style="padding:0.6rem;">{{ c.address }}</td>
+          <td style="padding:0.6rem;">{{ c.city }}</td>
+          <td style="padding:0.6rem;">{{ c.phone or '—' }}</td>
+          <td style="padding:0.6rem;text-align:center;">
+            <a href="/dashboard/customers/{{ c.id }}/edit" 
+               style="color:#4f46e5;text-decoration:none;margin-right:0.5rem;">✏️ Bearbeiten</a>
+            <form action="/dashboard/customers/{{ c.id }}/delete" method="post" style="display:inline;">
+              <button type="submit" 
+                      style="color:#ef4444;background:none;border:none;cursor:pointer;">🗑 Löschen</button>
+            </form>
+          </td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>
@@ -62,4 +56,3 @@
     📭 Keine Kunden gefunden.
   </div>
 {% endif %}
-{% endblock %}
