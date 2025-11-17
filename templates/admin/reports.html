@@ -1,56 +1,121 @@
 {% extends "base_dashboard.html" %}
-{% block title %}📈 Berichte{% endblock %}
+{% block title %}📈 Berichte | Ouhud CRM{% endblock %}
 
 {% block content %}
-<div class="dashboard-container" style="max-width:900px; margin:auto;">
-    <h1 style="text-align:center;">📊 Monatsumsatz</h1>
-    <p style="text-align:center; color:#666;">Umsatzentwicklung des aktuellen Jahres</p>
+<div class="reports-container">
+  <h1>📊 Monatsumsatz</h1>
+  <p class="subtitle">Umsatzentwicklung des aktuellen Jahres</p>
 
-    <canvas id="revenueChart" width="800" height="400"></canvas>
+  <div class="chart-card">
+    <canvas id="revenueChart"></canvas>
+  </div>
 
-    <div style="margin-top:2rem; background:#f9fafb; padding:1rem; border-radius:8px;">
-        <strong>ℹ️ Hinweis:</strong> Die Daten basieren auf den gespeicherten Rechnungen.
-        Wenn du Testdaten hinzufügen willst, erstelle einfach Rechnungen mit verschiedenen Monaten.
-    </div>
+  <div class="note-box">
+    <strong>ℹ️ Hinweis:</strong>
+    Die Daten basieren auf den gespeicherten Rechnungen. Um Testdaten zu erzeugen, erstelle Rechnungen mit unterschiedlichen Monaten.
+  </div>
 </div>
 
-<!-- 📊 Chart.js einbinden -->
+<!-- 📊 Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    const months = {{ months | tojson }};
-    const revenues = {{ revenues | tojson }};
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const months = {{ months | tojson }};
+  const revenues = {{ revenues | tojson }};
 
-    const monthLabels = months.map(m => new Date(2025, m - 1, 1).toLocaleString('de-DE', { month: 'short' }));
+  const monthLabels = months.map(m =>
+    new Date(2025, m - 1, 1).toLocaleString('de-DE', { month: 'short' })
+  );
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: monthLabels,
-            datasets: [{
-                label: 'Umsatz (CHF)',
-                data: revenues,
-                borderColor: '#4f46e5',
-                backgroundColor: 'rgba(79, 70, 229, 0.15)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 5,
-                pointHoverRadius: 7
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true },
-                tooltip: { mode: 'index', intersect: false }
-            },
-            interaction: { mode: 'nearest', intersect: false },
-            scales: {
-                x: { title: { display: true, text: 'Monat' } },
-                y: { title: { display: true, text: 'CHF' }, beginAtZero: true }
-            }
+  // 🎨 Farbverlauf erzeugen
+  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, 'rgba(79,70,229,0.35)');
+  gradient.addColorStop(1, 'rgba(79,70,229,0.02)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: monthLabels,
+      datasets: [{
+        label: 'Umsatz (CHF)',
+        data: revenues,
+        borderColor: '#4f46e5',
+        backgroundColor: gradient,
+        tension: 0.35,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#4f46e5'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (ctx) => ` ${ctx.parsed.y.toLocaleString('de-CH')} CHF`
+          }
         }
-    });
+      },
+      interaction: { mode: 'nearest', intersect: false },
+      scales: {
+        x: {
+          title: { display: true, text: 'Monat' },
+          grid: { display: false }
+        },
+        y: {
+          title: { display: true, text: 'Umsatz (CHF)' },
+          beginAtZero: true,
+          ticks: { callback: v => v.toLocaleString('de-CH') }
+        }
+      }
+    }
+  });
 </script>
+
+<style>
+  .reports-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .chart-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  .note-box {
+    background: #f9fafb;
+    border-left: 4px solid #4f46e5;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    color: #374151;
+  }
+</style>
 {% endblock %}

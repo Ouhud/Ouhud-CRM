@@ -1,38 +1,196 @@
 {% extends "base_dashboard.html" %}
-{% block title %}📨 Kommunikation / Inbox{% endblock %}
+{% block title %}📨 Kommunikation / Inbox – Ouhud CRM{% endblock %}
 
 {% block content %}
 <style>
-  .inbox-container { max-width: 1100px; margin: 0 auto; }
-  .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.05); padding: 1rem; }
-  .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
-  .toolbar input[type="text"] { padding: .5rem .7rem; border: 1px solid #ddd; border-radius: 8px; min-width: 240px; }
-  .toolbar select, .toolbar button, .toolbar a { padding: .5rem .7rem; border-radius: 8px; }
-  .toolbar button { background: #4f46e5; color: #fff; border: none; cursor: pointer; }
-  .toolbar a.ghost { background: #eef2ff; color: #4f46e5; text-decoration: none; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: .65rem; border-top: 1px solid #eee; text-align: left; vertical-align: top; }
-  th { background: #f4f6f8; }
-  .pill { display: inline-flex; align-items: center; gap: .3rem; font-size: .8rem; border-radius: 20px; padding: .2rem .6rem; }
-  .pill.read { background: #e5f6ff; color: #0369a1; }
-  .pill.unread { background: #fee2e2; color: #b91c1c; }
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --danger: #dc2626;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --muted: #6b7280;
+  }
+
+  .inbox-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.6rem;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .toolbar input[type="text"],
+  .toolbar select {
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .toolbar button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.25s ease;
+  }
+  .toolbar button:hover {
+    background: var(--primary-dark);
+  }
+
+  .toolbar a.ghost {
+    background: #e0e7ff;
+    color: var(--primary);
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-weight: 500;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.94rem;
+  }
+
+  th, td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--bg);
+    color: var(--primary-dark);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  tr:hover td {
+    background: #f9fafb;
+  }
+
+  .badge {
+    background: #e0f2fe;
+    color: #075985;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-top: 0.3rem;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    border-radius: 20px;
+    padding: 0.25rem 0.7rem;
+    font-weight: 600;
+  }
+  .pill.read { background: #dcfce7; color: #166534; }
+  .pill.unread { background: #fee2e2; color: #991b1b; }
   .pill.archived { background: #f1f5f9; color: #334155; }
-  .actions form { display: inline; }
-  .actions button { background: transparent; color: #4f46e5; border: none; cursor: pointer; }
-  .actions .danger { color: #ef4444; }
-  details summary { cursor: pointer; color: #4f46e5; }
-  .empty { padding: 1.2rem; text-align: center; }
-  .badge { background: #eef2ff; color: #4f46e5; border-radius: 999px; padding: .15rem .5rem; font-size: .8rem; }
+
+  .actions form {
+    display: inline;
+  }
+
+  .actions button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--primary-dark);
+  }
+
+  .actions button:hover {
+    filter: brightness(0.8);
+  }
+
+  .actions .danger {
+    color: var(--danger);
+  }
+
+  .empty {
+    padding: 1.2rem;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  details summary {
+    cursor: pointer;
+    color: var(--primary-dark);
+    font-weight: 500;
+    margin-top: 0.3rem;
+  }
+
+  details summary:hover {
+    text-decoration: underline;
+  }
+
+  details form textarea {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  details form button {
+    background: var(--success);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.4rem;
+  }
+
+  details form button:hover {
+    background: #059669;
+  }
+
+  /* Neue Nachricht (details) */
+  details[open] summary {
+    color: var(--success);
+  }
 </style>
 
 <div class="inbox-container">
-  <h1 style="font-size:1.6rem;font-weight:700;margin-bottom:.6rem;">📨 Kommunikation / Inbox</h1>
+  <h1>📨 Kommunikation / Inbox</h1>
 
-  <!-- 🔍 Toolbar mit Suche, Filter & Quick-Create -->
+  <!-- 🔍 Toolbar -->
   <div class="toolbar">
     <form method="get" action="/dashboard/inbox" style="display:flex;gap:.5rem;align-items:center;">
-      <input type="text" name="q" value="{{ q }}" placeholder="Suche Betreff/Absender/Text …">
-      <select name="show" style="border:1px solid #ddd;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Suche Betreff, Absender, Text …">
+      <select name="show">
         <option value="open" {% if show=='open' %}selected{% endif %}>Offen ({{ open_count }})</option>
         <option value="archived" {% if show=='archived' %}selected{% endif %}>Archiv ({{ archived_count }})</option>
         <option value="all" {% if show=='all' %}selected{% endif %}>Alle</option>
@@ -41,7 +199,7 @@
       <a class="ghost" href="/dashboard/inbox">Zurücksetzen</a>
     </form>
 
-    <!-- ➕ Neue Nachricht erstellen (intern) -->
+    <!-- ➕ Neue Nachricht -->
     <details style="margin-left:auto;">
       <summary>➕ Nachricht</summary>
       <form method="post" action="/dashboard/inbox/create" style="margin-top:.5rem;display:grid;gap:.4rem;">
@@ -73,14 +231,14 @@
           <tr>
             <td>
               <div><strong>{{ m.sender_name }}</strong></div>
-              <div style="color:#64748b;font-size:.9rem;">{{ m.sender_email }}</div>
+              <div style="color:var(--muted);font-size:.9rem;">{{ m.sender_email }}</div>
               {% if m.customer %}
                 <div class="badge">👤 Kunde: {{ m.customer.name }}</div>
               {% endif %}
             </td>
             <td>
               <div><strong>{{ m.subject }}</strong></div>
-              <div style="color:#6b7280;max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+              <div style="color:var(--muted);max-width:520px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
                 {{ m.content }}
               </div>
               <details>

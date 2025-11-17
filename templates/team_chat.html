@@ -1,44 +1,57 @@
 {% extends "base_dashboard.html" %}
-{% block title %}💬 Team-Chat – Intern (Pro){% endblock %}
+{% block title %}💬 Team-Chat – Ouhud CRM{% endblock %}
 
 {% block content %}
 <style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --bg: #f4f6f8;
+  }
+
   .chat-container {
     max-width: 900px;
     margin: 0 auto;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     height: 650px;
+    overflow: hidden;
   }
 
   .chat-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: .8rem 1rem;
-    background: #4f46e5;
-    color: white;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: #fff;
   }
 
   .chat-header h1 {
     font-size: 1.1rem;
     margin: 0;
+    font-weight: 700;
   }
 
   .chat-status {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     opacity: 0.9;
+    background: rgba(255,255,255,0.15);
+    padding: 0.3rem 0.7rem;
+    border-radius: 8px;
   }
 
   .presence {
-    font-size: 0.8rem;
-    color: #e0e7ff;
+    font-size: 0.85rem;
+    color: #dbeafe;
     margin-top: 0.2rem;
   }
 
@@ -46,11 +59,11 @@
     flex: 1;
     overflow-y: auto;
     padding: 1rem;
-    background: #f9fafb;
+    background: var(--bg);
   }
 
   .message {
-    margin-bottom: .75rem;
+    margin-bottom: 0.9rem;
     display: flex;
     align-items: flex-start;
   }
@@ -60,52 +73,70 @@
   }
 
   .message .bubble {
-    padding: .6rem .9rem;
+    padding: 0.75rem 1rem;
     border-radius: 12px;
     max-width: 70%;
     word-wrap: break-word;
     font-size: 0.95rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
 
   .message.agent .bubble {
-    background: #4f46e5;
-    color: white;
+    background: #e0f2fe;
+    color: #075985;
+    border: 1px solid #bae6fd;
   }
 
   .message.customer .bubble {
-    background: #e5e7eb;
-    color: #111827;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #bbf7d0;
   }
 
   .message .meta {
-    font-size: 0.7rem;
-    color: #6b7280;
-    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
     text-align: right;
   }
 
   .chat-input {
     display: flex;
-    padding: .8rem;
-    border-top: 1px solid #e5e7eb;
+    padding: 0.9rem;
+    border-top: 1px solid var(--border);
     background: #fff;
   }
 
   .chat-input input {
     flex: 1;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    padding: .6rem .9rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .chat-input input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(13,42,120,0.1);
   }
 
   .chat-input button {
-    margin-left: .5rem;
-    background: #4f46e5;
-    color: white;
+    margin-left: 0.6rem;
+    background: var(--primary);
+    color: #fff;
     border: none;
     border-radius: 8px;
-    padding: .6rem 1rem;
+    padding: 0.7rem 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 0.25s ease, transform 0.1s ease;
+  }
+
+  .chat-input button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
   }
 
   .chat-input button:disabled {
@@ -117,8 +148,8 @@
 <div class="chat-container">
   <div class="chat-header">
     <div>
-      <h1>💬 Team-Chat (Pro)</h1>
-      <div class="presence" id="presence">👤 Online: 0</div>
+      <h1>💬 Team-Chat (Intern)</h1>
+      <div class="presence" id="presence">👥 Online: 0</div>
     </div>
     <div class="chat-status" id="chat-status">Verbindung wird hergestellt…</div>
   </div>
@@ -144,7 +175,6 @@
   let pingInterval;
   let pongTimeout;
 
-  // Nachrichten aus DB laden
   async function loadChatHistory() {
     const res = await fetch('/dashboard/chat/history');
     const messages = await res.json();
@@ -155,11 +185,11 @@
   }
 
   function connectWebSocket() {
-    ws = new WebSocket(`ws://${window.location.host}/dashboard/chat/ws`);
+    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss://' : 'ws://'}${window.location.host}/dashboard/chat/ws`);
 
     ws.onopen = () => {
       chatStatus.textContent = '🟢 Verbunden';
-      chatStatus.style.color = '#dcfce7';
+      chatStatus.style.background = '#16a34a';
       reconnectAttempts = 0;
       startHeartbeat();
     };
@@ -178,11 +208,12 @@
     ws.onclose = () => {
       stopHeartbeat();
       chatStatus.textContent = '🔴 Verbindung getrennt – erneut verbinden...';
+      chatStatus.style.background = '#dc2626';
       if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
         reconnectAttempts++;
         setTimeout(connectWebSocket, 3000);
       } else {
-        chatStatus.textContent = '❌ Verbindung fehlgeschlagen. Bitte Seite neu laden.';
+        chatStatus.textContent = '❌ Verbindung fehlgeschlagen. Seite neu laden.';
       }
     };
 
@@ -207,20 +238,18 @@
   }
 
   function updatePresence(count) {
-    presenceBox.textContent = `👤 Online: ${count}`;
+    presenceBox.textContent = `👥 Online: ${count}`;
   }
 
-  // 💓 Ping/Pong Mechanismus
   function startHeartbeat() {
     pingInterval = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'ping' }));
         pongTimeout = setTimeout(() => {
-          console.warn('⚠️ Pong Timeout → Verbindung schließen');
           ws.close();
         }, 5000);
       }
-    }, 30000); // alle 30 Sekunden
+    }, 30000);
   }
 
   function stopHeartbeat() {

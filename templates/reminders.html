@@ -1,63 +1,170 @@
 {% extends "base_dashboard.html" %}
-{% block title %}📨 Aktive Mahnungen{% endblock %}
+{% block title %}📨 Aktive Mahnungen – Ouhud CRM{% endblock %}
 
 {% block content %}
-<div class="dashboard-container" style="max-width:1100px;margin:0 auto;">
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --danger: #dc2626;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --muted: #6b7280;
+  }
 
-  <!-- 📝 Titel -->
-  <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:0.5rem;">📨 Aktive Mahnungen</h1>
-  <p style="margin-bottom:1.5rem;color:#555;">
-    Hier sehen Sie alle offenen und aktiven Mahnungen im Überblick. 
-    Sie können Mahnungen als PDF herunterladen, per E-Mail versenden oder löschen.
+  .dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.4rem;
+  }
+
+  p.subtitle {
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-box {
+    background: #fff;
+    padding: 1.4rem;
+    border-radius: 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  thead {
+    background: var(--bg);
+  }
+
+  th, td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    text-align: left;
+    color: var(--primary-dark);
+    font-weight: 600;
+  }
+
+  td {
+    color: var(--text);
+  }
+
+  tr:hover td {
+    background: #f9fafb;
+  }
+
+  .amount {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .tag.level-1 { background: #f59e0b; }
+  .tag.level-2 { background: #ef4444; }
+  .tag.level-3 { background: #991b1b; }
+
+  .actions a {
+    display: inline-block;
+    margin: 0 0.3rem;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .actions a.pdf { color: var(--primary-dark); }
+  .actions a.send { color: var(--success); }
+  .actions a.delete { color: var(--danger); }
+
+  .actions a:hover {
+    text-decoration: underline;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 1.2rem 1.4rem;
+    overflow-x: auto;
+  }
+</style>
+
+<div class="dashboard-container">
+
+  <h1>📨 Aktive Mahnungen</h1>
+  <p class="subtitle">
+    Übersicht aller offenen Mahnungen. Sie können Mahnungen als PDF herunterladen, 
+    per E-Mail versenden oder löschen.
   </p>
 
-  <!-- 📃 Mahnungen Tabelle -->
   {% if reminders|length == 0 %}
-    <div style="background:white;padding:1.2rem;border-radius:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+    <div class="empty-box">
       📭 Keine aktiven Mahnungen vorhanden.
     </div>
   {% else %}
-    <div style="background:white;padding:1rem;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05);overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead style="background:#f4f6f8;">
+    <div class="card">
+      <table>
+        <thead>
           <tr>
-            <th style="padding:0.6rem;text-align:left;">📄 Rechnungsnr.</th>
-            <th style="padding:0.6rem;text-align:left;">📅 Fällig am</th>
-            <th style="padding:0.6rem;text-align:right;">💰 Betrag</th>
-            <th style="padding:0.6rem;text-align:center;">⚠️ Mahnstufe</th>
-            <th style="padding:0.6rem;text-align:center;">Aktionen</th>
+            <th>📄 Rechnungsnr.</th>
+            <th>📅 Fällig am</th>
+            <th class="amount">💰 Betrag</th>
+            <th class="center">⚠️ Mahnstufe</th>
+            <th class="center">Aktionen</th>
           </tr>
         </thead>
         <tbody>
           {% for r in reminders %}
-            <tr style="border-top:1px solid #eee;">
-              <td style="padding:0.6rem;">{{ r.invoice_number }}</td>
-              <td style="padding:0.6rem;">{{ r.due_date.strftime('%Y-%m-%d') if r.due_date else '—' }}</td>
-              <td style="padding:0.6rem;text-align:right;">{{ "%.2f"|format(r.total_amount or 0) }} EUR</td>
-              <td style="padding:0.6rem;text-align:center;">{{ r.reminder_level }}</td>
-                  <td style="padding:0.6rem;text-align:center;">
-                        <!-- 📄 PDF -->
-                        <a href="/dashboard/invoices/reminders/pdf/{{ r.id }}"
-                          title="Mahnung als PDF herunterladen"
-                          style="margin-right:0.5rem;color:#4f46e5;text-decoration:none;">
-                          📄 PDF
-                        </a>
-
-                        <!-- ✉️ Senden -->
-                        <a href="/dashboard/invoices/reminders/send/{{ r.id }}"
-                          title="Mahnung per E-Mail senden"
-                          style="margin-right:0.5rem;color:#16a34a;text-decoration:none;">
-                          ✉️ Senden
-                        </a>
-
-                        <!-- 🗑 Löschen -->
-                        <a href="/dashboard/invoices/reminders/delete/{{ r.id }}"
-                          onclick="return confirm('Mahnungsdatensatz wirklich löschen?')"
-                          style="color:red;text-decoration:none;">
-                          🗑 Löschen
-                        </a>
-                    </td>
-            </tr>
+          <tr>
+            <td>{{ r.invoice_number }}</td>
+            <td>{{ r.due_date.strftime('%Y-%m-%d') if r.due_date else '—' }}</td>
+            <td class="amount">{{ "%.2f"|format(r.total_amount or 0) }} EUR</td>
+            <td class="center">
+              <span class="tag level-{{ r.reminder_level }}">
+                Stufe {{ r.reminder_level }}
+              </span>
+            </td>
+            <td class="center actions">
+              <a href="/dashboard/invoices/reminders/pdf/{{ r.id }}" class="pdf" title="Mahnung als PDF herunterladen">
+                📄 PDF
+              </a>
+              <a href="/dashboard/invoices/reminders/send/{{ r.id }}" class="send" title="Mahnung per E-Mail senden">
+                ✉️ Senden
+              </a>
+              <a href="/dashboard/invoices/reminders/delete/{{ r.id }}" class="delete"
+                 onclick="return confirm('Mahnungsdatensatz wirklich löschen?')">
+                🗑 Löschen
+              </a>
+            </td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>

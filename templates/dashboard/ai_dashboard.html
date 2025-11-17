@@ -1,0 +1,181 @@
+{% extends "base_dashboard.html" %}
+{% block title %}📊 AI Lead Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+
+  <h1 class="page-title">📊 AI Lead Performance Dashboard</h1>
+
+  <!-- 🔥 KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card hot">
+      <h3>🔥 Hot Leads</h3>
+      <p>{{ stats.hot }}</p>
+    </div>
+
+    <div class="kpi-card warm">
+      <h3>🌤 Warm Leads</h3>
+      <p>{{ stats.warm }}</p>
+    </div>
+
+    <div class="kpi-card cold">
+      <h3>❄ Cold Leads</h3>
+      <p>{{ stats.cold }}</p>
+    </div>
+
+    <div class="kpi-card score">
+      <h3>📈 Durchschnitts-Score</h3>
+      <p>{{ stats.avg_score }}</p>
+    </div>
+  </div>
+
+  <!-- 📊 Charts -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h4>Score-Verteilung</h4>
+      <canvas id="scoreChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h4>Hot / Warm / Cold</h4>
+      <canvas id="levelChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h4>Lead-Aktivität (pro Monat)</h4>
+      <canvas id="activityChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 🧠 AI Insights -->
+  <div class="insights-card">
+    <h3>🧠 KI-Analyse – Empfehlungen</h3>
+
+    {% if ai_insights %}
+      <p>{{ ai_insights }}</p>
+    {% else %}
+      <p class="no-ai">Noch keine KI-Analyse durchgeführt.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- 📌 Charts.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  /* Score Chart */
+  new Chart(document.getElementById('scoreChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ charts.score_labels | safe }},
+      datasets: [{
+        label: 'Scores',
+        data: {{ charts.score_values | safe }},
+        backgroundColor: '#0D2A78'
+      }]
+    },
+    options: { responsive: true }
+  });
+
+  /* Hot/Warm/Cold Chart */
+  new Chart(document.getElementById('levelChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ["Hot", "Warm", "Cold"],
+      datasets: [{
+        data: [{{ stats.hot }}, {{ stats.warm }}, {{ stats.cold }}],
+        backgroundColor: ["#ef4444", "#facc15", "#3b82f6"]
+      }]
+    }
+  });
+
+  /* Activity Chart */
+  new Chart(document.getElementById('activityChart'), {
+    type: 'line',
+    data: {
+      labels: {{ charts.activity_months | safe }},
+      datasets: [{
+        label: 'Aktive Leads pro Monat',
+        data: {{ charts.activity_values | safe }},
+        borderColor: "#0D2A78",
+        borderWidth: 2,
+        fill: false
+      }]
+    }
+  });
+</script>
+
+<style>
+  .dashboard-container {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0D2A78;
+    margin-bottom: 1.5rem;
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .kpi-card {
+    background: #fff;
+    padding: 1.2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .kpi-card.hot { border-left: 6px solid #ef4444; }
+  .kpi-card.warm { border-left: 6px solid #facc15; }
+  .kpi-card.cold { border-left: 6px solid #3b82f6; }
+  .kpi-card.score { border-left: 6px solid #10B981; }
+
+  /* Chart Grid */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .chart-card {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+  }
+
+  .chart-card h4 {
+    margin-bottom: 0.7rem;
+    font-weight: 600;
+  }
+
+  /* Insights */
+  .insights-card {
+    margin-top: 2rem;
+    padding: 1.4rem;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+  }
+
+  .no-ai {
+    color: #6b7280;
+    font-style: italic;
+  }
+</style>
+
+{% endblock %}

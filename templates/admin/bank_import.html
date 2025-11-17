@@ -1,29 +1,159 @@
 {% extends "base_dashboard.html" %}
-{% block title %}🏦 Bankimport – CAMT.053{% endblock %}
+{% block title %}🏦 Bankimport – CAMT.053 | Ouhud CRM{% endblock %}
+
 {% block content %}
-<h1>🏦 CAMT.053 Bankdatei importieren</h1>
-<p>Lade eine CAMT.053 XML-Datei deiner Bank hoch, um Zahlungseingänge automatisch mit Rechnungen abzugleichen.</p>
+<style>
+  :root {
+    --brand-blue: #4f46e5;
+    --brand-blue-dark: #4338ca;
+    --brand-green: #10b981;
+    --brand-red: #ef4444;
+    --bg-light: #f9fafb;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+  }
 
-<form action="/dashboard/bank-import" method="post" enctype="multipart/form-data">
+  .bank-import {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  p.intro {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  form {
+    text-align: center;
+    padding: 1.5rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    background: var(--bg-light);
+    transition: border-color 0.3s;
+  }
+
+  form:hover {
+    border-color: var(--brand-blue);
+  }
+
+  input[type="file"] {
+    margin: 1rem 0;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: white;
+    cursor: pointer;
+  }
+
+  button {
+    background: var(--brand-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+
+  button:hover {
+    background: var(--brand-blue-dark);
+  }
+
+  .result-box {
+    margin-top: 2rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 10px;
+    background: #f9fafb;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .result-box h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+
+  .result-success {
+    border-left: 5px solid var(--brand-green);
+  }
+
+  .result-success h3 {
+    color: var(--brand-green);
+  }
+
+  .result-error {
+    border-left: 5px solid var(--brand-red);
+  }
+
+  .result-error h3 {
+    color: var(--brand-red);
+  }
+
+  ul {
+    margin: 0.5rem 0 0 1.2rem;
+    color: var(--text-dark);
+  }
+
+  li {
+    padding: 0.25rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .bank-import {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<div class="bank-import">
+  <h1>🏦 Bankimport – CAMT.053</h1>
+  <p class="intro">
+    Lade hier deine <strong>CAMT.053 XML-Datei</strong> hoch, um Zahlungseingänge automatisch mit Rechnungen abzugleichen.
+  </p>
+
+  <form action="/dashboard/bank-import" method="post" enctype="multipart/form-data">
     <input type="file" name="file" accept=".xml" required>
-    <button type="submit">📥 Datei hochladen</button>
-</form>
+    <br>
+    <button type="submit">📥 Datei hochladen & analysieren</button>
+  </form>
 
-{% if matched %}
-    <h3 style="color:green;">✅ Verbuchte Rechnungen:</h3>
+  {% if matched %}
+  <div class="result-box result-success">
+    <h3>✅ Verbuchte Rechnungen</h3>
     <ul>
-        {% for inv in matched %}
-            <li>{{ inv }}</li>
-        {% endfor %}
+      {% for inv in matched %}
+      <li>📄 Rechnung <strong>{{ inv }}</strong> erfolgreich zugeordnet.</li>
+      {% endfor %}
     </ul>
-{% endif %}
+  </div>
+  {% endif %}
 
-{% if unmatched %}
-    <h3 style="color:red;">⚠️ Nicht zuordenbare Zahlungen:</h3>
+  {% if unmatched %}
+  <div class="result-box result-error">
+    <h3>⚠️ Nicht zuordenbare Zahlungen</h3>
     <ul>
-        {% for p in unmatched %}
-            <li>{{ p.reference }} – {{ p.amount }} {{ p.type }}</li>
-        {% endfor %}
+      {% for p in unmatched %}
+      <li>
+        💶 <strong>{{ p.amount }}</strong> {{ p.currency or 'EUR' }} – 
+        <em>{{ p.reference }}</em> ({{ p.type }})
+      </li>
+      {% endfor %}
     </ul>
-{% endif %}
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

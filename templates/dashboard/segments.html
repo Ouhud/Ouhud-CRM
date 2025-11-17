@@ -2,83 +2,222 @@
 {% block title %}🧭 Zielgruppen-Segmente{% endblock %}
 
 {% block content %}
-<div style="max-width:1100px;margin:0 auto;">
-  <h1 style="font-size:1.7rem;font-weight:700;margin-bottom:1rem;">🧭 Zielgruppen-Segmente</h1>
+<div class="segments-container">
+  <h1 class="page-title">🧭 Zielgruppen-Segmente</h1>
 
   <!-- 🔍 Suche + Filter -->
-  <form method="get" action="/dashboard/segments" style="margin-bottom:1rem;display:flex;gap:.5rem;align-items:center;">
-    <input type="text" name="q" placeholder="Segment suchen..." value="{{ q or '' }}"
-      style="flex:1;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
-    <select name="filter" style="padding:.6rem;border:1px solid #ccc;border-radius:6px;">
+  <form method="get" action="/dashboard/segments" class="filter-bar">
+    <input type="text" name="q" placeholder="Segment suchen..." value="{{ q or '' }}">
+    <select name="filter">
       <option value="">Alle Kategorien</option>
       <option value="customer" {% if filter == 'customer' %}selected{% endif %}>Kunden</option>
       <option value="lead" {% if filter == 'lead' %}selected{% endif %}>Leads</option>
       <option value="newsletter" {% if filter == 'newsletter' %}selected{% endif %}>Newsletter</option>
     </select>
-    <button type="submit" style="background:#4f46e5;color:white;padding:.6rem 1rem;border:none;border-radius:6px;cursor:pointer;">🔍 Filtern</button>
+    <button type="submit" class="btn-primary">🔍 Filtern</button>
   </form>
 
   <!-- ➕ Neues Segment -->
-  <form method="post" action="/dashboard/segments/create" style="margin-bottom:1.5rem;display:flex;gap:.5rem;">
-    <input type="text" name="name" placeholder="Segmentname" required
-      style="flex:1;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
-    <input type="text" name="description" placeholder="Beschreibung"
-      style="flex:2;padding:.6rem;border:1px solid #ccc;border-radius:6px;">
-    <button type="submit" style="background:#16a34a;color:white;padding:.6rem 1rem;border:none;border-radius:6px;cursor:pointer;">➕ Erstellen</button>
+  <form method="post" action="/dashboard/segments/create" class="create-bar">
+    <input type="text" name="name" placeholder="Segmentname" required>
+    <input type="text" name="description" placeholder="Beschreibung">
+    <button type="submit" class="btn-success">➕ Erstellen</button>
   </form>
 
-  <!-- 📋 Segment-Tabelle -->
-  <table style="width:100%;border-collapse:collapse;background:white;box-shadow:0 2px 6px rgba(0,0,0,0.05);border-radius:8px;overflow:hidden;">
-    <thead style="background:#f3f4f6;">
-      <tr>
-        <th style="padding:.5rem;">#</th>
-        <th style="text-align:left;padding:.5rem;">Name</th>
-        <th style="text-align:left;padding:.5rem;">Beschreibung</th>
-        <th style="text-align:left;padding:.5rem;">📊 Statistik</th>
-        <th style="text-align:left;padding:.5rem;">Erstellt am</th>
-        <th style="text-align:left;padding:.5rem;">Aktionen</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if segments %}
-        {% for s in segments %}
-        <tr style="border-bottom:1px solid #eee;">
-          <td style="padding:.5rem;">{{ s.id }}</td>
-          <td style="padding:.5rem;">{{ s.name }}</td>
-          <td style="padding:.5rem;">{{ s.description or '-' }}</td>
-          <td style="padding:.5rem;">
-            👥 {{ s.stats_count or 0 }} Kontakte<br>
-            📈 {{ s.stats_rate or 0 }} %
-          </td>
-          <td style="padding:.5rem;">{{ s.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
-          <td style="padding:.5rem;white-space:nowrap;">
-            <a href="/dashboard/segments/edit/{{ s.id }}" 
-               style="background:#3b82f6;color:white;padding:.3rem .6rem;border-radius:4px;text-decoration:none;">✏️ Bearbeiten</a>
-            <form method="post" action="/dashboard/segments/delete" style="display:inline;">
-              <input type="hidden" name="id" value="{{ s.id }}">
-              <button type="submit" 
-                      style="background:#ef4444;color:white;padding:.3rem .6rem;border:none;border-radius:4px;cursor:pointer;">🗑 Löschen</button>
-            </form>
-          </td>
+  <!-- 📋 Tabelle -->
+  <div class="table-wrapper">
+    <table class="segments-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Beschreibung</th>
+          <th>📊 Statistik</th>
+          <th>Erstellt am</th>
+          <th>Aktionen</th>
         </tr>
-        {% endfor %}
-      {% else %}
-        <tr><td colspan="6" style="text-align:center;padding:1rem;">📭 Keine Segmente vorhanden</td></tr>
-      {% endif %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% if segments %}
+          {% for s in segments %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td><strong>{{ s.name }}</strong></td>
+            <td>{{ s.description or '–' }}</td>
+            <td>
+              👥 {{ s.stats_count or 0 }} Kontakte<br>
+              📈 {{ s.stats_rate or 0 }} %
+            </td>
+            <td>{{ s.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td class="actions">
+              <a href="/dashboard/segments/edit/{{ s.id }}" class="btn-edit">✏️ Bearbeiten</a>
+              <form method="post" action="/dashboard/segments/delete" onsubmit="return confirm('Segment wirklich löschen?')" style="display:inline;">
+                <input type="hidden" name="id" value="{{ s.id }}">
+                <button type="submit" class="btn-delete">🗑 Löschen</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="6" class="empty">📭 Keine Segmente vorhanden</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 
   <!-- 📄 Pagination -->
   {% if total_pages > 1 %}
-    <div style="margin-top:1rem;text-align:center;">
-      {% if page > 1 %}
-        <a href="?page={{ page - 1 }}&q={{ q }}&filter={{ filter }}" style="margin-right:.5rem;">⬅️ Zurück</a>
-      {% endif %}
-      Seite {{ page }} von {{ total_pages }}
-      {% if page < total_pages %}
-        <a href="?page={{ page + 1 }}&q={{ q }}&filter={{ filter }}" style="margin-left:.5rem;">Weiter ➡️</a>
-      {% endif %}
-    </div>
+  <div class="pagination">
+    {% if page > 1 %}
+      <a href="?page={{ page - 1 }}&q={{ q }}&filter={{ filter }}">⬅️ Zurück</a>
+    {% endif %}
+    <span>Seite {{ page }} von {{ total_pages }}</span>
+    {% if page < total_pages %}
+      <a href="?page={{ page + 1 }}&q={{ q }}&filter={{ filter }}">Weiter ➡️</a>
+    {% endif %}
+  </div>
   {% endif %}
 </div>
+
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --danger: #DC2626;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --muted: #6b7280;
+  }
+
+  .segments-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1.2rem;
+  }
+
+  .filter-bar, .create-bar {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  input, select {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.25s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.25s ease;
+  }
+
+  .btn-success:hover {
+    background: #059669;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background: #fff;
+  }
+
+  table.segments-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table.segments-table thead {
+    background: #f3f4f6;
+  }
+
+  table.segments-table th, table.segments-table td {
+    padding: 0.7rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  table.segments-table tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  .actions {
+    white-space: nowrap;
+  }
+
+  .btn-edit {
+    background: #3b82f6;
+    color: white;
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-right: 0.3rem;
+  }
+
+  .btn-delete {
+    background: var(--danger);
+    color: white;
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 1rem;
+    color: var(--muted);
+  }
+
+  .pagination {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
+  .pagination a {
+    color: var(--primary);
+    text-decoration: none;
+    margin: 0 0.5rem;
+  }
+
+  .pagination a:hover {
+    text-decoration: underline;
+  }
+</style>
 {% endblock %}

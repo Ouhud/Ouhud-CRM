@@ -1,50 +1,134 @@
 {% extends "base_dashboard.html" %}
-{% block title %}🔌 WhatsApp verbinden{% endblock %}
+{% block title %}🔌 WhatsApp verbinden – Ouhud CRM{% endblock %}
 
 {% block content %}
 <style>
   :root {
-    --primary: #4f46e5;
-    --success: #16a34a;
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
     --border: #e5e7eb;
-    --text: #111827;
+    --text: #1f2937;
     --muted: #6b7280;
-    --bg: #f8fafc;
+    --bg: #f4f6f8;
   }
+
   .card {
-    background:#fff;border:1px solid var(--border);border-radius:12px;
-    box-shadow:0 4px 18px rgba(0,0,0,.04);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    overflow: hidden;
   }
-  .header {padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
-  .content {padding:1.25rem;}
-  .title {font-weight:700;font-size:1.2rem;color:var(--text);}
-  .desc {color:var(--muted);margin-top:.25rem;}
+
+  .header {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: white;
+  }
+
+  .title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .desc {
+    color: #e0e7ff;
+    font-size: 0.9rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
 
   .form-grid {
-    display:grid;gap:.9rem;margin-top:1rem;
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
   }
-  .form-grid label {font-size:.9rem;color:var(--muted);}
-  .form-grid input[type="text"]{
-    width:100%;padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;font-size:.95rem;
+
+  .form-grid label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 0.25rem;
   }
+
+  .form-grid input[type="text"] {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .form-grid input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 42, 120, 0.1);
+  }
+
   .btn {
-    appearance:none;border:1px solid var(--success);background:var(--success);color:#fff;
-    padding:.7rem 1.1rem;border-radius:8px;cursor:pointer;font-size:.95rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.25s ease;
   }
+
+  .btn:hover {
+    background: var(--primary-dark);
+  }
+
   .tip {
-    background:#eef2ff;border:1px solid #c7d2fe;color:#1e3a8a;border-radius:10px;
-    padding:.9rem 1rem;margin-top:1rem;font-size:.9rem;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #075985;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.2rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
-  .links {margin-top:.75rem;}
-  .links a {color:var(--primary);text-decoration:none;}
-  .links a:hover {text-decoration:underline;}
+
+  .links {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .links a {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .links a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+  }
+
+  .dashboard-container {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: 16px;
+  }
 </style>
 
-<div class="dashboard-container" style="max-width:700px;margin:0 auto;">
+<div class="dashboard-container">
   <div class="card">
     <div class="header">
       <div class="title">🔌 WhatsApp Business API verbinden</div>
-      <div class="desc">Trage hier die Zugangsdaten aus deinem Meta for Developers Dashboard ein.</div>
+      <div class="desc">Trage hier deine Zugangsdaten aus dem Meta for Developers Dashboard ein.</div>
     </div>
     <div class="content">
       <form method="post" action="/dashboard/whatsapp/save_credentials" class="form-grid">
@@ -64,13 +148,15 @@
       </form>
 
       <div class="tip">
-        <strong>Hinweis:</strong> Nach dem Speichern prüft das System automatisch den Status.
+        <strong>💡 Hinweis:</strong> Nach dem Speichern prüft das System automatisch den Verbindungsstatus.<br>
         Anschließend kannst du im <a href="/dashboard/whatsapp">WhatsApp Chat</a> Nachrichten empfangen und senden.
       </div>
 
       <div class="links">
         ➕ Zugangsdaten findest du im
-        <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer">Meta for Developers Dashboard</a>.
+        <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer">
+          Meta for Developers Dashboard
+        </a>.
       </div>
     </div>
   </div>

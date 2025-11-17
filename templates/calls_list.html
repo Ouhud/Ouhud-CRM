@@ -1,12 +1,132 @@
 {% extends "base_dashboard.html" %}
-{% block title %}📞 Anrufe & Telefoneinstellungen{% endblock %}
+{% block title %}📞 Telefonie – Ouhud CRM{% endblock %}
 
 {% block content %}
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --danger: #dc2626;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --muted: #6b7280;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    color: var(--text);
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--primary);
+    background: rgba(13,42,120,0.05);
+  }
+
+  .tab-btn.active {
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .tab-content {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 1rem;
+  }
+
+  input, select, textarea {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(13,42,120,0.1);
+    outline: none;
+  }
+
+  button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.25s ease;
+  }
+
+  button:hover {
+    background: var(--primary-dark);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.94rem;
+  }
+
+  th, td {
+    padding: 0.65rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--bg);
+    color: var(--primary-dark);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  tr:hover td {
+    background: #f9fafb;
+  }
+
+  .status-pill {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .status-success { background: #dcfce7; color: #166534; }
+  .status-error { background: #fee2e2; color: #991b1b; }
+  .status-neutral { background: #f1f5f9; color: #334155; }
+
+  .btn-success {
+    background: var(--success);
+  }
+
+  .btn-success:hover {
+    background: #059669;
+  }
+</style>
+
 <div style="max-width:1100px;margin:0 auto;">
-  <h1 style="font-size:1.8rem;font-weight:700;margin-bottom:1rem;">📞 Telefonie</h1>
+  <h1>📞 Telefonie</h1>
 
   <!-- 🧭 Tabs -->
-  <div style="display:flex;gap:1rem;margin-bottom:1rem;border-bottom:2px solid #e5e7eb;">
+  <div style="display:flex;gap:1rem;margin-bottom:1rem;border-bottom:2px solid var(--border);">
     <button class="tab-btn active" data-tab="calls">📋 Anrufliste</button>
     <button class="tab-btn" data-tab="settings">⚙️ Telefoneinstellungen</button>
   </div>
@@ -15,67 +135,63 @@
   <div id="tab-calls" class="tab-content active">
     <!-- 🔍 Filter -->
     <form method="get" action="/dashboard/calls" 
-          style="display:grid;grid-template-columns:1fr 180px 100px;gap:.5rem;margin-bottom:1rem;">
+          style="display:grid;grid-template-columns:1fr 180px 100px;gap:.6rem;margin-bottom:1rem;">
       <input type="text" name="q" 
-             placeholder="🔍 Nach Nummer oder Name suchen..." 
-             value="{{ request.query_params.get('q','') }}"
-             style="padding:.5rem;border:1px solid #ccc;border-radius:6px;">
-      <select name="status" style="padding:.5rem;border:1px solid #ccc;border-radius:6px;">
+             placeholder="🔍 Nach Nummer oder Name suchen…" 
+             value="{{ request.query_params.get('q','') }}">
+      <select name="status">
         <option value="">Alle Status</option>
         <option value="completed">✅ Erfolgreich</option>
         <option value="missed">❌ Verpasst</option>
         <option value="rejected">🚫 Abgelehnt</option>
       </select>
-      <button type="submit" 
-              style="background:#4f46e5;color:#fff;padding:.5rem 1rem;border:none;border-radius:6px;">
-        Filtern
-      </button>
+      <button type="submit">Filtern</button>
     </form>
 
     <!-- 📞 Tabelle -->
     <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;background:#fff;min-width:750px;">
-        <thead style="background:#f3f4f6;">
+      <table>
+        <thead>
           <tr>
-            <th style="padding:.5rem;">#</th>
-            <th style="padding:.5rem;">Richtung</th>
-            <th style="padding:.5rem;">Nummer</th>
-            <th style="padding:.5rem;">Name</th>
-            <th style="padding:.5rem;">Zeit</th>
-            <th style="padding:.5rem;">Dauer</th>
-            <th style="padding:.5rem;">Status</th>
+            <th>#</th>
+            <th>Richtung</th>
+            <th>Nummer</th>
+            <th>Name</th>
+            <th>Zeit</th>
+            <th>Dauer</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
           {% if calls %}
             {% for call in calls %}
-            <tr style="border-bottom:1px solid #e5e7eb;">
-              <td style="padding:.5rem;">{{ call.id }}</td>
-              <td style="padding:.5rem;">
+            <tr>
+              <td>{{ call.id }}</td>
+              <td>
                 {% if call.direction == 'inbound' %}
                   📥 Eingehend
                 {% else %}
                   📤 Ausgehend
                 {% endif %}
               </td>
-              <td style="padding:.5rem;">{{ call.phone_number }}</td>
-              <td style="padding:.5rem;">{{ call.contact_name or '-' }}</td>
-              <td style="padding:.5rem;">{{ call.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
-              <td style="padding:.5rem;">{{ call.duration or 0 }} s</td>
-              <td style="padding:.5rem;">
+              <td>{{ call.phone_number }}</td>
+              <td>{{ call.contact_name or '-' }}</td>
+              <td>{{ call.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+              <td>{{ call.duration or 0 }} s</td>
+              <td>
                 {% if call.status == 'completed' %}
-                  <span style="background:#dcfce7;color:#166534;padding:.2rem .5rem;border-radius:6px;">✅ Erfolgreich</span>
+                  <span class="status-pill status-success">✅ Erfolgreich</span>
                 {% elif call.status == 'missed' %}
-                  <span style="background:#fee2e2;color:#991b1b;padding:.2rem .5rem;border-radius:6px;">❌ Verpasst</span>
+                  <span class="status-pill status-error">❌ Verpasst</span>
                 {% else %}
-                  <span style="background:#e5e7eb;color:#374151;padding:.2rem .5rem;border-radius:6px;">🚫 Abgelehnt</span>
+                  <span class="status-pill status-neutral">🚫 Abgelehnt</span>
                 {% endif %}
               </td>
             </tr>
             {% endfor %}
           {% else %}
             <tr>
-              <td colspan="7" style="text-align:center;padding:1rem;color:#666;">
+              <td colspan="7" style="text-align:center;padding:1rem;color:var(--muted);">
                 📭 Keine Anrufe gefunden.
               </td>
             </tr>
@@ -85,9 +201,11 @@
     </div>
 
     <!-- ➕ Formular -->
-    <h2 style="font-size:1.2rem;font-weight:600;margin-top:2rem;">➕ Neuen Anruf eintragen</h2>
+    <h2 style="font-size:1.2rem;font-weight:600;margin-top:2rem;color:var(--primary-dark);">
+      ➕ Neuen Anruf eintragen
+    </h2>
     <form method="post" action="/dashboard/calls/add" 
-          style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;">
+          style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.6rem;margin-top:.6rem;">
       <input type="text" name="phone_number" placeholder="Nummer" required>
       <select name="direction">
         <option value="inbound">📥 Eingehend</option>
@@ -100,15 +218,15 @@
         <option value="missed">❌ Verpasst</option>
         <option value="rejected">🚫 Abgelehnt</option>
       </select>
-      <button type="submit" 
-              style="background:#4f46e5;color:#fff;padding:.5rem 1rem;border:none;border-radius:6px;">
-        ➕ Hinzufügen
-      </button>
+      <button type="submit">➕ Hinzufügen</button>
     </form>
   </div>
 
   <!-- ⚙️ TAB: Telefoneinstellungen -->
   <div id="tab-settings" class="tab-content" style="display:none;">
+    <h2 style="font-size:1.2rem;font-weight:600;margin-bottom:.8rem;color:var(--primary-dark);">
+      ⚙️ Telefoneinstellungen
+    </h2>
     <form method="post" action="/dashboard/calls/settings/save" style="display:flex;flex-direction:column;gap:.8rem;">
       <label>
         Anbieter:
@@ -136,11 +254,11 @@
         <input type="password" name="sip_password" value="{{ settings.sip_password if settings else '' }}">
       </label>
 
-      <div style="display:flex;gap:.5rem;">
-        <button type="submit" style="background:#4f46e5;color:#fff;padding:.5rem 1rem;border:none;border-radius:6px;">
-          💾 Speichern
-        </button>
-        <a href="/dashboard/calls/settings/test" style="background:#10b981;color:#fff;padding:.5rem 1rem;border-radius:6px;text-decoration:none;">
+      <div style="display:flex;gap:.6rem;margin-top:.6rem;">
+        <button type="submit">💾 Speichern</button>
+        <a href="/dashboard/calls/settings/test"
+           class="btn-success"
+           style="text-decoration:none;display:inline-block;padding:.6rem 1rem;border-radius:8px;">
           🔌 Verbindung testen
         </a>
       </div>
@@ -156,25 +274,9 @@
     tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      const target = tab.getAttribute('data-tab');
+      const target = tab.dataset.tab;
       contents.forEach(c => c.style.display = c.id === 'tab-' + target ? 'block' : 'none');
     });
   });
 </script>
-
-<style>
-  .tab-btn {
-    background:none;
-    border:none;
-    padding:.5rem;
-    font-size:1rem;
-    cursor:pointer;
-    border-bottom:3px solid transparent;
-  }
-  .tab-btn.active {
-    border-bottom-color:#4f46e5;
-    font-weight:600;
-    color:#4f46e5;
-  }
-</style>
 {% endblock %}

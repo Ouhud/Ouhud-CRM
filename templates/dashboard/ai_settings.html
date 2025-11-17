@@ -1,26 +1,214 @@
-{% extends "base_dashboard.html" %}
-{% block title %}⚙️ KI-Einstellungen{% endblock %}
+{% extends "base.html" %}
+{% block title %}⚙️ KI-Einstellungen – Ouhud CRM{% endblock %}
 
 {% block content %}
-<h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">⚙️ KI-Einstellungen</h1>
 
-<form method="post" action="/dashboard/ai/settings/save" style="max-width:600px;">
-  <label>🤖 Name des Assistenten</label>
-  <input type="text" name="assistant_name" value="{{ settings.assistant_name }}" required style="width:100%;margin-bottom:1rem;">
+<style>
+    .ai-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 2rem 2.4rem;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+        animation: fadeIn 0.3s ease;
+    }
 
-  <label>🔑 API-Key</label>
-  <input type="password" name="api_key" value="{{ settings.api_key or '' }}" style="width:100%;margin-bottom:1rem;">
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-  <label>🌐 Provider</label>
-  <select name="api_provider" style="width:100%;margin-bottom:1rem;">
-    <option value="openai" {% if settings.api_provider == 'openai' %}selected{% endif %}>OpenAI</option>
-    <option value="azure" {% if settings.api_provider == 'azure' %}selected{% endif %}>Azure</option>
-    <option value="local" {% if settings.api_provider == 'local' %}selected{% endif %}>Lokal</option>
-  </select>
+    .ai-title {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #0D2A78;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: .5rem;
+    }
 
-  <label><input type="checkbox" name="active" value="true" {% if settings.active %}checked{% endif %}> Aktivieren</label>
-  <br><br>
+    .ai-desc {
+        color: #6b7280;
+        margin-bottom: 1.8rem;
+        font-size: 1rem;
+    }
 
-  <button type="submit" style="padding:.5rem 1rem;background:#4f46e5;color:white;border:none;border-radius:8px;">💾 Speichern</button>
-</form>
+    .ai-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.4rem;
+    }
+
+    .ai-label {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: .2rem;
+        display: block;
+    }
+
+    .ai-input,
+    .ai-select {
+        width: 100%;
+        padding: 0.65rem 0.8rem;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border .2s ease;
+    }
+
+    .ai-input:focus,
+    .ai-select:focus {
+        outline: none;
+        border-color: #0D2A78;
+        background: white;
+    }
+
+    .ai-helper {
+        font-size: .85rem;
+        color: #64748b;
+        margin-top: -6px;
+    }
+
+    .ai-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+    }
+
+    .ai-btn-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        background: #0D2A78;
+        color: white;
+        padding: 0.7rem 1.3rem;
+        border-radius: 8px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background .2s ease;
+    }
+
+    .btn-primary:hover {
+        background: #1E40AF;
+    }
+
+    .btn-secondary {
+        background: #059669;
+        color: white;
+        padding: 0.7rem 1.3rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-secondary:hover {
+        background: #047857;
+    }
+
+    .test-output {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #f3f4f6;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+    }
+</style>
+
+
+
+<div class="ai-wrapper">
+
+    <div class="ai-title">⚙️ KI-Einstellungen</div>
+    <p class="ai-desc">
+        Konfiguriere deinen KI-Assistenten, wähle Provider, Modell und API-Key.  
+        Bei Ouhud CRM kannst du OpenAI, Gemini, Groq und OpenRouter flexibel nutzen.
+    </p>
+
+    <form class="ai-form" method="post" action="/dashboard/ai/settings/save">
+
+        <!-- Name -->
+        <div>
+            <label class="ai-label">🤖 Assistent-Name</label>
+            <input type="text" name="assistant_name" class="ai-input"
+                   value="{{ settings.assistant_name }}">
+        </div>
+
+        <!-- Provider -->
+        <div>
+            <label class="ai-label">🌐 Provider</label>
+            <select class="ai-select" name="provider">
+                {% for p in providers %}
+                    <option value="{{p}}" {% if settings.provider == p %}selected{% endif %}>
+                        {{ p | capitalize }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Modell -->
+        <div>
+            <label class="ai-label">🧬 Modell</label>
+            <input type="text" name="model" class="ai-input"
+                   placeholder="z. B. gpt-4.1, gpt-5.1, llama3-70b, gemini-1.5-pro"
+                   value="{{ settings.model }}">
+            <div class="ai-helper">
+                Beispiel je nach Provider:<br>
+                <strong>OpenAI:</strong> gpt-4.1, gpt-5.1<br>
+                <strong>Gemini:</strong> gemini-1.5-pro<br>
+                <strong>Groq:</strong> llama3-70b, mixtral-8x7b<br>
+                <strong>OpenRouter:</strong> externe Modelle
+            </div>
+        </div>
+
+        <!-- API KEY -->
+        <div>
+            <label class="ai-label">🔑 API-Key</label>
+            <input type="password" name="api_key" class="ai-input"
+                   value="{{ settings.api_key }}">
+        </div>
+
+        <!-- Aktiv -->
+        <div class="ai-checkbox">
+            <input type="checkbox" name="active" {% if settings.active %}checked{% endif %}>
+            <label>AI aktivieren</label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="ai-btn-row">
+            <button type="submit" class="btn-primary">💾 Speichern</button>
+            <button type="button" class="btn-secondary" onclick="testAI()">⚡ API testen</button>
+        </div>
+
+    </form>
+
+    <div id="test-output" class="test-output" style="display:none;"></div>
+
+</div>
+
+
+<script>
+async function testAI() {
+    const output = document.getElementById("test-output");
+    output.style.display = "block";
+    output.innerHTML = "⏳ Test läuft ...";
+
+    let r = await fetch("/dashboard/ai/settings/test", { method: "POST" });
+    let j = await r.json();
+
+    output.innerHTML = JSON.stringify(j, null, 2);
+}
+</script>
+
 {% endblock %}

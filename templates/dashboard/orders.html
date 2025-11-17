@@ -2,20 +2,19 @@
 {% block title %}🛍 Bestellungen{% endblock %}
 
 {% block content %}
-  <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">🛍 Bestellungen</h1>
-  <p>Hier kannst du Bestellungen einsehen und verwalten.</p>
+<div class="orders-container">
+  <h1>🛍 Bestellungen</h1>
+  <p>Hier kannst du Bestellungen einsehen, anlegen und verwalten.</p>
 
-  <!-- ========================================= -->
-  <!-- 📝 Formular: Neue Bestellung anlegen -->
-  <!-- ========================================= -->
-  <section style="background:white;padding:1rem;border-radius:8px;margin-top:1.5rem;margin-bottom:2rem;box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-    <h2 style="margin-top:0;margin-bottom:0.8rem;font-size:1.2rem;">➕ Neue Bestellung</h2>
+  <!-- ➕ Neue Bestellung -->
+  <section class="order-form-card">
+    <h2>➕ Neue Bestellung</h2>
 
-    <form method="post" action="/dashboard/orders/create" style="display:flex;gap:1rem;flex-wrap:wrap;">
-      <!-- Kunde auswählen -->
-      <div style="flex:1;min-width:180px;">
-        <label for="customer_id" style="display:block;font-size:0.9rem;margin-bottom:0.2rem;">👤 Kunde</label>
-        <select id="customer_id" name="customer_id" required style="width:100%;padding:0.4rem;border-radius:6px;border:1px solid #ccc;">
+    <form method="post" action="/dashboard/orders/create" class="order-form">
+      <!-- 👤 Kunde -->
+      <div class="form-group">
+        <label for="customer_id">👤 Kunde</label>
+        <select id="customer_id" name="customer_id" required>
           <option value="">-- Bitte wählen --</option>
           {% for customer in customers %}
             <option value="{{ customer.id }}">{{ customer.name }}</option>
@@ -23,17 +22,16 @@
         </select>
       </div>
 
-      <!-- Betrag -->
-      <div style="flex:1;min-width:160px;">
-        <label for="total_amount" style="display:block;font-size:0.9rem;margin-bottom:0.2rem;">💰 Betrag (EUR)</label>
-        <input type="number" step="0.01" id="total_amount" name="total_amount" required
-               style="width:100%;padding:0.4rem;border-radius:6px;border:1px solid #ccc;">
+      <!-- 💰 Betrag -->
+      <div class="form-group">
+        <label for="total_amount">💰 Betrag (EUR)</label>
+        <input type="number" step="0.01" id="total_amount" name="total_amount" required>
       </div>
 
-      <!-- Status -->
-      <div style="flex:1;min-width:160px;">
-        <label for="status" style="display:block;font-size:0.9rem;margin-bottom:0.2rem;">📌 Status</label>
-        <select id="status" name="status" style="width:100%;padding:0.4rem;border-radius:6px;border:1px solid #ccc;">
+      <!-- 📌 Status -->
+      <div class="form-group">
+        <label for="status">📌 Status</label>
+        <select id="status" name="status" required>
           <option value="offen">📝 Offen</option>
           <option value="bezahlt">✅ Bezahlt</option>
           <option value="versendet">📦 Versendet</option>
@@ -41,56 +39,229 @@
         </select>
       </div>
 
-      <!-- Speichern -->
-      <div style="align-self:flex-end;">
-        <button type="submit" style="background:#4f46e5;color:white;border:none;padding:0.6rem 1.2rem;
-                                     border-radius:6px;font-weight:500;cursor:pointer;">
-          💾 Bestellung speichern
-        </button>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">💾 Bestellung speichern</button>
       </div>
     </form>
   </section>
 
-
-  <!-- ========================================= -->
-  <!-- 📄 Liste aller Bestellungen -->
-  <!-- ========================================= -->
+  <!-- 📋 Liste -->
   {% if orders and orders|length > 0 %}
-    <table style="width:100%;background:white;border-radius:8px;overflow:hidden;border-collapse:collapse;
-                  box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-      <thead style="background:#f4f6f8;">
+  <div class="table-wrapper">
+    <table class="orders-table">
+      <thead>
         <tr>
-          <th style="padding:0.6rem;text-align:left;">#</th>
-          <th style="padding:0.6rem;text-align:left;">Kunde</th>
-          <th style="padding:0.6rem;text-align:left;">Datum</th>
-          <th style="padding:0.6rem;text-align:left;">Betrag</th>
-          <th style="padding:0.6rem;text-align:left;">Status</th>
-          <th style="padding:0.6rem;text-align:center;">Aktionen</th>
+          <th>#</th>
+          <th>Kunde</th>
+          <th>Datum</th>
+          <th>Betrag</th>
+          <th>Status</th>
+          <th class="center">Aktionen</th>
         </tr>
       </thead>
       <tbody>
         {% for order in orders %}
-          <tr style="border-top:1px solid #eee;">
-            <td style="padding:0.6rem;">{{ order.id }}</td>
-            <td style="padding:0.6rem;">{{ order.customer.name if order.customer else '—' }}</td>
-            <td style="padding:0.6rem;">{{ order.order_date.strftime('%d.%m.%Y %H:%M') }}</td>
-            <td style="padding:0.6rem;">{{ "%.2f"|format(order.total_amount) }} EUR</td>
-            <td style="padding:0.6rem;">{{ order.status }}</td>
-            <td style="padding:0.6rem;text-align:center;">
-              <form method="post" action="/dashboard/orders/{{ order.id }}/delete" style="display:inline;">
-                <button type="submit" style="background:#ef4444;color:white;border:none;padding:0.3rem 0.6rem;
-                                            border-radius:4px;cursor:pointer;">
-                  🗑 Löschen
-                </button>
-              </form>
-            </td>
-          </tr>
+        <tr>
+          <td>{{ order.id }}</td>
+          <td>{{ order.customer.name if order.customer else '—' }}</td>
+          <td>{{ order.order_date.strftime('%d.%m.%Y %H:%M') }}</td>
+          <td><strong>{{ "%.2f"|format(order.total_amount) }} €</strong></td>
+          <td>
+            {% if order.status == "bezahlt" %}
+              <span class="badge success">✅ Bezahlt</span>
+            {% elif order.status == "versendet" %}
+              <span class="badge info">📦 Versendet</span>
+            {% elif order.status == "storniert" %}
+              <span class="badge danger">🚫 Storniert</span>
+            {% else %}
+              <span class="badge warning">📝 Offen</span>
+            {% endif %}
+          </td>
+          <td class="center">
+            <form method="post" action="/dashboard/orders/{{ order.id }}/delete" style="display:inline;">
+              <button type="submit" class="btn-danger" onclick="return confirm('Diese Bestellung wirklich löschen?')">🗑 Löschen</button>
+            </form>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
   {% else %}
-    <div style="margin-top:1rem;padding:1rem;background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-      📭 Noch keine Bestellungen vorhanden.
-    </div>
+    <div class="empty-state">📭 Noch keine Bestellungen vorhanden.</div>
   {% endif %}
+</div>
+
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --info: #3B82F6;
+    --warning: #F59E0B;
+    --danger: #DC2626;
+    --neutral: #6B7280;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+  }
+
+  .orders-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.3rem;
+  }
+
+  p {
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  /* Formular-Karte */
+  .order-form-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+  }
+
+  .order-form-card h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .order-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .form-group {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(13,42,120,0.15);
+  }
+
+  .form-actions {
+    align-self: flex-end;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  /* Tabelle */
+  .table-wrapper {
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  table.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table.orders-table th,
+  table.orders-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  table.orders-table thead {
+    background: #f3f4f6;
+  }
+
+  table.orders-table td.center {
+    text-align: center;
+  }
+
+  table.orders-table tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+
+  .btn-danger:hover {
+    background: #b91c1c;
+  }
+
+  .badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+  }
+
+  .badge.success { background: var(--success); }
+  .badge.info { background: var(--info); }
+  .badge.warning { background: var(--warning); color: #1f2937; }
+  .badge.danger { background: var(--danger); }
+
+  .empty-state {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 12px;
+    text-align: center;
+    color: var(--neutral);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  @media (max-width: 700px) {
+    .order-form { flex-direction: column; }
+  }
+</style>
 {% endblock %}

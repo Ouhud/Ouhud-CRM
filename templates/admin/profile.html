@@ -1,91 +1,144 @@
 {% extends "base_dashboard.html" %}
-{% block title %}👤 Admin-Profil{% endblock %}
+{% block title %}👤 Admin-Profil | Ouhud CRM{% endblock %}
 
 {% block content %}
 <style>
   .profile-container {
     max-width: 700px;
     margin: 2rem auto;
-    background: #fff;
+    background: #ffffff;
     padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  .profile-container h1 {
-    font-size: 1.5rem;
-    color: #1f2937;
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     margin-bottom: 1.5rem;
-    text-align: center;
+  }
+
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #4f46e5;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .profile-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .profile-header p {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .profile-section {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.2rem;
+    margin-top: 1.2rem;
   }
 
   .profile-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.9rem;
   }
 
   .profile-label {
     font-weight: 600;
-    color: #4b5563;
+    color: #374151;
   }
 
   .profile-value {
     color: #111827;
   }
 
+  .empty {
+    color: #9ca3af;
+  }
+
   .back-link {
-    display: block;
+    display: inline-block;
     text-align: center;
     margin-top: 1.5rem;
-    text-decoration: none;
     color: #4f46e5;
+    background: #eef2ff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.25s ease;
   }
 
   .back-link:hover {
-    text-decoration: underline;
+    background: #e0e7ff;
+  }
+
+  @media (max-width: 600px) {
+    .profile-row { flex-direction: column; gap: .25rem; }
   }
 </style>
 
 <div class="profile-container">
-  <h1>👤 Administrator-Profil</h1>
-
-  <div class="profile-row">
-    <div class="profile-label">Benutzername:</div>
-    <div class="profile-value">{{ user.username }}</div>
+  <div class="profile-header">
+    <div class="profile-avatar">
+      {{ user.first_name[:1]|upper if user.first_name else "A" }}
+    </div>
+    <div>
+      <h1>{{ user.first_name or "Admin" }} {{ user.last_name or "" }}</h1>
+      <p>👑 Administrator</p>
+    </div>
   </div>
 
-  <div class="profile-row">
-    <div class="profile-label">E-Mail:</div>
-    <div class="profile-value">{{ user.email }}</div>
+  <div class="profile-section">
+    <div class="profile-row">
+      <div class="profile-label">👤 Benutzername:</div>
+      <div class="profile-value">{{ user.username }}</div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-label">📧 E-Mail:</div>
+      <div class="profile-value">{{ user.email }}</div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-label">📞 Telefon:</div>
+      <div class="profile-value">{{ user.phone or "-" }}</div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-label">🏠 Adresse:</div>
+      <div class="profile-value">{{ user.address or "-" }}</div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-label">🎂 Geburtsdatum:</div>
+      <div class="profile-value">{{ user.birthday or "-" }}</div>
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-label">🗓 Konto erstellt am:</div>
+      <div class="profile-value">{{ user.created_at.strftime('%d.%m.%Y') if user.created_at else "-" }}</div>
+    </div>
   </div>
 
-  <div class="profile-row">
-    <div class="profile-label">Vorname:</div>
-    <div class="profile-value">{{ user.first_name or "-" }}</div>
+  <div style="text-align:center;">
+    <a href="/admin" class="back-link">⬅️ Zurück zum Admin-Dashboard</a>
   </div>
-
-  <div class="profile-row">
-    <div class="profile-label">Nachname:</div>
-    <div class="profile-value">{{ user.last_name or "-" }}</div>
-  </div>
-
-  <div class="profile-row">
-    <div class="profile-label">Telefon:</div>
-    <div class="profile-value">{{ user.phone or "-" }}</div>
-  </div>
-
-  <div class="profile-row">
-    <div class="profile-label">Adresse:</div>
-    <div class="profile-value">{{ user.address or "-" }}</div>
-  </div>
-
-  <div class="profile-row">
-    <div class="profile-label">Geburtsdatum:</div>
-    <div class="profile-value">{{ user.birthday or "-" }}</div>
-  </div>
-
-  <a href="/admin" class="back-link">⬅️ Zurück zum Admin-Dashboard</a>
 </div>
 {% endblock %}

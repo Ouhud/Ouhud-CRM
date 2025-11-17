@@ -1,24 +1,25 @@
 {% extends "base_dashboard.html" %}
-{% block title %}📲 WhatsApp Chat{% endblock %}
+{% block title %}📲 WhatsApp Chat – Ouhud CRM{% endblock %}
 
 {% block content %}
 <style>
   :root {
-    --primary: #4f46e5;
-    --success: #16a34a;
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
     --warning: #f59e0b;
-    --danger: #ef4444;
+    --danger: #dc2626;
     --border: #e5e7eb;
-    --text: #111827;
+    --text: #1f2937;
     --muted: #6b7280;
-    --bg: #f8fafc;
+    --bg: #f4f6f8;
   }
 
   .card {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 4px 18px rgba(0,0,0,.04);
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
   }
 
   .header {
@@ -26,8 +27,10 @@
     align-items: center;
     justify-content: space-between;
     gap: .75rem;
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: #fff;
   }
 
   .title {
@@ -36,19 +39,20 @@
     gap: .6rem;
     font-weight: 700;
     font-size: 1.1rem;
-    color: var(--text);
   }
 
   .status-pill {
     font-size: .8rem;
     padding: .25rem .6rem;
     border-radius: 999px;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
   }
   .status-pill.connected {
-    background: #dcfce7;
-    color: #166534;
-    border-color: #bbf7d0;
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #a7f3d0;
   }
   .status-pill.disconnected {
     background: #fee2e2;
@@ -57,7 +61,7 @@
   }
 
   .content {
-    padding: 1rem 1.25rem;
+    padding: 1.25rem 1.5rem;
   }
 
   .alert {
@@ -82,10 +86,12 @@
     border: 1px solid var(--border);
     background: #fff;
     color: var(--text);
-    padding: .55rem .9rem;
+    padding: .6rem 1rem;
     border-radius: 8px;
     cursor: pointer;
     font-size: .95rem;
+    font-weight: 500;
+    transition: background 0.25s, transform 0.1s;
   }
   .btn-primary {
     background: var(--primary);
@@ -97,19 +103,22 @@
     color: #fff;
     border-color: var(--success);
   }
-  .btn:hover { filter: brightness(.98); }
+  .btn:hover {
+    filter: brightness(.98);
+    transform: translateY(-1px);
+  }
 
   /* Chat area */
   .chat-wrap {
     display: grid;
     grid-template-rows: 1fr auto;
     gap: .8rem;
-    height: 60vh;
+    height: 65vh;
     min-height: 460px;
   }
 
   .chat-box {
-    background: #fff;
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 1rem;
@@ -128,16 +137,24 @@
     gap: .5rem;
   }
   .msg .bubble {
-    padding: .6rem .85rem;
+    padding: .7rem .9rem;
     border-radius: 12px;
     margin-top: .25rem;
     word-wrap: break-word;
     border: 1px solid var(--border);
-    background: var(--bg);
+    background: #fff;
   }
   .msg.agent { margin-left: auto; text-align: right; }
-  .msg.agent .bubble { background: #eef6ff; border-color: #dbeafe; }
-  .msg.business .bubble { background: #ecfdf5; border-color: #bbf7d0; }
+  .msg.agent .bubble {
+    background: #e0f2fe;
+    border-color: #bae6fd;
+    color: #075985;
+  }
+  .msg.customer .bubble {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #064e3b;
+  }
 
   .send-form {
     display: grid;
@@ -156,8 +173,16 @@
     border-radius: 8px;
     font-size: .95rem;
   }
+  .send-form input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(13, 42, 120, 0.1);
+  }
 
-  .muted { color: var(--muted); font-size: .9rem; }
+  .muted {
+    color: var(--muted);
+    font-size: .9rem;
+  }
 
   @media (max-width: 800px) {
     .send-form .row { grid-template-columns: 1fr; }
@@ -169,17 +194,16 @@
   <div class="card">
     <div class="header">
       <div class="title">
-        <span>📲 WhatsApp Kundennachrichten</span>
+        📲 WhatsApp Kundennachrichten
         <span id="wa-status" class="status-pill disconnected">Nicht verbunden</span>
       </div>
       <div class="actions">
         <a class="btn" href="/dashboard/whatsapp/connect">🔌 Verbinden</a>
-        <button id="refreshBtn" class="btn">🔄 Aktualisieren</button>
+        <button id="refreshBtn" class="btn btn-primary">🔄 Aktualisieren</button>
       </div>
     </div>
 
     <div class="content">
-      <!-- Hinweis wenn nicht verbunden -->
       <div id="notConnected" class="alert" style="display:none;">
         <div>⚠️ <strong>Nicht verbunden.</strong> Bitte verbinde deinen WhatsApp Business Account (Phone Number ID, Business ID, Access Token).</div>
         <div class="actions" style="margin-left:auto;">
@@ -187,7 +211,6 @@
         </div>
       </div>
 
-      <!-- Chat -->
       <div class="chat-wrap">
         <div id="whatsapp-box" class="chat-box">
           <div class="muted">Nachrichten werden geladen…</div>
@@ -203,12 +226,13 @@
       </div>
 
       <div class="muted" style="margin-top:.6rem;">
-        Tipp: Das System prüft den Verbindungsstatus alle 5 Sekunden und lädt neue Nachrichten automatisch.
+        💡 Das System prüft den Verbindungsstatus alle 5 Sekunden und lädt neue Nachrichten automatisch.
       </div>
     </div>
   </div>
 </div>
 
+<!-- JavaScript bleibt identisch -->
 <script>
   const statusBadge = document.getElementById('wa-status');
   const notConnected = document.getElementById('notConnected');
@@ -242,7 +266,7 @@
     }
     msgs.forEach(m => {
       const div = document.createElement('div');
-      const isAgent = (m.from === 'Business');   // unsere ausgehende Nachricht
+      const isAgent = (m.from === 'Business');
       div.className = 'msg ' + (isAgent ? 'agent business' : 'customer');
       const time = m.time ? new Date(m.time).toLocaleTimeString() : '';
       div.innerHTML = `
@@ -295,7 +319,7 @@
       if (!res.ok) throw new Error('Send fehlgeschlagen');
       textInput.value = '';
       await fetchMessages();
-    } catch (e) {
+    } catch {
       alert('Senden fehlgeschlagen. Bitte später erneut versuchen.');
     }
   });
@@ -305,59 +329,34 @@
     if (connected) await fetchMessages();
   });
 
-  // initial + Intervalle
   (async function init() {
     const connected = await fetchStatus();
     if (connected) await fetchMessages();
     setInterval(fetchStatus, 5000);
     setInterval(fetchMessages, 6000);
   })();
-</script>
-<script>
+
+  // WebSocket
   const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/dashboard/whatsapp/ws';
   let ws;
-  const box = document.getElementById('whatsapp-box');
-
   function initWebSocket() {
     ws = new WebSocket(wsUrl);
-
-    ws.onopen = () => {
-      console.log('🟢 WebSocket verbunden');
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      renderIncomingMessage(data);
-    };
-
-    ws.onclose = () => {
-      console.warn('🔴 WebSocket getrennt – versuche Reconnect in 3s…');
-      setTimeout(initWebSocket, 3000);
-    };
-
-    ws.onerror = (err) => {
-      console.error('⚠️ WebSocket Fehler:', err);
-      ws.close();
-    };
+    ws.onopen = () => console.log('🟢 WebSocket verbunden');
+    ws.onmessage = e => renderIncomingMessage(JSON.parse(e.data));
+    ws.onclose = () => setTimeout(initWebSocket, 3000);
   }
-
   function renderIncomingMessage(data) {
     const div = document.createElement('div');
     const isAgent = data.from === 'Business';
     div.className = 'msg ' + (isAgent ? 'agent business' : 'customer');
     const time = data.time ? new Date(data.time).toLocaleTimeString() : '';
     div.innerHTML = `
-      <div class="meta">
-        <strong>${data.from}</strong>
-        <span>${time}</span>
-      </div>
+      <div class="meta"><strong>${data.from}</strong><span>${time}</span></div>
       <div class="bubble">${data.text}</div>
     `;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
   }
-
-  // WebSocket starten
   initWebSocket();
 </script>
 {% endblock %}

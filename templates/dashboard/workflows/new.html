@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}🛠 Neuer Workflow – Ouhud CRM{% endblock %}
+
+{% block content %}
+
+<style>
+    .wf-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 2.2rem 2.5rem;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+        border: 1px solid #e5e7eb;
+        animation: fadeIn .3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .wf-title {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #0D2A78;
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        margin-bottom: .8rem;
+    }
+
+    .wf-desc {
+        color: #6b7280;
+        margin-bottom: 1.8rem;
+        font-size: 1rem;
+    }
+
+    .wf-label {
+        font-weight: 600;
+        margin-bottom: .3rem;
+        color: #1f2937;
+        display: block;
+    }
+
+    .wf-input,
+    .wf-textarea {
+        width: 100%;
+        padding: .7rem .9rem;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border .2s ease, background .2s ease;
+    }
+
+    .wf-input:focus,
+    .wf-textarea:focus {
+        outline: none;
+        border-color: #0D2A78;
+        background: white;
+    }
+
+    .wf-textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .wf-btn-row {
+        margin-top: 1.4rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-primary {
+        background: #0D2A78;
+        color: white;
+        padding: .75rem 1.4rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background .2s ease;
+    }
+
+    .btn-primary:hover {
+        background: #12338d;
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: #374151;
+        padding: .75rem 1.4rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+</style>
+
+
+<div class="wf-wrapper">
+
+    <!-- Titel -->
+    <div class="wf-title">🛠 Neuer Workflow</div>
+    <p class="wf-desc">
+        Lege einen neuen Workflow an. Workflows automatisieren Aufgaben wie
+        Lead-Scoring, Kundennachrichten, Zahlungen, Erinnerungen, E-Mails und mehr.
+    </p>
+
+    <!-- Formular -->
+    <form method="post">
+
+        <!-- Name -->
+        <div>
+            <label class="wf-label">Name</label>
+            <input class="wf-input"
+                   name="name"
+                   placeholder="z. B. Lead automatisch qualifizieren">
+        </div>
+
+        <!-- Beschreibung -->
+        <div>
+            <label class="wf-label">Beschreibung</label>
+            <textarea class="wf-textarea"
+                      name="description"
+                      placeholder="Beschreibe, was dieser Workflow automatisieren soll …"></textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="wf-btn-row">
+            <button type="submit" class="btn-primary">✨ Workflow erstellen</button>
+            <a href="/dashboard/workflows" class="btn-secondary">Zurück</a>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,167 +1,151 @@
 {% extends "base_dashboard.html" %}
-
-{% block title %}👥 Benutzerverwaltung – Ouhud CRM{% endblock %}
+{% block title %}👥 Benutzerverwaltung | Ouhud CRM{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="user-container">
   <h1>👥 Benutzerverwaltung</h1>
+  <p class="subtext">Verwalte hier Administratoren und Mitarbeiter im Ouhud CRM-System.</p>
 
-  <!-- ➕ Neuen Benutzer anlegen -->
+  <!-- 🧍‍♂️ Benutzerformular -->
   <section class="user-form">
-    <h2>➕ Neuen Mitarbeiter / Admin anlegen</h2>
-    <p>Lege hier neue Benutzerkonten für Administratoren oder Mitarbeiter an. Der Benutzer kann sich danach einloggen und sein Passwort ändern.</p>
+    <h2>➕ Neuen Benutzer anlegen</h2>
+    <p>Der Benutzer erhält nach der Erstellung Zugriff auf das System und kann sein Passwort ändern.</p>
 
     <form action="/admin/users/create" method="post" class="form-grid">
-
-      <!-- 🧍 Vorname -->
+      <div><label>Vorname</label><input type="text" name="vorname" required></div>
+      <div><label>Nachname</label><input type="text" name="nachname" required></div>
+      <div><label>Telefonnummer</label><input type="text" name="telefon" placeholder="+49 176 1234567"></div>
+      <div><label>E-Mail (Login)</label><input type="email" name="email" placeholder="name@firma.de" required></div>
+      <div><label>Adresse</label><input type="text" name="adresse" placeholder="Straße, PLZ, Ort"></div>
+      <div><label>Initiales Passwort</label><input type="password" name="password" minlength="8" required></div>
       <div>
-        <label for="vorname">Vorname:</label>
-        <input type="text" id="vorname" name="vorname" placeholder="z. B. Julia" required>
-      </div>
-
-      <!-- 🧍 Nachname -->
-      <div>
-        <label for="nachname">Nachname:</label>
-        <input type="text" id="nachname" name="nachname" placeholder="z. B. Schneider" required>
-      </div>
-
-      <!-- ☎ Telefonnummer -->
-      <div>
-        <label for="telefon">Telefonnummer:</label>
-        <input type="text" id="telefon" name="telefon" placeholder="+49 176 1234567">
-      </div>
-
-      <!-- 📧 E-Mail -->
-      <div>
-        <label for="email">E-Mail (Login):</label>
-        <input type="email" id="email" name="email" placeholder="name@firma.de" required>
-      </div>
-
-      <!-- 🏡 Adresse -->
-      <div>
-        <label for="adresse">Adresse:</label>
-        <input type="text" id="adresse" name="adresse" placeholder="Straße, PLZ, Ort">
-      </div>
-
-      <!-- 🔑 Passwort -->
-      <div>
-        <label for="password">Initiales Passwort:</label>
-        <input type="password" id="password" name="password" placeholder="Mindestens 8 Zeichen" required>
-      </div>
-
-      <!-- 🧭 Rolle -->
-      <div>
-        <label for="role">Rolle:</label>
-        <select id="role" name="role" required>
+        <label>Rolle</label>
+        <select name="role" required>
           {% for r in roles %}
             <option value="{{ r.name }}">{{ r.name|capitalize }}</option>
           {% endfor %}
         </select>
       </div>
-
-      <!-- 🚀 Absenden -->
       <div class="form-actions">
         <button type="submit" class="btn-primary">✅ Benutzer erstellen</button>
       </div>
     </form>
   </section>
 
-  <hr>
+  <hr class="divider">
 
-  <!-- 📋 Benutzerliste -->
+  <!-- 📋 Bestehende Benutzer -->
   <section class="user-list">
     <h2>📋 Bestehende Benutzer</h2>
-
     {% if users|length == 0 %}
-      <p>❌ Keine Benutzer vorhanden.</p>
+      <div class="empty-box">📭 Keine Benutzer vorhanden.</div>
     {% else %}
-    <table class="user-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>E-Mail</th>
-          <th>Telefon</th>
-          <th>Rolle</th>
-          <th>Aktiv</th>
-          <th>Aktionen</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in users %}
-        <tr>
-          <td>{{ u.id }}</td>
-          <td>{{ u.first_name }} {{ u.last_name }}</td>
-          <td>{{ u.email }}</td>
-          <td>{{ u.phone or "–" }}</td>
-          <td>{{ u.role.name if u.role else '–' }}</td>
-          <td>{{ '✅' if u.is_active else '❌' }}</td>
-          <td>
-            <!-- ✏ Rolle ändern -->
-            <form action="/admin/users/{{ u.id }}/role" method="post" style="display:inline;">
-              <select name="role">
-                {% for r in roles %}
-                  <option value="{{ r.name }}" {% if u.role and u.role.name == r.name %}selected{% endif %}>
-                    {{ r.name|capitalize }}
-                  </option>
-                {% endfor %}
-              </select>
-              <button type="submit" title="Rolle ändern">✏</button>
-            </form>
-
-            <!-- 🗑 Löschen -->
-            <form action="/admin/users/{{ u.id }}/delete" method="post" style="display:inline;">
-              <button type="submit" title="Benutzer löschen" onclick="return confirm('Benutzer wirklich löschen?')">🗑</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>E-Mail</th>
+            <th>Telefon</th>
+            <th>Rolle</th>
+            <th>Status</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.first_name }} {{ u.last_name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.phone or '–' }}</td>
+            <td>{{ u.role.name if u.role else '–' }}</td>
+            <td>
+              {% if u.is_active %}
+                <span class="badge badge-success">Aktiv</span>
+              {% else %}
+                <span class="badge badge-danger">Deaktiviert</span>
+              {% endif %}
+            </td>
+            <td>
+              <form action="/admin/users/{{ u.id }}/role" method="post" class="inline-form">
+                <select name="role" class="mini-select" onchange="this.form.submit()">
+                  {% for r in roles %}
+                    <option value="{{ r.name }}" {% if u.role and u.role.name == r.name %}selected{% endif %}>{{ r.name|capitalize }}</option>
+                  {% endfor %}
+                </select>
+              </form>
+              <form action="/admin/users/{{ u.id }}/delete" method="post" class="inline-form" onsubmit="return confirm('Benutzer wirklich löschen?');">
+                <button type="submit" class="btn-delete" title="Benutzer löschen">🗑</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% endif %}
   </section>
 </div>
 
 <style>
-  .container {
-    max-width: 1000px;
+  .user-container {
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
-  h1, h2 {
-    color: #333;
-    margin-bottom: 0.5rem;
+  h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1f2937;
   }
 
-  .user-form p {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 1rem;
+  .subtext {
+    color: #6b7280;
+    margin-bottom: 1.2rem;
+  }
+
+  h2 {
+    color: #374151;
+    margin-bottom: .5rem;
+    font-size: 1.25rem;
+  }
+
+  .user-form {
+    background: #f9fafb;
+    padding: 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
 
   .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1rem;
-    background: #f9f9f9;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
 
   label {
-    display: block;
     font-weight: 500;
+    display: block;
     margin-bottom: 0.3rem;
+    color: #111827;
   }
 
   input, select {
     width: 100%;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 0.55rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
     font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.15);
   }
 
   .form-actions {
@@ -170,58 +154,108 @@
   }
 
   .btn-primary {
-    background-color: #4f46e5;
-    color: white;
+    background: #4f46e5;
+    color: #fff;
     border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
+    padding: 0.7rem 1.3rem;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.25s ease;
   }
 
   .btn-primary:hover {
-    background-color: #4338ca;
+    background: #4338ca;
+  }
+
+  .divider {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
   }
 
   .user-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
-    font-size: 0.95rem;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
   }
 
-  .user-table th, .user-table td {
-    border: 1px solid #ddd;
-    padding: 0.5rem 0.8rem;
+  th, td {
+    padding: 0.65rem 0.8rem;
     text-align: left;
+    border-bottom: 1px solid #f3f4f6;
   }
 
-  .user-table th {
-    background: #f0f0f0;
+  thead th {
+    background: #f9fafb;
     font-weight: 600;
   }
 
-  .user-table tr:nth-child(even) {
+  tr:nth-child(even) {
     background: #fafafa;
   }
 
-  .user-table form {
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .badge-success {
+    background: #dcfce7;
+    color: #065f46;
+  }
+
+  .badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .inline-form {
     display: inline;
+    margin-right: .3rem;
   }
 
-  select {
-    padding: 0.3rem;
+  .mini-select {
+    padding: .25rem .4rem;
+    border-radius: 5px;
+    font-size: .85rem;
   }
 
-  button[title] {
+  .btn-delete {
     background: none;
     border: none;
-    cursor: pointer;
+    color: #ef4444;
     font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
   }
 
-  button[title]:hover {
+  .btn-delete:hover {
     opacity: 0.7;
+  }
+
+  .empty-box {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+    color: #6b7280;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  @media (max-width: 700px) {
+    .user-container { padding: 1rem; }
+    .form-grid { grid-template-columns: 1fr; }
   }
 </style>
 {% endblock %}

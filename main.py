@@ -1,18 +1,21 @@
 # main.py
 import os
-from fastapi import FastAPI
+from typing import Callable 
+
+
+from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import RedirectResponse
+
+
+# 🔌 Module
 from app import audit
 from app import ai_assistant
 from app import ai_settings
 
-
-
-
-# 📌 Importiere deine Routen sauber, ohne Dopplungen
+# 📌 Importiere deine Routen sauber
 from app import (
     auth,
     dashboard,
@@ -41,19 +44,22 @@ from app import (
     public_payment,
     forms,
 )
+from app import ai_leads
 
-# 📞 Spezielle Channels separat
+# 📞 Calls separat
 from app.channels_calls import router as calls_router
 
-# 🛢️ Datenbank initialisieren
+# 🛢️ DB initialisieren
 from app.database import init_db
+from app.workflows import router as workflows_router
 
 # ─────────────────────────────
 # 🧭 Templates global
 # ─────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")  # ✅ korrigiert
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
 
 # ─────────────────────────────
 # 🚀 FastAPI App erstellen
@@ -64,125 +70,117 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# ─────────────────────────────
-# 🗃️ Datenbanktabellen beim Start sicherstellen
-# ─────────────────────────────
-init_db()   # ruft Base.metadata.create_all(bind=engine) intern auf
+# 🗃️ Tabellen erzeugen
+init_db()
+
 
 # ─────────────────────────────
-# 🌐 Health Check / Startseite
+# 🔄 Root → Login
 # ─────────────────────────────
 @app.get("/")
-def redirect_to_login():
+def redirect_to_login() -> RedirectResponse:
     return RedirectResponse(url="/auth/login")
 
+
 # ─────────────────────────────
-# 🖼 Statische Dateien (CSS, QR-Codes, PDFs)
+# 🖼 Static
 # ─────────────────────────────
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-# ─────────────────────────────
-# 🔌 Router registrieren (Reihenfolge wichtig!)
-# ─────────────────────────────
-# ─────────────────────────────
-# 1️⃣ Authentifizierung zuerst (Login, Token, Cookies)
-# ─────────────────────────────
-app.include_router(auth.router)              # Login / Auth MUSS ganz oben sein
 
 # ─────────────────────────────
-# 2️⃣ Dashboard & Admin-Bereich
+# 🔌 Router registrieren
 # ─────────────────────────────
-app.include_router(dashboard.router)         # Dashboard (geschützt)
-app.include_router(admin.router)             # Adminbereich (geschützt, Rollenprüfung)
-app.include_router(dashboard_users.router)   # Benutzerübersicht im Dashboard
+app.include_router(auth.router)
 
-# ─────────────────────────────
-# 3️⃣ Kernmodule (interne Funktionen)
-# ─────────────────────────────
-app.include_router(users.router)             # Benutzerverwaltung
-app.include_router(customers.router)         # Kundenverwaltung
-app.include_router(products.router)         # Produkte
-app.include_router(invoices.router)          # Rechnungen
-app.include_router(reminders.router)         # Mahnungen 📨
-app.include_router(payments.router)         # 💳 Zahlungen
-app.include_router(orders.router)            # Bestellungen
-app.include_router(leads.router)            # Leads
-app.include_router(history.router)          # Verlauf / Historie
-app.include_router(calendar.router)         # Kalender
+app.include_router(dashboard.router)
+app.include_router(admin.router)
+app.include_router(dashboard_users.router)
+
+# Kernmodule
+app.include_router(users.router)
+app.include_router(customers.router)
+app.include_router(products.router)
+app.include_router(invoices.router)
+app.include_router(reminders.router)
+app.include_router(payments.router)
+app.include_router(orders.router)
+app.include_router(leads.router)
+app.include_router(history.router)
+app.include_router(calendar.router)
 app.include_router(ai_assistant.router)
 
-# ─────────────────────────────
-# 4️⃣ Kommunikation & Kanäle
-# ─────────────────────────────
+# Kommunikation
 app.include_router(chat.router)
 app.include_router(inbox.router)
 app.include_router(channels_whatsapp.router)
 app.include_router(calls_router)
 
-# ─────────────────────────────
-# 5️⃣ Berichte & Analyse
-# ─────────────────────────────
+# Reports
 app.include_router(reports.router)
 app.include_router(campaigns.router)
 app.include_router(segments.router)
 app.include_router(audit.router)
 
-# ─────────────────────────────
-# 6️⃣ Einstellungen & Formulare
-# ─────────────────────────────
+# Einstellungen
 app.include_router(settings.router)
 app.include_router(forms.router)
 app.include_router(integrations.router)
 app.include_router(ai_settings.router)
-# ─────────────────────────────
-# 7️⃣ Öffentliche Seiten (ohne Login)
-# ─────────────────────────────
-app.include_router(public.router)           # Öffentliche Bestellseite
+
+# Öffentlich
+app.include_router(public.router)
 app.include_router(public_payment.router)
 app.include_router(privacy.router)
-
+app.include_router(ai_leads.router)
 
 # ─────────────────────────────
 # ⚡ Session Middleware
 # ─────────────────────────────
 app.add_middleware(SessionMiddleware, secret_key="SUPERGEHEIM123")
 
+
+
+app.include_router(workflows_router)
 # ─────────────────────────────
-# 📴 Logout Redirect
+# 🔌 Logout
 # ─────────────────────────────
 @app.get("/logout")
-def logout_redirect():
+def logout_redirect() -> RedirectResponse:
     return RedirectResponse(url="/auth/logout", status_code=307)
 
-
-# ─────────────────────────────
-# 🔐 Zugriffsschutz: Weiterleitung auf Login-Seite
-# ─────────────────────────────
-from fastapi import Request
+# ---------------------------------------------------
+# 🔐 Auth-Middleware (stabil, kein falsches Logout)
+# ---------------------------------------------------
 
 PUBLIC_PATHS = [
-    "/",                      # Root
-    "/auth/login",            # Login
+    "/",
+    "/auth/login",
     "/auth/token",
-    "/auth/forgot-password",  # Passwort vergessen
-    "/auth/reset-password",   # Passwort zurücksetzen
-    "/static",                # CSS / Bilder
-    "/favicon.ico"
+    "/auth/forgot-password",
+    "/auth/reset-password",
+    "/static",
+    "/favicon.ico",
 ]
 
+STATIC_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".css", ".js", ".ico")
+
+
 @app.middleware("http")
-async def auth_redirect_middleware(request: Request, call_next):
+async def auth_redirect_middleware(
+    request: Request,
+    call_next: Callable[[Request], Response]
+) -> Response:
+
     path = request.url.path
 
-    # 🔓 Öffentliche Routen zulassen
-    if any(path.startswith(p) for p in PUBLIC_PATHS):
+    if any(path.startswith(p) for p in PUBLIC_PATHS) or path.endswith(STATIC_EXTENSIONS):
         return await call_next(request)
 
-    # 🔐 Zugriff nur mit Cookie "access_token"
     token = request.cookies.get("access_token")
+
     if not token:
         return RedirectResponse(url="/auth/login")
 
-    # ✅ Wenn Token vorhanden → Anfrage weiterleiten
-    response = await call_next(request)
-    return response
+    result = await call_next(request)
+    return result

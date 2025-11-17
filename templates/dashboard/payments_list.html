@@ -2,82 +2,225 @@
 {% block title %}💳 Zahlungen{% endblock %}
 
 {% block content %}
-<!-- Kopfbereich mit Button -->
-<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-  <div>
-    <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">💳 Zahlungen</h1>
-    <p style="margin:0;color:#6b7280">Verwalte alle Zahlungseingänge und Erstattungen.</p>
+<div class="payments-container">
+  <!-- 🔹 Kopfbereich -->
+  <div class="header-bar">
+    <div>
+      <h1>💳 Zahlungen</h1>
+      <p>Verwalte alle Zahlungseingänge, offenen Beträge und Erstattungen.</p>
+    </div>
+    <a href="/dashboard/payments/new" class="btn-primary">➕ Neue Zahlung</a>
   </div>
-  <div>
-    <a href="/dashboard/payments/new"
-       style="background:#4f46e5;color:#fff;padding:.55rem .9rem;border-radius:8px;text-decoration:none;">
-      ➕ Neue Zahlung
-    </a>
-  </div>
-</div>
 
-<!-- Filter -->
-<form method="get" action="/dashboard/payments" 
-      style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:1rem 0;">
-  <input type="text" name="q" placeholder="🔎 Suche (Rechnung, Methode, Notiz)…"
-         style="flex:1 1 260px;padding:.55rem .7rem;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
-  <button type="submit"
-          style="background:#4f46e5;color:#fff;border:none;padding:.55rem .9rem;border-radius:8px;cursor:pointer;">
-    Filtern
-  </button>
-</form>
+  <!-- 🔍 Filter -->
+  <form method="get" action="/dashboard/payments" class="filter-bar">
+    <input type="text" name="q" placeholder="🔎 Suche (Rechnung, Methode, Notiz)…" value="{{ q or '' }}">
+    <button type="submit" class="btn-primary">Filtern</button>
+  </form>
 
-<!-- Zahlungen Tabelle -->
-{% if payments|length == 0 %}
-  <div style="background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);">
-    📭 Keine Zahlungen vorhanden.
-  </div>
-{% else %}
-  <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.05);">
-    <table style="width:100%;border-collapse:collapse;">
-      <thead style="background:#f4f6f8;">
-        <tr>
-          <th style="padding:.65rem .8rem;text-align:left;">#</th>
-          <th style="padding:.65rem .8rem;text-align:left;">Rechnung</th>
-          <th style="padding:.65rem .8rem;text-align:right;">Betrag</th>
-          <th style="padding:.65rem .8rem;text-align:left;">Methode</th>
-          <th style="padding:.65rem .8rem;text-align:center;">Datum</th>
-          <th style="padding:.65rem .8rem;text-align:center;">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in payments %}
-          <tr style="border-top:1px solid #eef2f7;">
-            <td style="padding:.65rem .8rem;">{{ p.id }}</td>
-            <td style="padding:.65rem .8rem;">
+  <!-- 📋 Tabelle -->
+  {% if payments|length == 0 %}
+    <div class="empty-state">📭 Keine Zahlungen vorhanden.</div>
+  {% else %}
+    <div class="table-wrapper">
+      <table class="payments-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Rechnung</th>
+            <th class="right">Betrag</th>
+            <th>Methode</th>
+            <th class="center">Datum</th>
+            <th class="center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td>{{ p.id }}</td>
+            <td>
               {% if p.invoice %}
                 #{{ p.invoice.invoice_number }}
               {% else %}
                 –
               {% endif %}
             </td>
-            <td style="padding:.65rem .8rem;text-align:right;font-family:monospace;font-weight:600;">
-              {{ "%.2f"|format(p.amount) }} €
-            </td>
-            <td style="padding:.65rem .8rem;">{{ p.method }}</td>
-            <td style="padding:.65rem .8rem;text-align:center;">
-              {{ p.date.strftime('%d.%m.%Y') }}
-            </td>
-            <td style="padding:.65rem .8rem;text-align:center;">
+            <td class="right"><strong>{{ "%.2f"|format(p.amount) }} €</strong></td>
+            <td>{{ p.method }}</td>
+            <td class="center">{{ p.date.strftime('%d.%m.%Y') }}</td>
+            <td class="center">
               {% if p.status == 'received' %}
-                <span style="background:#dcfce7;color:#065f46;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">✅ Erhalten</span>
+                <span class="badge success">✅ Erhalten</span>
               {% elif p.status == 'pending' %}
-                <span style="background:#fef3c7;color:#92400e;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">⏳ Offen</span>
+                <span class="badge warning">⏳ Offen</span>
               {% elif p.status == 'refunded' %}
-                <span style="background:#fee2e2;color:#991b1b;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">💸 Erstattung</span>
+                <span class="badge danger">💸 Erstattung</span>
               {% else %}
-                <span style="background:#e5e7eb;color:#374151;padding:.2rem .55rem;border-radius:999px;font-size:.78rem;">❔ Unbekannt</span>
+                <span class="badge neutral">❔ Unbekannt</span>
               {% endif %}
             </td>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #DC2626;
+    --neutral: #6B7280;
+    --bg: #f4f6f8;
+    --border: #e5e7eb;
+    --text: #1f2937;
+  }
+
+  .payments-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .header-bar h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0;
+  }
+
+  .header-bar p {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .filter-bar input {
+    flex: 1 1 260px;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: #fff;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.25s ease;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .empty-state {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    color: var(--neutral);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .table-wrapper {
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .payments-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+  }
+
+  .payments-table thead {
+    background: #f3f4f6;
+  }
+
+  .payments-table th,
+  .payments-table td {
+    padding: 0.75rem 0.9rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+  }
+
+  .payments-table th.right,
+  .payments-table td.right {
+    text-align: right;
+  }
+
+  .payments-table th.center,
+  .payments-table td.center {
+    text-align: center;
+  }
+
+  .payments-table tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  .badge {
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .badge.success {
+    background: #dcfce7;
+    color: #065f46;
+  }
+
+  .badge.warning {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge.danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge.neutral {
+    background: #e5e7eb;
+    color: #374151;
+  }
+
+  @media (max-width: 600px) {
+    .header-bar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
 {% endblock %}

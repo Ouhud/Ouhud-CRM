@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block title %}🛠 Workflow bearbeiten – Ouhud CRM{% endblock %}
+
+{% block content %}
+
+<style>
+/* Layout */
+.wf-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* Card */
+.card {
+    background: #fff;
+    padding: 22px 28px;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    margin-bottom: 26px;
+}
+
+/* Headings */
+.title-main {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #0D2A78;
+}
+
+.section-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    margin-top: 30px;
+    color: #0D2A78;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.25s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-blue { background: #0D2A78; color: white; }
+.btn-blue:hover { background: #1E3A8A; transform: translateY(-2px); }
+
+.btn-green { background: #059669; color: white; }
+.btn-green:hover { background: #047857; transform: translateY(-2px); }
+
+.btn-red { background: #DC2626; color: white; }
+.btn-red:hover { background: #B91C1C; transform: translateY(-2px); }
+
+.btn-gray { background: #6B7280; color: white; }
+.btn-gray:hover { background: #4B5563; transform: translateY(-2px); }
+
+/* Trigger & Actions */
+.workflow-block {
+    border-left: 5px solid #0D2A78;
+    padding-left: 15px;
+}
+
+.action-block {
+    border-left: 5px solid #059669;
+    padding-left: 15px;
+}
+
+/* JSON pre */
+.json-box {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    white-space: pre-wrap;
+}
+
+/* Modal */
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    background: white;
+    padding: 28px;
+    width: 100%;
+    max-width: 550px;
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+</style>
+
+<div class="wf-container">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <div>
+            <div class="title-main">🛠 Workflow bearbeiten</div>
+            <p class="text-gray-600">Passe Trigger, Bedingungen und Aktionen deines Workflows an.</p>
+        </div>
+        <a href="/dashboard/workflows" class="btn btn-blue">← Zurück zur Übersicht</a>
+    </div>
+
+
+    <!-- Workflow Info -->
+    <div class="section-title">🔧 Workflow-Informationen</div>
+    <div class="card workflow-block">
+        <div class="text-xl font-semibold text-gray-900">{{ workflow.name }}</div>
+        {% if workflow.description %}
+            <p class="text-gray-600">{{ workflow.description }}</p>
+        {% else %}
+            <p class="text-gray-400 italic">Keine Beschreibung angegeben.</p>
+        {% endif %}
+    </div>
+
+
+    <!-- Trigger -->
+    <div class="section-title">🎯 Trigger</div>
+
+    {% if triggers %}
+        <div class="card trigger-box">
+            <div class="text-lg font-semibold text-blue-900">
+                {{ triggers[0].trigger_type }}
+            </div>
+
+            {% if triggers[0].config_json %}
+                <div class="json-box mt-3">
+                    {{ triggers[0].config_json | tojson(indent=2) }}
+                </div>
+            {% endif %}
+
+            {% if triggers[0].conditions_json %}
+                <div class="json-box mt-3" style="border-left:5px solid #0D2A78;">
+                    <strong>Bedingungen (IF / ELSE):</strong>
+                    <br>
+                    {{ triggers[0].conditions_json | tojson(indent=2) }}
+                </div>
+            {% endif %}
+
+        </div>
+    {% else %}
+        <p class="text-gray-500">Kein Trigger gesetzt.</p>
+    {% endif %}
+
+    <div style="text-align:right;">
+        <button onclick="openModal('triggerModal')" class="btn btn-blue">Trigger ändern</button>
+    </div>
+
+
+    <!-- Actions -->
+    <div class="section-title">⚡ Aktionen</div>
+
+    {% if actions|length == 0 %}
+        <p class="text-gray-500">Noch keine Aktionen definiert.</p>
+    {% endif %}
+
+    {% for a in actions %}
+    <div class="card action-block">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div class="text-lg font-semibold text-gray-800">{{ a.action_type }}</div>
+                <div class="text-sm text-gray-600">Reihenfolge: {{ a.order_index }}</div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="openModal('actionEdit_{{ a.id }}')" class="btn btn-blue">Bearbeiten</button>
+                <button onclick="openModal('actionDelete_{{ a.id }}')" class="btn btn-red">Löschen</button>
+            </div>
+        </div>
+
+        {% if a.config_json %}
+        <div class="json-box mt-3">
+            {{ a.config_json | tojson(indent=2) }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Action Edit Modal -->
+    <div id="actionEdit_{{ a.id }}" class="modal-bg">
+        <div class="modal">
+            <h2 class="text-2xl font-bold mb-4">✏️ Aktion bearbeiten</h2>
+
+            <form method="post" action="/dashboard/workflows/{{ workflow.id }}/edit/actions/{{ a.id }}/save">
+                <label class="font-semibold">Aktionstyp</label>
+                <input class="w-full border p-2 rounded mb-3" name="action_type" value="{{ a.action_type }}"/>
+
+                <label class="font-semibold">Konfiguration (JSON)</label>
+                <textarea name="config_json" class="w-full border rounded p-3 h-40">{{ a.config_json }}</textarea>
+
+                <div style="text-align:right; margin-top:20px;">
+                    <button type="button" onclick="closeModal('actionEdit_{{ a.id }}')" class="btn btn-gray">Abbrechen</button>
+                    <button class="btn btn-green">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Action Delete Modal -->
+    <div id="actionDelete_{{ a.id }}" class="modal-bg">
+        <div class="modal">
+            <h2 class="text-xl font-bold text-red-600 mb-4">⚠️ Aktion löschen?</h2>
+            <p class="text-gray-600 mb-4">Möchtest du diese Aktion wirklich löschen?</p>
+
+            <form method="post" action="/dashboard/workflows/{{ workflow.id }}/edit/actions/{{ a.id }}/delete">
+                <div style="text-align:right;">
+                    <button type="button" onclick="closeModal('actionDelete_{{ a.id }}')" class="btn btn-gray">Abbrechen</button>
+                    <button class="btn btn-red">Löschen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% endfor %}
+
+    <div style="text-align:right; margin-top:20px;">
+        <button onclick="openModal('actionAddModal')" class="btn btn-green">+ Aktion hinzufügen</button>
+    </div>
+
+</div>
+
+<!-- Trigger Modal -->
+<div id="triggerModal" class="modal-bg">
+    <div class="modal">
+        <h2 class="text-2xl font-bold mb-4">🎯 Trigger ändern</h2>
+
+        <form method="post" action="/dashboard/workflows/{{ workflow.id }}/edit/trigger/save">
+            <label class="font-semibold">Trigger-Typ</label>
+            <select name="trigger_type" class="w-full border rounded p-2 mb-3">
+                <option value="on_create">Bei Erstellung</option>
+                <option value="on_update">Bei Änderung</option>
+                <option value="schedule">Zeitplan</option>
+            </select>
+
+            <label class="font-semibold">Konfiguration (JSON)</label>
+            <textarea name="config_json" class="w-full border rounded p-3 h-40">
+                {{ triggers[0].config_json if triggers else '' }}
+            </textarea>
+
+            <label class="font-semibold mt-4">Bedingungen (conditions_json)</label>
+            <textarea name="conditions_json" class="w-full border rounded p-3 h-40">
+                {{ triggers[0].conditions_json if triggers else '' }}
+            </textarea>
+
+            <div style="text-align:right; margin-top:20px;">
+                <button type="button" onclick="closeModal('triggerModal')" class="btn btn-gray">Abbrechen</button>
+                <button class="btn btn-green">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Action Add Modal -->
+<div id="actionAddModal" class="modal-bg">
+    <div class="modal">
+        <h2 class="text-2xl font-bold mb-4">⚡ Neue Aktion hinzufügen</h2>
+
+        <form method="post" action="/dashboard/workflows/{{ workflow.id }}/edit/actions/add">
+            <label class="font-semibold">Aktionstyp</label>
+            <select name="action_type" class="w-full border rounded p-2 mb-3">
+                <option value="send_email">E-Mail senden</option>
+                <option value="create_task">Aufgabe erstellen</option>
+                <option value="update_record">Datensatz aktualisieren</option>
+                <option value="webhook_call">Webhook ausführen</option>
+            </select>
+
+            <label class="font-semibold">Konfiguration (JSON)</label>
+            <textarea name="config_json" class="w-full border rounded p-3 h-40"></textarea>
+
+            <div style="text-align:right; margin-top:20px;">
+                <button type="button" onclick="closeModal('actionAddModal')" class="btn btn-gray">Abbrechen</button>
+                <button class="btn btn-green">Hinzufügen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id) {
+    document.getElementById(id).style.display = "flex";
+}
+function closeModal(id) {
+    document.getElementById(id).style.display = "none";
+}
+</script>
+
+{% endblock %}

@@ -1,74 +1,189 @@
 {% extends "base_dashboard.html" %}
-{% block title %}⏰ Überfällige Rechnungen{% endblock %}
+{% block title %}⏰ Überfällige Rechnungen | Ouhud CRM{% endblock %}
 
 {% block content %}
-
-<!-- 🧭 Kopfbereich -->
-<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-  <div>
-    <h1 style="font-size:1.6rem;font-weight:800;margin:0 0 .25rem 0;">⏰ Überfällige Rechnungen</h1>
-    <p style="margin:0;color:#6b7280">Alle Rechnungen, deren Fälligkeitsdatum überschritten ist.</p>
+<div class="invoice-container">
+  <!-- 🧭 Kopfbereich -->
+  <div class="header">
+    <div>
+      <h1>⏰ Überfällige Rechnungen</h1>
+      <p>Alle Rechnungen, deren Fälligkeitsdatum überschritten ist.</p>
+    </div>
+    <a href="/dashboard/invoices" class="back-link">← Zurück zur Übersicht</a>
   </div>
-  <a href="/dashboard/invoices" 
-     style="text-decoration:none;color:#4f46e5;font-weight:500;">← Zurück zur Übersicht</a>
+
+  <!-- 📊 Tabelle oder leer -->
+  {% if invoices|length == 0 %}
+    <div class="empty">
+      ✅ Keine überfälligen Rechnungen 🎉
+    </div>
+  {% else %}
+    <div class="table-wrapper">
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Rechnungsnummer</th>
+            <th>Kunde</th>
+            <th>Fällig am</th>
+            <th class="right">Betrag</th>
+            <th>Status</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoices %}
+          <tr>
+            <td>{{ inv.id }}</td>
+            <td class="mono">{{ inv.invoice_number }}</td>
+            <td>{{ inv.customer.name if inv.customer else "—" }}</td>
+            <td class="overdue-date">
+              {{ inv.due_date.strftime("%d.%m.%Y") if inv.due_date else "—" }}
+              {% if inv.due_date %}
+                <small style="color:#991b1b;">
+                  (+{{ ((current_date - inv.due_date).days) if current_date and inv.due_date else '' }} Tage)
+                </small>
+              {% endif %}
+            </td>
+            <td class="right mono"><strong>{{ "%.2f"|format(inv.total_amount) }}</strong> {{ company_settings.currency_code or "€" if company_settings else "€" }}</td>
+            <td>
+              <span class="badge badge-overdue">⏰ Überfällig</span>
+            </td>
+            <td class="actions">
+              <a href="/dashboard/invoices/pdf/{{ inv.id }}" target="_blank" class="btn small blue">📄</a>
+              <a href="/dashboard/invoices/edit/{{ inv.id }}" class="btn small indigo">✏️</a>
+              <a href="/dashboard/invoices/delete/{{ inv.id }}" onclick="return confirm('Rechnung wirklich löschen?');" class="btn small red">🗑</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="right" style="font-weight:600;">Gesamtsumme überfälliger Rechnungen:</td>
+            <td class="right mono" style="font-weight:700;">
+              {{ "%.2f"|format(invoices|sum(attribute="total_amount")) }} {{ company_settings.currency_code or "€" if company_settings else "€" }}
+            </td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% endif %}
 </div>
 
-<!-- 📊 Tabelle oder leerer Zustand -->
-{% if invoices|length == 0 %}
-  <div style="background:#fff;padding:1rem;border-radius:12px;margin-top:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.05);text-align:center;">
-    <p style="font-size:1rem;color:#16a34a;margin:0;">✅ Keine überfälligen Rechnungen 🎉</p>
-  </div>
-{% else %}
-  <div style="background:#fff;border-radius:12px;margin-top:1.5rem;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.05);">
-    <table style="width:100%;border-collapse:collapse;">
-      <thead style="background:#f4f6f8;">
-        <tr>
-          <th style="padding:.65rem .8rem;text-align:left;">#</th>
-          <th style="padding:.65rem .8rem;text-align:left;">Rechnungsnummer</th>
-          <th style="padding:.65rem .8rem;text-align:left;">Kunde</th>
-          <th style="padding:.65rem .8rem;text-align:center;">Fällig am</th>
-          <th style="padding:.65rem .8rem;text-align:right;">Betrag</th>
-          <th style="padding:.65rem .8rem;text-align:center;">Status</th>
-          <th style="padding:.65rem .8rem;text-align:center;">Aktionen</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for inv in invoices %}
-        <tr style="border-top:1px solid #eef2f7;">
-          <td style="padding:.65rem .8rem;">{{ inv.id }}</td>
-          <td style="padding:.65rem .8rem;font-family:monospace;">{{ inv.invoice_number }}</td>
-          <td style="padding:.65rem .8rem;">{{ inv.customer.name if inv.customer else "—" }}</td>
-          <td style="padding:.65rem .8rem;text-align:center;color:#dc2626;font-weight:600;">
-            {{ inv.due_date.strftime("%d.%m.%Y") if inv.due_date else "—" }}
-          </td>
-          <td style="padding:.65rem .8rem;text-align:right;font-family:monospace;font-weight:600;">
-            {{ "%.2f"|format(inv.total_amount) }} {{ company_settings.currency_code or "€" if company_settings else "€" }}
-          </td>
-          <td style="padding:.65rem .8rem;text-align:center;">
-            <span style="display:inline-block;padding:.25rem .6rem;border-radius:999px;font-size:.8rem;background:#fee2e2;color:#991b1b;">
-              ⏰ Überfällig
-            </span>
-          </td>
-          <td style="padding:.55rem .8rem;text-align:center;white-space:nowrap;">
-            <a href="/dashboard/invoices/pdf/{{ inv.id }}" target="_blank"
-               style="background:#3b82f6;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;margin-right:.3rem;">
-              📄 PDF
-            </a>
-            <a href="/dashboard/invoices/edit/{{ inv.id }}"
-               style="background:#6366f1;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;margin-right:.3rem;">
-              ✏️ Bearbeiten
-            </a>
-            <a href="/dashboard/invoices/delete/{{ inv.id }}"
-               onclick="return confirm('Rechnung wirklich löschen?');"
-               style="background:#ef4444;color:#fff;padding:.38rem .6rem;border-radius:8px;text-decoration:none;">
-              🗑 Löschen
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% endif %}
+<style>
+.invoice-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.header p {
+  color: #6b7280;
+  margin: 0;
+}
+
+.back-link {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  margin-top: 1.5rem;
+  background: #fff;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: .7rem .8rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+th {
+  background: #f9fafb;
+  text-align: left;
+  font-weight: 600;
+}
+
+tr:hover { background: #fff7f7; }
+
+.right { text-align: right; }
+.mono { font-family: monospace; }
+
+.badge {
+  display: inline-block;
+  padding: .25rem .55rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 500;
+}
+
+.badge-overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.actions {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn.small {
+  display: inline-block;
+  padding: .35rem .6rem;
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-size: .85rem;
+  margin-right: .3rem;
+}
+
+.btn.blue { background: #3b82f6; }
+.btn.indigo { background: #6366f1; }
+.btn.red { background: #ef4444; }
+
+.btn:hover { opacity: 0.9; }
+
+.empty {
+  background: #fff;
+  padding: 1.2rem;
+  border-radius: 10px;
+  text-align: center;
+  color: #16a34a;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  margin-top: 1.5rem;
+}
+
+tfoot td {
+  background: #f9fafb;
+  border-top: 2px solid #e5e7eb;
+}
+</style>
 {% endblock %}

@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import (
     APIRouter, Request, Depends, Form, UploadFile
 )
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -17,7 +17,7 @@ from app.models import Customer, Invoice, InvoiceItem, CompanySettings
 from app.utils.pdf_utils import generate_invoice_pdf
 
 from fastapi.background import BackgroundTasks
-from app.utils.pdf_utils import generate_invoice_pdf
+
 from app.utils.email_utils import send_invoice_email  # 📌 diese Funktion musst du gleich anlegen
 
 
@@ -613,3 +613,31 @@ def reminder_invoices(request: Request, db: Session = Depends(get_db)):
         "reminders.html",   # ✅ neues Template
         {"request": request, "user": user, "reminders": reminders}  # ✅ Variable richtig benennen
     )
+    
+    
+    # 💬 Chat-Verlauf
+
+@router.get("/chat/history")
+async def chat_history(request: Request, db: Session = Depends(get_db)):
+    user = require_login(request, db)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    # Beispielhafte Chatnachrichten (hier später echte DB)
+    messages = [
+        {"sender": "Kunde A", "text": "Hallo, ich brauche Support."},
+        {"sender": "Support", "text": "Gerne, womit kann ich helfen?"},
+        {"sender": "Kunde A", "text": "Ich habe ein Problem mit der Rechnung."},
+    ]
+
+    return JSONResponse(messages)
+    
+    # 📋 Kundenübersicht (Liste)
+@router.get("/customers", response_class=HTMLResponse)
+def customers_list(request: Request, db: Session = Depends(get_db)):
+    user = require_login(request, db)
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    customers = db.query(Customer).all()
+    return templates.TemplateResponse("admin/customers.html", {"request": request, "customers": customers, "user": user})

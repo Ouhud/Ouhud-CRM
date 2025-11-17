@@ -248,8 +248,21 @@
       <a href="/admin/">⚡ Administration</a>
 
       <div class="section-title">Ouhud KI</div>
-      <a href="/dashboard/ai/leads">📈 Lead Scoring</a>
-      <a href="/dashboard/ai/assistant">🤖 KI-Assistent</a>
+
+<a href="/dashboard/ai/settings"
+   {% if request.url.path.startswith('/dashboard/ai/settings') %}class="active"{% endif %}>
+   ⚙️ AI Einstellungen
+</a>
+
+<a href="/dashboard/ai/leads"
+   {% if request.url.path.startswith('/dashboard/ai/leads') %}class="active"{% endif %}>
+   📈 Lead Scoring
+</a>
+
+<a href="/dashboard/ai/assistant"
+   {% if request.url.path.startswith('/dashboard/ai/assistant') %}class="active"{% endif %}>
+   🤖 KI-Assistent
+</a>
     </nav>
 
     <!-- 👤 Benutzer -->

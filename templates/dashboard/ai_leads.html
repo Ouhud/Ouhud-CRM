@@ -1,0 +1,173 @@
+{% extends "base_dashboard.html" %}
+{% block title %}🤖 AI Lead Scoring – Ouhud CRM{% endblock %}
+
+{% block content %}
+
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --warning: #fbbf24;
+    --danger: #ef4444;
+    --muted: #6b7280;
+    --bg: #f4f6f8;
+    --border: #e5e7eb;
+  }
+
+  .ai-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.6rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .ai-header h2 {
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    border: none;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  table.ai-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  table.ai-table th {
+    background: var(--primary);
+    color: #fff;
+    padding: 12px;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  table.ai-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+  }
+
+  .badge {
+    padding: 0.35rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .hot { background: #fee2e2; color: #b91c1c; }
+  .warm { background: #fef9c3; color: #92400e; }
+  .cold { background: #e5e7eb; color: #374151; }
+
+  .btn-small {
+    border: 1px solid var(--primary);
+    padding: 6px 10px;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .btn-small:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+</style>
+
+
+<div class="ai-card">
+
+  <div class="ai-header">
+    <h2>🤖 AI Lead Scoring</h2>
+
+    <form method="post" action="/dashboard/ai/leads/score-all">
+      <button class="btn-primary">⭐ Alle Leads bewerten (KI)</button>
+    </form>
+  </div>
+
+  <h4 class="mt-3" style="font-weight:600;">Lead-Liste (automatische KI-Bewertung)</h4>
+
+  <table class="ai-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>E-Mail</th>
+        <th>Firma</th>
+        <th>Telefon</th>
+        <th>Score</th>
+        <th>Begründung</th>
+        <th style="width: 130px;">Aktion</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>{{ lead.name }}</td>
+        <td>{{ lead.email }}</td>
+        <td>{{ lead.company }}</td>
+        <td>{{ lead.phone }}</td>
+
+        <!-- SCORE BADGE -->
+        <td>
+          {% if lead.score is not none %}
+              {% if lead.score >= 80 %}
+                <span class="badge hot">🔥 Hot – {{ lead.score }}</span>
+              {% elif lead.score >= 40 %}
+                <span class="badge warm">🌤 Warm – {{ lead.score }}</span>
+              {% else %}
+                <span class="badge cold">❄ Cold – {{ lead.score }}</span>
+              {% endif %}
+          {% else %}
+              <span class="badge cold">Noch nicht bewertet</span>
+          {% endif %}
+        </td>
+
+        <!-- REASON -->
+        <td>
+          {% if lead.score_reason %}
+            {{ lead.score_reason }}
+          {% else %}
+            <span class="text-muted">Keine KI-Bewertung vorhanden</span>
+          {% endif %}
+        </td>
+
+        <!-- ACTION BUTTON -->
+        <td>
+          <form method="post" action="/dashboard/ai/leads/{{ lead.id }}/score">
+            <button class="btn-small">Bewerten</button>
+          </form>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+{% endblock %}

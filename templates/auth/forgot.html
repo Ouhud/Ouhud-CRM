@@ -5,24 +5,31 @@
   <title>🔑 Passwort vergessen | Ouhud CRM</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- 🌿 Gemeinsames CSS -->
   <link rel="stylesheet" href="/static/style.css">
 
   <style>
-    /* 🔐 Layout für Passwort-Reset */
+    /* 🔐 Passwort-Reset Layout */
+    :root {
+      --brand-indigo: #4f46e5;
+      --brand-indigo-dark: #4338ca;
+      --bg-gradient: linear-gradient(135deg, #4f46e5, #6d28d9);
+      --text-muted: #6b7280;
+    }
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #4f46e5, #6d28d9);
+      background: var(--bg-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      padding: 1rem;
     }
 
     .auth-box {
       background: white;
-      padding: 2rem 2.5rem;
+      padding: 2.2rem 2.4rem;
       border-radius: 14px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       max-width: 420px;
@@ -32,22 +39,22 @@
     }
 
     .auth-box img.logo {
-      height: 50px;
+      height: 54px;
       margin-bottom: 1rem;
     }
 
     .auth-box h1 {
-      margin-top: 0;
-      color: #4f46e5;
-      font-size: 1.5rem;
-      margin-bottom: 0.4rem;
+      color: var(--brand-indigo);
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
     }
 
     .auth-box p {
-      color: #555;
-      font-size: 0.92rem;
-      margin-bottom: 1.4rem;
-      line-height: 1.4;
+      color: var(--text-muted);
+      font-size: 0.93rem;
+      margin-bottom: 1.6rem;
+      line-height: 1.45;
     }
 
     form {
@@ -65,64 +72,77 @@
 
     input[type="email"] {
       padding: 0.6rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
       font-size: 0.95rem;
       width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     input[type="email"]:focus {
       outline: none;
-      border-color: #4f46e5;
+      border-color: var(--brand-indigo);
       box-shadow: 0 0 0 2px rgba(79,70,229,0.15);
     }
 
     button {
-      background-color: #4f46e5;
+      background-color: var(--brand-indigo);
       color: white;
       border: none;
       padding: 0.75rem;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.25s ease;
-      width: 100%;
+      transition: background-color 0.25s ease, transform 0.1s ease;
     }
 
     button:hover {
-      background-color: #4338ca;
+      background-color: var(--brand-indigo-dark);
+      transform: translateY(-1px);
     }
 
     .back-link {
       display: inline-block;
-      margin-top: 1rem;
-      color: #4f46e5;
+      margin-top: 1.2rem;
+      color: var(--brand-indigo);
       text-decoration: none;
       font-size: 0.9rem;
       transition: color 0.25s ease;
     }
 
     .back-link:hover {
-      color: #3730a3;
+      color: var(--brand-indigo-dark);
       text-decoration: underline;
     }
 
     .message {
       font-size: 0.9rem;
-      margin-top: 0.8rem;
+      margin-top: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
     }
 
     .message.success {
-      color: #16a34a;
+      color: #166534;
+      background: #dcfce7;
+      border-left: 4px solid #16a34a;
     }
 
     .message.error {
-      color: #dc2626;
+      color: #991b1b;
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
     }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .auth-box {
+        padding: 1.8rem 1.4rem;
+      }
     }
   </style>
 </head>
@@ -131,18 +151,20 @@
   <div class="auth-box">
     <img src="/static/logo_ouhud.png" alt="Ouhud Logo" class="logo">
     <h1>🔑 Passwort vergessen</h1>
-    <p>Gib deine E-Mail-Adresse ein. Wenn ein Konto existiert, erhältst du einen sicheren Link zum Zurücksetzen deines Passworts.</p>
+    <p>Gib deine registrierte E-Mail-Adresse ein. Wenn ein Konto existiert, erhältst du einen sicheren Link zum Zurücksetzen deines Passworts.</p>
 
-    <!-- 🔐 Formular für Passwort-Reset -->
+    <!-- 🔐 Formular -->
     <form method="post" action="/auth/forgot">
       <label for="email">E-Mail-Adresse</label>
       <input type="email" id="email" name="email" placeholder="z. B. deinname@firma.ch" required>
-      <button type="submit">Reset-Link zusenden</button>
+      <button type="submit">📩 Reset-Link senden</button>
     </form>
 
-    <!-- 📩 Erfolgsmeldung (optional per URL-Parameter msg) -->
+    <!-- 📩 Nachricht -->
     {% if request.query_params.get('msg') == 'reset_sent' %}
-      <p class="message success">📧 Wenn die E-Mail existiert, wurde ein Link gesendet.</p>
+      <p class="message success">📧 Wenn die E-Mail existiert, wurde ein Link zum Zurücksetzen gesendet.</p>
+    {% elif request.query_params.get('msg') == 'error' %}
+      <p class="message error">⚠️ Leider konnte der Link nicht gesendet werden. Bitte versuche es erneut.</p>
     {% endif %}
 
     <a href="/auth/login" class="back-link">⬅️ Zurück zum Login</a>

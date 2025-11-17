@@ -2,64 +2,122 @@
 {% block title %}📅 Kalender & Aufgaben{% endblock %}
 
 {% block content %}
-<h1 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">📅 Kalender & Aufgaben</h1>
-<p style="color:#555;margin-bottom:1rem;">
-  Verwalte hier deine Termine, Meetings und Aufgaben. Klicke in den Kalender, um neue Einträge zu erstellen.
-</p>
+<div class="calendar-container">
+  <h1>📅 Kalender & Aufgaben</h1>
+  <p class="subtitle">
+    Verwalte Termine, Meetings und Aufgaben. Klicke in den Kalender, um neue Einträge zu erstellen.
+  </p>
 
-<!-- 📅 Kalender-Container -->
-<div id="calendar" style="background:white;padding:1rem;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.05);"></div>
+  <div id="calendar"></div>
+</div>
 
-<!-- FullCalendar.js + CSS -->
+<!-- ✅ FullCalendar -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --success: #10B981;
+    --danger: #DC2626;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+  }
+
+  .calendar-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .calendar-container h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.3rem;
+  }
+
+  .calendar-container .subtitle {
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  #calendar {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  /* FullCalendar-Farben */
+  .fc-toolbar-title {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .fc-button {
+    background: var(--primary);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    font-weight: 600;
+    transition: background 0.25s ease;
+  }
+
+  .fc-button:hover {
+    background: var(--primary-dark);
+  }
+
+  .fc-event {
+    background: var(--success);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .fc-daygrid-day:hover {
+    background-color: #f9fafb;
+  }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const calendarEl = document.getElementById('calendar');
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',        // Monatsansicht als Standard
+    initialView: 'dayGridMonth',
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
     },
-    locale: 'de',                       // 🇩🇪 Deutsche Sprache
+    locale: 'de',
     selectable: true,
-    editable: true,                     // Drag & Drop aktivieren
+    editable: true,
     eventSources: [
       {
-        url: '/dashboard/calendar/events', // 🔄 Backend-Rückgabe (JSON)
+        url: '/dashboard/calendar/events',
         method: 'GET',
-        failure: () => { alert('Fehler beim Laden der Termine'); }
+        failure: () => alert('⚠️ Fehler beim Laden der Termine')
       }
     ],
     select: async function (info) {
       const title = prompt('📌 Titel für neuen Termin:');
       if (title) {
-        const event = {
-          title: title,
-          start: info.startStr,
-          end: info.endStr
-        };
-
-        const response = await fetch('/dashboard/calendar/events', {
+        const event = { title, start: info.startStr, end: info.endStr };
+        const res = await fetch('/dashboard/calendar/events', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(event)
         });
-
-        if (response.ok) {
-          calendar.refetchEvents();
-        } else {
-          alert('Fehler beim Erstellen des Termins.');
-        }
+        res.ok ? calendar.refetchEvents() : alert('❌ Fehler beim Erstellen.');
       }
       calendar.unselect();
     },
     eventDrop: async function (info) {
-      // 📝 Termin per Drag & Drop verschoben → speichern
       const event = {
         id: info.event.id,
         start: info.event.startStr,
@@ -67,15 +125,14 @@ document.addEventListener('DOMContentLoaded', function () {
       };
       await fetch(`/dashboard/calendar/events/${event.id}`, {
         method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(event)
       });
     },
     eventClick: function (info) {
-      if (confirm(`Termin "${info.event.title}" löschen?`)) {
-        fetch(`/dashboard/calendar/events/${info.event.id}`, {
-          method: 'DELETE'
-        }).then(() => calendar.refetchEvents());
+      if (confirm(`🗑 Termin "${info.event.title}" löschen?`)) {
+        fetch(`/dashboard/calendar/events/${info.event.id}`, { method: 'DELETE' })
+          .then(() => calendar.refetchEvents());
       }
     }
   });

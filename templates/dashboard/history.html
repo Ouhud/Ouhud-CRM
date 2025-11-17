@@ -2,149 +2,159 @@
 {% block title %}📜 Verlauf & Aktivitäten{% endblock %}
 
 {% block content %}
+<div class="activity-container">
+  <header class="activity-header">
+    <h1>📜 Verlauf & Aktivitäten</h1>
+    <p>Hier findest du alle letzten Aktionen im CRM-System – Leads, Bestellungen, Logins u.v.m.</p>
+  </header>
+
+  {% if logs|length == 0 %}
+    <div class="activity-empty">📭 Noch keine Aktivitäten vorhanden.</div>
+  {% else %}
+    <div class="activity-list">
+      {% for log in logs %}
+      <div class="activity-item">
+        <div class="activity-left">
+          <div class="activity-title">{{ log.action }}</div>
+
+          {% if log.details %}
+            <div class="activity-details">{{ log.details }}</div>
+          {% endif %}
+
+          <div class="activity-meta">
+            👤 {{ log.user.username if log.user else 'System' }} •
+            <span class="timestamp" data-time="{{ log.timestamp.isoformat() }}">
+              {{ log.timestamp.strftime('%d.%m.%Y %H:%M') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="activity-category
+          {% if log.category == 'Lead' %}category-lead
+          {% elif log.category == 'Order' %}category-order
+          {% elif log.category == 'Customer' %}category-customer
+          {% elif log.category == 'Auth' %}category-auth
+          {% else %}category-default{% endif %}
+        ">
+          {% if log.category == 'Lead' %}📝{% elif log.category == 'Order' %}📦{% elif log.category == 'Customer' %}👤{% elif log.category == 'Auth' %}🔐{% else %}ℹ️{% endif %}
+          {{ log.category or 'Info' }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
 <style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+  }
+
   .activity-container {
     max-width: 950px;
     margin: 0 auto;
+    padding: 1rem;
   }
 
   .activity-header h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.3rem;
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.2rem;
   }
 
   .activity-header p {
-    color: #555;
-    margin-bottom: 1.5rem;
+    color: var(--muted);
+    margin-bottom: 1.4rem;
   }
 
   .activity-empty {
     background: white;
-    padding: 1.2rem;
-    border-radius: 10px;
+    padding: 1.3rem;
+    border-radius: 12px;
     text-align: center;
-    color: #555;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    color: var(--muted);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   }
 
   .activity-list {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.9rem;
   }
 
   .activity-item {
     background: white;
-    padding: 1rem 1.2rem;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .activity-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
   }
 
-  .activity-left {
-    flex: 1;
+  .activity-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.07);
   }
+
+  .activity-left { flex: 1; }
 
   .activity-title {
     font-weight: 600;
     font-size: 1rem;
-    color: #1f2937;
+    color: var(--text);
   }
 
   .activity-details {
     font-size: 0.9rem;
-    color: #555;
-    margin-top: 0.2rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
     white-space: pre-wrap;
   }
 
   .activity-meta {
     font-size: 0.8rem;
-    color: #777;
+    color: #888;
     margin-top: 0.4rem;
   }
 
+  /* Kategorien */
   .activity-category {
     font-size: 0.8rem;
-    font-weight: 500;
-    padding: 0.3rem 0.6rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
     border-radius: 9999px;
     display: flex;
     align-items: center;
     gap: 0.3rem;
+    white-space: nowrap;
   }
 
   .category-lead { background: #dbeafe; color: #1e40af; }
   .category-order { background: #dcfce7; color: #166534; }
   .category-customer { background: #fef9c3; color: #854d0e; }
   .category-auth { background: #e0e7ff; color: #3730a3; }
-  .category-default { background: #f4f4f5; color: #444; }
+  .category-default { background: #f3f4f6; color: #374151; }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .activity-item {
       flex-direction: column;
       align-items: flex-start;
+      gap: 0.6rem;
     }
     .activity-category {
-      margin-top: 0.5rem;
+      align-self: flex-start;
+      margin-top: 0.4rem;
     }
   }
 </style>
-
-<div class="activity-container">
-  <div class="activity-header">
-    <h1>📜 Verlauf & Aktivitäten</h1>
-    <p>Hier findest du die letzten Aktionen im CRM-System.</p>
-  </div>
-
-  {% if logs|length == 0 %}
-    <div class="activity-empty">
-      📭 Noch keine Aktivitäten vorhanden.
-    </div>
-  {% else %}
-    <div class="activity-list">
-      {% for log in logs %}
-        <div class="activity-item">
-          <div class="activity-left">
-            <div class="activity-title">{{ log.action }}</div>
-
-            {% if log.details %}
-              <div class="activity-details">{{ log.details }}</div>
-            {% endif %}
-
-            <div class="activity-meta">
-              👤 {{ log.user.username if log.user else 'System' }} • 
-              <span class="timestamp" data-time="{{ log.timestamp.isoformat() }}">
-                {{ log.timestamp.strftime('%d.%m.%Y %H:%M') }}
-              </span>
-            </div>
-          </div>
-
-          <div class="
-            activity-category 
-            {% if log.category == 'Lead' %}category-lead
-            {% elif log.category == 'Order' %}category-order
-            {% elif log.category == 'Customer' %}category-customer
-            {% elif log.category == 'Auth' %}category-auth
-            {% else %}category-default{% endif %}
-          ">
-            {% if log.category == 'Lead' %}📝{% elif log.category == 'Order' %}📦{% elif log.category == 'Customer' %}👤{% elif log.category == 'Auth' %}🔐{% else %}ℹ️{% endif %}
-            {{ log.category or 'Info' }}
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-</div>
 
 <script>
   // ⏱ Zeit in "vor X Minuten" umwandeln
@@ -157,13 +167,11 @@
       { label: 'Tag', seconds: 86400 },
       { label: 'Stunde', seconds: 3600 },
       { label: 'Minute', seconds: 60 },
-      { label: 'Sekunde', seconds: 1 }
     ];
     for (const i of intervals) {
       const count = Math.floor(seconds / i.seconds);
-      if (count >= 1) {
+      if (count >= 1)
         return `vor ${count} ${i.label}${count > 1 ? 'n' : ''}`;
-      }
     }
     return 'gerade eben';
   }

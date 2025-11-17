@@ -2,47 +2,172 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Rechnung {{ invoice.invoice_number }} bezahlen</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; background: #f5f5f5; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        h1 { font-size: 1.8rem; margin-bottom: 1rem; }
-        .amount { font-size: 1.5rem; font-weight: bold; margin-top: 0.5rem; color: #2c3e50; }
-        .qrcodes { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
-        .qrbox { text-align: center; }
-        .qrbox img { width: 140px; height: 140px; border: 1px solid #ddd; padding: 5px; background: white; }
-        .footer { text-align: center; font-size: 0.85rem; color: #666; margin-top: 2rem; }
-    </style>
+  <meta charset="UTF-8">
+  <title>💳 Rechnung {{ invoice.invoice_number }} bezahlen – Ouhud CRM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --primary: #0D2A78;
+      --primary-dark: #1E40AF;
+      --success: #10B981;
+      --border: #e5e7eb;
+      --bg: #f4f6f8;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      padding: 2rem;
+      max-width: 720px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 0.3rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+      color: var(--primary-dark);
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .amount {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 1rem 0;
+      color: var(--primary-dark);
+    }
+
+    .qrcodes {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .qrbox {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      width: 180px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+      transition: transform 0.2s ease;
+    }
+
+    .qrbox:hover {
+      transform: translateY(-4px);
+    }
+
+    .qrbox img {
+      width: 140px;
+      height: 140px;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ddd;
+    }
+
+    .qrbox div {
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    .pdf-link {
+      display: inline-block;
+      background: var(--success);
+      color: #fff;
+      padding: 0.7rem 1.3rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1.8rem;
+      transition: background 0.25s ease;
+    }
+
+    .pdf-link:hover {
+      background: #059669;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 1.5rem; }
+      .qrcodes { gap: 1rem; }
+      .qrbox { width: 150px; }
+      .qrbox img { width: 120px; height: 120px; }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="card">
-        <h1>Rechnung {{ invoice.invoice_number }}</h1>
-        <p>Kunde: <strong>{{ customer.name }}</strong><br>
-           E-Mail: {{ customer.email }}</p>
-        <p>Fällig am: {{ invoice.due_date }}</p>
-        <div class="amount">Betrag: {{ "%.2f"|format(invoice.total_amount) }} CHF</div>
+  <div class="card">
+    <h1>💳 Rechnung {{ invoice.invoice_number }}</h1>
 
-        <h2>Zahlungsoptionen</h2>
-        <div class="qrcodes">
-            <div class="qrbox">
-                <img src="/static/qrcodes/link_{{ invoice.invoice_number }}.png" alt="Online bezahlen">
-                <div>🌐 Online-Zahlung</div>
-            </div>
-            <div class="qrbox">
-                <img src="/static/qrcodes/sepa_{{ invoice.invoice_number }}.png" alt="SEPA">
-                <div>🇪🇺 SEPA Überweisung</div>
-            </div>
-            <div class="qrbox">
-                <img src="/static/qrcodes/twint_{{ invoice.invoice_number }}.png" alt="TWINT">
-                <div>🇨🇭 TWINT / QR-Rechnung</div>
-            </div>
-        </div>
+    <p>
+      Kunde: <strong>{{ customer.name }}</strong><br>
+      E-Mail: {{ customer.email }}<br>
+      Fällig am: {{ invoice.due_date.strftime('%d.%m.%Y') if invoice.due_date else '–' }}
+    </p>
+
+    <div class="amount">
+      Betrag: {{ "%.2f"|format(invoice.total_amount) }} {{ company.currency_code if company else "CHF" }}
     </div>
 
-    <div class="footer">
-        © {{ datetime.utcnow().year }} Hamza Dev GmbH – Sichere Online-Zahlung
+    <h2>Zahlungsoptionen</h2>
+
+    <div class="qrcodes">
+      <div class="qrbox">
+        <img src="/static/qrcodes/link_{{ invoice.invoice_number }}.png" alt="Online bezahlen">
+        <div>🌐 Online-Zahlung</div>
+      </div>
+      <div class="qrbox">
+        <img src="/static/qrcodes/sepa_{{ invoice.invoice_number }}.png" alt="SEPA">
+        <div>🇪🇺 SEPA-Überweisung</div>
+      </div>
+      <div class="qrbox">
+        <img src="/static/qrcodes/twint_{{ invoice.invoice_number }}.png" alt="TWINT">
+        <div>🇨🇭 TWINT / QR-Rechnung</div>
+      </div>
     </div>
+
+    <!-- 📄 PDF Download -->
+    <a href="/dashboard/invoices/{{ invoice.id }}/pdf" class="pdf-link">
+      📄 Rechnung als PDF herunterladen
+    </a>
+  </div>
+
+  <div class="footer">
+    © {{ datetime.utcnow().year }} Ouhud GmbH – Sichere Online-Zahlung powered by Ouhud CRM
+  </div>
 </body>
 </html>

@@ -21,6 +21,8 @@ from datetime import datetime
 
 from sqlalchemy import Table
 
+
+
 # app/models.py
 from datetime import  timedelta
 import uuid
@@ -159,9 +161,9 @@ class InvoiceItem(Base):
 
     # 📝 Positionsdaten
     description = Column(String(255), nullable=False)
-    quantity = Column(Integer, nullable=False, default=1)
-    unit_price = Column(Float, nullable=False, default=0.0)
-    tax_rate = Column(Float, nullable=False, default=0.0)
+    quantity: int = Column(Integer, nullable=False, default=1)
+    unit_price: float = Column(Float, nullable=False, default=0.0)
+    tax_rate: float = Column(Float, nullable=False, default=0.0)
 
     # 🔗 Beziehung zurück zur Rechnung
     invoice = relationship("Invoice", back_populates="items")
@@ -242,7 +244,7 @@ class OrderDB(Base):
     # Beziehungen
     customer = relationship("Customer", back_populates="orders")
     
-    # ─────────────────────────────
+# ─────────────────────────────
 # 🚀 Leads & Opportunities
 # ─────────────────────────────
 
@@ -263,9 +265,18 @@ class LeadDB(Base):
     company = Column(String(100), nullable=True)
     status = Column(Enum(LeadStatus), default=LeadStatus.neu, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # 🔥 KI Score Felder
+    score = Column(Integer, default=0)
+    score_label = Column(String(50), default="Cold")
+    score_reason = Column(Text, nullable=True)
+
+    # 🔥 KI Dashboard Felder
+    conversion_chance = Column(Integer, default=0)   # 0–100 %
+    ai_notes = Column(Text, nullable=True)           # freie KI-Analyse
     
     
-    # ─────────────────────────────
+# ─────────────────────────────
 # 📝 Kalender-Events
 # ─────────────────────────────
 class CalendarEvent(Base):
@@ -684,17 +695,31 @@ class AIChatMessage(Base):
     # Beziehung zum Benutzer (bidirektional)
     user = relationship("User", backref="ai_chat_messages")
 
-
-# ⚙️ KI-Einstellungen (Name, API-Key, Provider etc.)
+# ⚙️ KI-Einstellungen (global oder pro Benutzer)
 class AISettings(Base):
     """
-    🧭 Speichert globale Einstellungen für den KI-Assistenten.
-    Ermöglicht Administratoren z. B. den API-Key oder Namen des Assistenten zu ändern.
+    Speichert KI-Provider, Modell, API-Key sowie optional pro Benutzer.
+    Wenn user_id = NULL → globale Einstellung.
     """
     __tablename__ = "ai_settings"
 
     id = Column(Integer, primary_key=True, index=True)
-    assistant_name = Column(String(100), default="Ouhud KI-Assistent")  # Benutzerdefinierbarer Name
-    api_key = Column(String(255), nullable=True)                        # OpenAI- oder anderer Key
-    api_provider = Column(String(50), default="openai")                 # z. B. 'openai', 'azure', 'local'
-    active = Column(Boolean, default=False)                             # Aktiviert/Deaktiviert den Assistenten
+
+    # NULL = global, sonst pro Benutzer
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    # KI Meta-Daten
+    assistant_name = Column(String(100), default="Ouhud KI-Assistent")
+    api_key = Column(String(255), nullable=True)
+    provider = Column(String(50), nullable=False, default="openai")  # openai, gemini, local
+    model = Column(String(100), nullable=False, default="gpt-4o-mini")
+    active = Column(Boolean, default=False)
+
+    # Beziehung zum User
+    user = relationship("User", backref="ai_settings")
+
+    def __repr__(self):
+        return (
+            f"<AISettings(provider='{self.provider}', "
+            f"model='{self.model}', active={self.active})>"
+        )

@@ -1,7 +1,7 @@
 # app/ai_query.py
-import openai
+
 from fastapi import (
-    APIRouter, Depends, Request, Form, HTTPException
+    APIRouter, Depends, Request, Form
 )
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -11,11 +11,15 @@ from app.database import get_db
 from app.models import AISettings, AIChatMessage, User
 from app.auth import require_login, get_current_user
 
+from openai import OpenAI   # Neue OpenAI API
+
 router = APIRouter(prefix="/dashboard/ai", tags=["AI Assistent"])
 templates = Jinja2Templates(directory="templates")
 
 
+# =========================================================
 # 🧠 KI-Abfrage — POST (Chat)
+# =========================================================
 @router.post("/query")
 @require_login
 async def ai_query(
@@ -25,11 +29,10 @@ async def ai_query(
     user: User = Depends(get_current_user)
 ):
     """
-    Nimmt eine Benutzernachricht entgegen, liest KI-Einstellungen aus der DB,
-    ruft OpenAI API auf und speichert den Verlauf.
+    Empfängt eine Nachricht, ruft KI auf, speichert Chatverlauf.
     """
     try:
-        # 1️⃣ KI-Einstellungen abrufen
+        # 1️⃣ KI Settings laden
         settings = db.query(AISettings).first()
         if not settings or not settings.active or not settings.api_key:
             return JSONResponse(
@@ -37,35 +40,34 @@ async def ai_query(
                 status_code=400
             )
 
-        # 2️⃣ OpenAI API-Key setzen
-        openai.api_key = settings.api_key
+        # 2️⃣ OpenAI Client initialisieren
+        client = OpenAI(api_key=settings.api_key)
 
-        # 3️⃣ Nutzer-Nachricht in DB speichern
+        # 3️⃣ User-Nachricht speichern
         user_msg = AIChatMessage(
-            user_id=user.id if user else None,
+            user_id=user.id,
             role="user",
             content=message
         )
         db.add(user_msg)
         db.commit()
 
-        # 4️⃣ KI-Antwort generieren
-        completion = openai.ChatCompletion.create(
-            model="gpt-4",
+        # 4️⃣ KI Antwort
+        completion = client.chat.completions.create(
+            model=settings.model or "gpt-4o-mini",
             messages=[
-                {
-                    "role": "system",
-                    "content": f"Du bist ein hilfreicher Assistent namens {settings.assistant_name}."
-                },
+                {"role": "system",
+                 "content": f"Du bist ein hilfreicher Assistent namens {settings.assistant_name}."},
                 {"role": "user", "content": message}
             ],
+            max_tokens=400
         )
 
-        reply = completion.choices[0].message["content"]
+        reply = completion.choices[0].message.content
 
         # 5️⃣ Antwort speichern
         bot_msg = AIChatMessage(
-            user_id=user.id if user else None,
+            user_id=user.id,
             role="assistant",
             content=reply
         )
@@ -82,7 +84,9 @@ async def ai_query(
         )
 
 
-# 🟦 KI-Frontend — GET (Chat UI)
+# =========================================================
+# 🟦 KI Chat UI — GET
+# =========================================================
 @router.get("/assistant", response_class=HTMLResponse)
 def assistant_ui(
     request: Request,
@@ -90,24 +94,23 @@ def assistant_ui(
     user: User = Depends(get_current_user)
 ):
     """
-    Zeigt die Chat-Oberfläche für den KI-Assistenten an.
-    Admins sehen zusätzlich den ⚙️ Einstellungs-Button.
+    Zeigt AI Chat-Oberfläche.
     """
-    # 👤 Login-Prüfung
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    # 🧭 KI-Konfigurationsstatus abrufen (DB)
     settings = db.query(AISettings).first()
     error = None
     if not settings or not settings.api_key or not settings.active:
-        error = "⚠️ KI ist nicht konfiguriert. Bitte API-Key in den Einstellungen eintragen."
+        error = "⚠️ KI ist nicht konfiguriert. Bitte API-Key speichern."
 
-    # 👑 Admin-Erkennung
     is_admin = bool(user.role and user.role.name == "admin")
 
-    return templates.TemplateResponse(request, "dashboard/ai_assistant.html", {
-        "request": request,
-        "is_admin": is_admin,
-        "error": error
-    })
+    return templates.TemplateResponse(
+        "dashboard/ai_assistant.html",
+        {
+            "request": request,
+            "is_admin": is_admin,
+            "error": error
+        }
+    )
