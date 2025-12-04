@@ -33,7 +33,7 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 # ─────────────────────────────
 @router.get("/", response_class=HTMLResponse)
 def reminders_list(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

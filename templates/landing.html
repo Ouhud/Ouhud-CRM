@@ -1,0 +1,138 @@
+{% extends "base_dashboard.html" %} {% block title %}Ouhud CRM – Einfach.
+Modern. Automatisiert.{% endblock %} {% block content %}
+
+<!-- HERO SECTION -->
+<section class="bg-gray-50 p-16 text-center">
+  <h1 class="text-5xl font-bold text-gray-900 mb-4">
+    Ouhud CRM – Für moderne Unternehmen
+  </h1>
+  <p class="text-xl text-gray-600 mb-8">
+    Kunden, Rechnungen, Leads und Automatisierungen – alles in einem System.
+  </p>
+
+  <div class="flex justify-center gap-6">
+    <a
+      href="/register"
+      class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700"
+    >
+      Kostenlos starten
+    </a>
+
+    <a
+      href="/pricing"
+      class="px-8 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300"
+    >
+      Tarife ansehen
+    </a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="p-16 bg-white">
+  <h2 class="text-3xl font-bold text-center mb-12">Warum Ouhud CRM?</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+    <div class="p-6 border rounded-xl shadow bg-gray-50">
+      <div class="text-4xl mb-3">⚡</div>
+      <h3 class="text-xl font-bold mb-2">Schnell & Intuitiv</h3>
+      <p class="text-gray-600">
+        Modernes CRM ohne Komplexität – sofort einsatzbereit.
+      </p>
+    </div>
+
+    <div class="p-6 border rounded-xl shadow bg-gray-50">
+      <div class="text-4xl mb-3">🤖</div>
+      <h3 class="text-xl font-bold mb-2">Künstliche Intelligenz integriert</h3>
+      <p class="text-gray-600">
+        Automatische Lead-Analyse, E-Mail-Antworten, Chat-Assistent.
+      </p>
+    </div>
+
+    <div class="p-6 border rounded-xl shadow bg-gray-50">
+      <div class="text-4xl mb-3">🔗</div>
+      <h3 class="text-xl font-bold mb-2">Volle Automatisierung</h3>
+      <p class="text-gray-600">
+        Workflows, Trigger, Aktionen – wie bei HubSpot & Zoho.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="bg-gray-100 p-16">
+  <h2 class="text-3xl font-bold text-center mb-12">Unsere Tarife</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+    <!-- BASIC -->
+    <div class="bg-white p-8 rounded-xl shadow text-center">
+      <h3 class="text-2xl font-bold mb-2">Basic</h3>
+      <p class="text-gray-600 mb-4">Ideal für kleine Teams</p>
+      <p class="text-4xl font-bold mb-6">
+        €34 <span class="text-xl">.99</span> / Monat
+      </p>
+
+      <ul class="mb-6 text-gray-700 text-left space-y-2">
+        <li>✓ 3 Benutzer</li>
+        <li>✓ Kundenverwaltung</li>
+        <li>✓ Rechnungen</li>
+        <li>✓ Basis Automatisierung</li>
+      </ul>
+
+      <a
+        href="/register"
+        class="block bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+      >
+        14 Tage kostenlos testen
+      </a>
+    </div>
+
+    <!-- PRO -->
+    <div
+      class="bg-indigo-50 p-8 rounded-xl shadow-xl border-2 border-indigo-600 text-center"
+    >
+      <h3 class="text-2xl font-bold mb-2">Pro</h3>
+      <p class="text-gray-600 mb-4">Für wachsende Unternehmen</p>
+      <p class="text-4xl font-bold mb-6">
+        €64 <span class="text-xl">.99</span> / Monat
+      </p>
+
+      <ul class="mb-6 text-gray-700 text-left space-y-2">
+        <li>✓ 15 Benutzer</li>
+        <li>✓ E-Mail Module</li>
+        <li>✓ WhatsApp Integration</li>
+        <li>✓ Erweiterte Automatisierung</li>
+      </ul>
+
+      <a
+        href="/register"
+        class="block bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+      >
+        Meist gewählt – Jetzt testen
+      </a>
+    </div>
+
+    <!-- PROFESSIONAL -->
+    <div class="bg-white p-8 rounded-xl shadow text-center">
+      <h3 class="text-2xl font-bold mb-2">Professional</h3>
+      <p class="text-gray-600 mb-4">Für große Teams und Agenturen</p>
+      <p class="text-4xl font-bold mb-6">
+        €99 <span class="text-xl">.99</span> / Monat
+      </p>
+
+      <ul class="mb-6 text-gray-700 text-left space-y-2">
+        <li>✓ Unbegrenzte Benutzer</li>
+        <li>✓ Premium Support</li>
+        <li>✓ API & Integrationen</li>
+      </ul>
+
+      <a
+        href="/register"
+        class="block bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+      >
+        14 Tage kostenlos testen
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

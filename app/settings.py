@@ -33,7 +33,7 @@ def settings_page(
     db: Session = Depends(get_db)
 ):
     """Zeigt die Benutzereinstellungen an."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -61,7 +61,7 @@ def update_settings(
     Aktualisiert E-Mail, Passwort und optionale Sprache 
     des aktuell eingeloggten Benutzers.
     """
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -92,7 +92,7 @@ def delete_account(
     db: Session = Depends(get_db)
 ):
     """Löscht das Benutzerkonto unwiderruflich."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

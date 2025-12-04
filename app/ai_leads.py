@@ -69,7 +69,7 @@ def ai_leads_page(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", 303)
 
@@ -90,7 +90,7 @@ def ai_score_lead(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return JSONResponse({"error": "Not authenticated"}, 401)
 
@@ -143,7 +143,7 @@ def ai_score_all(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", 303)
 

@@ -34,7 +34,7 @@ def history_page(request: Request, db: Session = Depends(get_db)):
     Zeigt die letzten Benutzer- und Systemaktivitäten im CRM an.
     Nur für eingeloggte Benutzer zugänglich.
     """
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         # Redirect zur Login-Seite, wenn nicht eingeloggt
         return RedirectResponse(url="/auth/login", status_code=303)

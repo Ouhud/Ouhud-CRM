@@ -27,7 +27,7 @@ def inbox_list(
     q: str | None = None,
     show: str | None = "open"   # open | archived | all
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -74,7 +74,7 @@ def inbox_list(
 # ✅ Nachricht als gelesen/ungelesen markieren
 @router.post("/{message_id}/toggle-read")
 def toggle_read(message_id: int, request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", status_code=303)
 
@@ -90,7 +90,7 @@ def toggle_read(message_id: int, request: Request, db: Session = Depends(get_db)
 # 📂 Nachricht archivieren oder wiederherstellen
 @router.post("/{message_id}/toggle-archive")
 def toggle_archive(message_id: int, request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", status_code=303)
 
@@ -111,7 +111,7 @@ def reply_message(
     db: Session = Depends(get_db),
     body: str = Form(...)
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", status_code=303)
 
@@ -132,7 +132,7 @@ def reply_message(
 # 🗑 Nachricht löschen
 @router.post("/{message_id}/delete")
 def delete_message(message_id: int, request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", status_code=303)
 
@@ -155,7 +155,7 @@ def create_message(
     content: str = Form(...)
 ):
     # 🧑‍💻 Login prüfen
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse("/auth/login", status_code=303)
 

@@ -39,7 +39,7 @@ def leads_page(
     """
     Zeigt die Übersicht aller Leads (Opportunities) an.
     """
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -74,7 +74,7 @@ def create_lead(
     """
     Erstellt einen neuen Lead-Eintrag (Interessent).
     """
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -115,7 +115,7 @@ def delete_lead(
     """
     Löscht einen Lead unwiderruflich.
     """
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

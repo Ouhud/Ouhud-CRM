@@ -1,0 +1,116 @@
+{% extends "email/base.html" %} {% set active_tab = "settings" %} {% block
+email_content %}
+
+<h1 class="text-2xl font-bold mb-6">⚙️ E-Mail Provider Einstellungen</h1>
+
+<!-- PROVIDER LIST -->
+<div class="bg-gray-50 border rounded-xl p-6 mb-8 shadow-sm">
+  <h2 class="text-lg font-semibold mb-4">Aktuelle Provider</h2>
+
+  {% if providers|length == 0 %}
+  <p class="text-gray-500">Noch keine Provider gespeichert.</p>
+  {% else %}
+  <ul class="divide-y">
+    {% for p in providers %}
+    <li class="py-4 flex justify-between">
+      <div>
+        <strong class="text-lg">{{ p.provider|upper }}</strong><br />
+        <span class="text-gray-600 text-sm">{{ p.smtp_user }}</span>
+      </div>
+
+      {% if p.is_active %}
+      <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold">
+        Aktiv
+      </span>
+      {% else %}
+      <a
+        href="/dashboard/email/{{ p.id }}/activate"
+        class="text-blue-600 hover:underline font-medium"
+      >
+        Aktivieren
+      </a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+<!-- ADD NEW PROVIDER -->
+<div class="bg-white rounded-xl p-6 shadow-sm mb-8">
+  <h2 class="text-lg font-semibold mb-4">Neuen Provider hinzufügen</h2>
+
+  <form method="POST" action="/dashboard/email/save" class="space-y-4">
+    <div>
+      <label class="font-medium">Provider</label>
+      <select name="provider" class="input">
+        <option value="smtp">SMTP</option>
+        <option value="sendgrid">SendGrid</option>
+        <option value="mailgun">Mailgun</option>
+        <option value="ses">AWS SES</option>
+      </select>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input class="input" name="smtp_host" placeholder="SMTP Host" />
+      <input class="input" name="smtp_port" placeholder="SMTP Port" />
+      <input class="input" name="smtp_user" placeholder="SMTP Benutzer" />
+      <input
+        class="input"
+        type="password"
+        name="smtp_password"
+        placeholder="SMTP Passwort"
+      />
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input class="input" name="sendgrid_key" placeholder="SendGrid API Key" />
+      <input class="input" name="mailgun_key" placeholder="Mailgun API Key" />
+      <input class="input" name="ses_key" placeholder="AWS SES Key" />
+      <input
+        class="input"
+        type="password"
+        name="ses_secret"
+        placeholder="AWS Secret"
+      />
+      <input class="input" name="ses_region" placeholder="AWS Region" />
+    </div>
+
+    <button class="btn-primary">💾 Speichern</button>
+  </form>
+</div>
+
+<!-- TEST EMAIL -->
+<div class="bg-white rounded-xl p-6 shadow-sm">
+  <h2 class="text-lg font-semibold mb-4">Test-E-Mail senden</h2>
+
+  <form method="POST" action="/dashboard/email/test" class="flex gap-4">
+    <input
+      type="email"
+      name="to_email"
+      class="input flex-1"
+      placeholder="Empfänger E-Mail"
+    />
+    <button class="btn-primary">✉️ Test senden</button>
+  </form>
+</div>
+
+<style>
+  .input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: #fafafa;
+  }
+</style>
+
+{% endblock %}
+
+<!--
+Quellen:
+- HubSpot Settings UI: https://developers.hubspot.com/docs/cms/guides/design
+- Salesforce Form Standards: https://www.lightningdesignsystem.com/components/forms/
+-->

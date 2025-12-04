@@ -1,0 +1,302 @@
+{% extends "base_dashboard.html" %} {% block title %}🏢 Firmen & Kontakte –
+Ouhud CRM{% endblock %} {% block content %}
+<style>
+  :root {
+    --brand-blue: #4f46e5;
+    --brand-blue-dark: #4338ca;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f9fafb;
+    --border-light: #e5e7eb;
+  }
+
+  body {
+    background: var(--bg-light);
+  }
+
+  .page-wrapper {
+    padding: 1rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-light);
+    padding-bottom: 0.5rem;
+  }
+
+  .tab {
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: 0.3s;
+  }
+
+  .tab.active {
+    background: var(--brand-blue);
+    color: white;
+  }
+
+  .tab:hover {
+    background: var(--brand-blue-dark);
+    color: white;
+  }
+
+  /* Section */
+  section {
+    display: none;
+  }
+  section.active {
+    display: block;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  th,
+  td {
+    padding: 0.9rem;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.95rem;
+  }
+
+  th {
+    background: #eef2ff;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-align: left;
+  }
+
+  tr:hover {
+    background: #f3f4f6;
+  }
+
+  .btn-primary {
+    background: var(--brand-blue);
+    color: white;
+    padding: 0.65rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover {
+    background: var(--brand-blue-dark);
+  }
+
+  /* Forms */
+  .form-card {
+    background: white;
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    max-width: 900px;
+    margin-top: 1rem;
+  }
+
+  label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.7rem;
+    margin-top: 0.3rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+  }
+
+  /* Badge */
+  .badge {
+    background: var(--brand-blue);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+</style>
+
+<div class="page-wrapper">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">🏢 Firmen & Kontakte</h1>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-target="companies">🏢 Firmen</div>
+    <div class="tab" data-target="contacts">👥 Kontakte</div>
+    <div class="tab" data-target="create_company">➕ Firma erstellen</div>
+    <div class="tab" data-target="create_contact">👤 Kontakt erstellen</div>
+  </div>
+
+  <!-- ================================= -->
+  <!-- SECTION: COMPANIES (LIST) -->
+  <!-- ================================= -->
+  <section id="companies" class="active">
+    <h2 class="text-xl font-bold mb-3">📦 Firmenliste</h2>
+
+    <table>
+      <tr>
+        <th>Firma</th>
+        <th>Stadt</th>
+        <th>Land</th>
+        <th>Telefon</th>
+        <th>Kontakte</th>
+        <th>Aktionen</th>
+      </tr>
+
+      {% for company in companies %}
+      <tr>
+        <td>{{ company.name }}</td>
+        <td>{{ company.city }}</td>
+        <td>{{ company.country }}</td>
+        <td>{{ company.phone }}</td>
+        <td>
+          <span class="badge">{{ company.contacts|length }}</span>
+        </td>
+        <td>
+          <a href="/dashboard/company/{{ company.id }}" class="btn-primary"
+            >Öffnen</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <!-- ================================= -->
+  <!-- SECTION: CONTACTS (LIST) -->
+  <!-- ================================= -->
+  <section id="contacts">
+    <h2 class="text-xl font-bold mb-3">👥 Kontaktliste</h2>
+
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>E-Mail</th>
+        <th>Telefon</th>
+        <th>Firma</th>
+        <th>Position</th>
+      </tr>
+
+      {% for c in contacts %}
+      <tr>
+        <td>{{ c.first_name }} {{ c.last_name }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.phone }}</td>
+        <td>{{ c.company.name if c.company }}</td>
+        <td>{{ c.position }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <!-- ================================= -->
+  <!-- SECTION: CREATE COMPANY -->
+  <!-- ================================= -->
+  <section id="create_company">
+    <h2 class="text-xl font-bold">🏢 Neue Firma anlegen</h2>
+    <div class="form-card">
+      <form action="/dashboard/company/create" method="post">
+        <label>Firmenname *</label>
+        <input type="text" name="name" required />
+
+        <label>Adresse</label>
+        <input type="text" name="address" />
+
+        <label>Stadt</label>
+        <input type="text" name="city" />
+
+        <label>Land</label>
+        <input type="text" name="country" />
+
+        <label>Telefon</label>
+        <input type="text" name="phone" />
+
+        <label>E-Mail</label>
+        <input type="email" name="email" />
+
+        <label>Website</label>
+        <input type="text" name="website" />
+
+        <button class="btn-primary mt-4">Firma speichern</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================================= -->
+  <!-- SECTION: CREATE CONTACT -->
+  <!-- ================================= -->
+  <section id="create_contact">
+    <h2 class="text-xl font-bold">👤 Neuen Kontakt anlegen</h2>
+    <div class="form-card">
+      <form action="/dashboard/company/create_contact" method="post">
+        <label>Vorname *</label>
+        <input type="text" name="first_name" required />
+
+        <label>Nachname *</label>
+        <input type="text" name="last_name" required />
+
+        <label>E-Mail *</label>
+        <input type="email" name="email" required />
+
+        <label>Telefon</label>
+        <input type="text" name="phone" />
+
+        <label>Position</label>
+        <input type="text" name="position" />
+
+        <label>Firma (optional)</label>
+        <select name="company_id">
+          <option value="">-- Keine Firma --</option>
+          {% for company in companies %}
+          <option value="{{ company.id }}">{{ company.name }}</option>
+          {% endfor %}
+        </select>
+
+        <button class="btn-primary mt-4">Kontakt speichern</button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Tab Switch Logic
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.target;
+
+      // Tabs
+      document
+        .querySelectorAll(".tab")
+        .forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      // Sections
+      document
+        .querySelectorAll("section")
+        .forEach((sec) => sec.classList.remove("active"));
+      document.getElementById(target).classList.add("active");
+    });
+  });
+</script>
+
+{% endblock %}

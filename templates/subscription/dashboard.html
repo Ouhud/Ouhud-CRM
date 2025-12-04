@@ -1,0 +1,39 @@
+{% extends "base_dashboard.html" %} {% block title %}🔐 Dein Abo – Ouhud CRM{%
+endblock %} {% block content %}
+<div class="max-w-4xl mx-auto px-6 py-10">
+  <h1 class="text-3xl font-bold mb-6">🔐 Dein aktuelles Abo</h1>
+
+  <div class="bg-white shadow rounded-xl p-8">
+    <p class="text-lg">
+      <strong>Tarif:</strong> {{ subscription.plan|capitalize }}
+    </p>
+
+    <p class="mt-2"><strong>Status:</strong> {{ subscription.status }}</p>
+
+    {% if subscription.status == "trial" %}
+    <p class="mt-2 text-indigo-600">
+      ⏳ Testphase endet am: {{ subscription.trial_end }}
+    </p>
+    {% endif %} {% if subscription.free_months_end %}
+    <p class="mt-2 text-green-600">
+      🎁 Kostenlose Monate bis: {{ subscription.free_months_end }}
+    </p>
+    {% endif %} {% if subscription.next_payment %}
+    <p class="mt-2">💳 Nächste Zahlung: {{ subscription.next_payment }}</p>
+    {% endif %}
+
+    <div class="mt-6 flex gap-3">
+      <a
+        href="/dashboard/subscription/upgrade"
+        class="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+        >Upgrade</a
+      >
+      <a
+        href="/dashboard/subscription/cancel"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg"
+        >Abo kündigen</a
+      >
+    </div>
+  </div>
+</div>
+{% endblock %}

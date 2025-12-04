@@ -1,0 +1,153 @@
+{% extends "base_dashboard.html" %} {% block title %}📦 Tarife – Ouhud CRM{%
+endblock %} {% block content %}
+<div class="max-w-6xl mx-auto px-6 py-10">
+  <h1 class="text-4xl font-bold text-center mb-4">Wähle deinen Tarif</h1>
+  <p class="text-center text-gray-600 mb-10">
+    Starte 14 Tage kostenlos. Danach erhältst du automatisch 3 Monate geschenkt.
+  </p>
+
+  <!-- BILLING SWITCH -->
+  <div class="flex justify-center mb-12">
+    <div class="flex items-center gap-3 bg-white shadow rounded-full px-6 py-2">
+      <span
+        class="font-semibold {% if billing_cycle=='monthly' %}text-indigo-600{% endif %}"
+        >Monatlich</span
+      >
+      <label class="switch">
+        <input type="checkbox" id="billingToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span
+        class="font-semibold {% if billing_cycle=='yearly' %}text-indigo-600{% endif %}"
+      >
+        Jährlich <span class="text-green-600">(1 Monat gratis)</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- PRICING GRID -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- BASIC -->
+    <div class="border rounded-xl p-6 shadow hover:shadow-lg transition">
+      <h2 class="text-2xl font-bold mb-2">Basic</h2>
+      <p class="text-gray-600 mb-4">Ideal für kleine Teams</p>
+
+      <p class="text-4xl font-bold mb-4">
+        €34<span class="text-xl">.99</span>
+        <span class="text-gray-500 text-sm">/ Monat</span>
+      </p>
+
+      <ul class="space-y-2 text-gray-700 mb-6">
+        <li>✓ 3 Benutzer</li>
+        <li>✓ Kundenverwaltung</li>
+        <li>✓ Angebote & Rechnungen</li>
+        <li>✓ Basis-Automatisierungen</li>
+      </ul>
+
+      <a
+        href="/dashboard/subscription/start?plan=basic"
+        class="block w-full bg-indigo-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-indigo-700"
+      >
+        Jetzt starten – 14 Tage kostenlos
+      </a>
+    </div>
+
+    <!-- PRO -->
+    <div
+      class="border-2 border-indigo-600 rounded-xl p-6 shadow-xl bg-indigo-50"
+    >
+      <h2 class="text-2xl font-bold mb-2">Pro</h2>
+      <p class="text-gray-600 mb-4">Für wachsende Unternehmen</p>
+
+      <p class="text-4xl font-bold mb-4">
+        €64<span class="text-xl">.99</span>
+        <span class="text-gray-500 text-sm">/ Monat</span>
+      </p>
+
+      <ul class="space-y-2 text-gray-700 mb-6">
+        <li>✓ 15 Benutzer</li>
+        <li>✓ Alles aus BASIC</li>
+        <li>✓ WhatsApp & E-Mail Module</li>
+        <li>✓ Erweiterte Automatisierungen</li>
+      </ul>
+
+      <a
+        href="/dashboard/subscription/start?plan=pro"
+        class="block w-full bg-indigo-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-indigo-700"
+      >
+        Meist gewählt – 14 Tage kostenlos
+      </a>
+    </div>
+
+    <!-- PROFESSIONAL -->
+    <div class="border rounded-xl p-6 shadow hover:shadow-lg transition">
+      <h2 class="text-2xl font-bold mb-2">Professional</h2>
+      <p class="text-gray-600 mb-4">Für große Teams und Agenturen</p>
+
+      <p class="text-4xl font-bold mb-4">
+        €99<span class="text-xl">.99</span>
+        <span class="text-gray-500 text-sm">/ Monat</span>
+      </p>
+
+      <ul class="space-y-2 text-gray-700 mb-6">
+        <li>✓ Unbegrenzte Benutzer</li>
+        <li>✓ Vollzugriff auf alle Module</li>
+        <li>✓ Premium Support</li>
+        <li>✓ API & Integrationen</li>
+      </ul>
+
+      <a
+        href="/dashboard/subscription/start?plan=professional"
+        class="block w-full bg-indigo-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-indigo-700"
+      >
+        14 Tage kostenlos testen
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+  }
+  .switch input {
+    display: none;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+  }
+  input:checked + .slider {
+    background-color: #4f46e5;
+  }
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+  .slider.round {
+    border-radius: 34px;
+  }
+  .slider.round:before {
+    border-radius: 50%;
+  }
+</style>
+
+{% endblock %}

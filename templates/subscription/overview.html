@@ -1,0 +1,156 @@
+{% extends "base_dashboard.html" %} {% block title %}Abonnement & Tarife – Ouhud
+CRM{% endblock %} {% block content %}
+<div class="max-w-6xl mx-auto px-6 py-10">
+  <h1 class="text-4xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+    <span>💳 Abonnement & Tarife</span>
+  </h1>
+
+  <!-- Aktueller Plan -->
+  <div class="bg-white p-6 rounded-2xl shadow mb-10 border border-gray-200">
+    <h2 class="text-2xl font-semibold mb-4">
+      Dein aktueller Tarif:
+      <span class="text-indigo-600">{{ subscription.plan|capitalize }}</span>
+    </h2>
+
+    <p class="text-gray-700 mb-2">
+      <strong>Status:</strong>
+      {% if subscription.status == "trial" %}
+      <span class="text-blue-600 font-semibold">Testphase läuft</span>
+      {% elif subscription.status == "active" %}
+      <span class="text-green-600 font-semibold">Aktiv</span>
+      {% elif subscription.status == "canceled" %}
+      <span class="text-red-600 font-semibold">Gekündigt</span>
+      {% else %} {{ subscription.status }} {% endif %}
+    </p>
+
+    {% if subscription.status == "trial" %}
+    <p class="text-gray-700">
+      ⏳ Testphase endet am:
+      <strong>{{ subscription.trial_end.strftime('%d.%m.%Y') }}</strong>
+    </p>
+    {% endif %} {% if subscription.free_months_end %}
+    <p class="text-gray-700">
+      🎁 Gratis-Monate bis:
+      <strong>{{ subscription.free_months_end.strftime('%d.%m.%Y') }}</strong>
+    </p>
+    {% endif %}
+
+    <p class="mt-2 text-gray-700">
+      👥 Benutzerlimit:
+      <strong>{{ subscription.user_limit }} Nutzer</strong>
+    </p>
+
+    <div class="mt-6 flex gap-3">
+      <a
+        href="#plans"
+        class="px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
+      >
+        🔄 Tarif wechseln
+      </a>
+
+      <form method="post" action="/dashboard/subscription/cancel">
+        <button
+          class="px-5 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700"
+        >
+          ❌ Abo kündigen
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pricing Grid -->
+  <h2 class="text-3xl font-bold mb-4" id="plans">Tarife auswählen</h2>
+  <p class="text-gray-600 mb-10">
+    14 Tage kostenlos – danach automatisch 3 Monate kostenlos.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- BASIC -->
+    <div
+      class="border rounded-2xl p-6 shadow hover:shadow-lg transition bg-white"
+    >
+      <h3 class="text-2xl font-bold mb-2">Basic</h3>
+      <p class="text-gray-600 mb-4">Ideal für kleine Teams</p>
+
+      <p class="text-4xl font-bold mb-4">
+        €34<span class="text-xl">.99</span
+        ><span class="text-gray-500 text-sm">/Monat</span>
+      </p>
+
+      <ul class="space-y-2 text-gray-700 mb-6">
+        <li>✓ 3 Benutzer</li>
+        <li>✓ Kundenverwaltung</li>
+        <li>✓ Rechnungen & Angebote</li>
+        <li>✓ Basis-Automatisierungen</li>
+      </ul>
+
+      <form method="POST" action="/dashboard/subscription/change-plan">
+        <input type="hidden" name="plan" value="basic" />
+        <button
+          class="block w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+        >
+          Basic auswählen
+        </button>
+      </form>
+    </div>
+
+    <!-- PRO -->
+    <div
+      class="border-2 border-indigo-600 rounded-2xl p-6 shadow-xl bg-indigo-50"
+    >
+      <h3 class="text-2xl font-bold mb-2">Pro</h3>
+      <p class="text-gray-600 mb-4">Für wachsende Unternehmen</p>
+
+      <p class="text-4xl font-bold mb-4">
+        €64<span class="text-xl">.99</span
+        ><span class="text-gray-500 text-sm">/Monat</span>
+      </p>
+
+      <ul class="space-y-2 text-gray-700 mb-6">
+        <li>✓ 15 Benutzer</li>
+        <li>✓ Alles aus BASIC</li>
+        <li>✓ WhatsApp + E-Mail Module</li>
+        <li>✓ Erweiterte Automatisierungen</li>
+      </ul>
+
+      <form method="POST" action="/dashboard/subscription/change-plan">
+        <input type="hidden" name="plan" value="pro" />
+        <button
+          class="block w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+        >
+          Meist gewählt – Pro aktivieren
+        </button>
+      </form>
+    </div>
+
+    <!-- PROFESSIONAL -->
+    <div
+      class="border rounded-2xl p-6 shadow hover:shadow-lg bg-white transition"
+    >
+      <h3 class="text-2xl font-bold mb-2">Professional</h3>
+      <p class="text-gray-600 mb-4">Für große Teams & Agenturen</p>
+
+      <p class="text-4xl font-bold mb-4">
+        €99<span class="text-xl">.99</span
+        ><span class="text-gray-500 text-sm">/Monat</span>
+      </p>
+
+      <ul class="space-y-2 text-gray-700 mb-6">
+        <li>✓ Unbegrenzte Benutzer</li>
+        <li>✓ Vollzugriff auf alle CRM-Module</li>
+        <li>✓ Premium Support</li>
+        <li>✓ API & Integrationen</li>
+      </ul>
+
+      <form method="POST" action="/dashboard/subscription/change-plan">
+        <input type="hidden" name="plan" value="professional" />
+        <button
+          class="block w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700"
+        >
+          Professional auswählen
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

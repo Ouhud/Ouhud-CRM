@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # 📋 Formular-Liste mit Suche & Pagination
 @router.get("/", response_class=HTMLResponse)
 def list_forms(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

@@ -28,7 +28,7 @@ def list_campaigns(
     db: Session = Depends(get_db)
 ):
     """Zeigt die Liste aller Kampagnen, mit Filter- und Suchoptionen."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

@@ -1,0 +1,84 @@
+{% extends "email/base.html" %} {% set active_tab = "automation" %} {% block
+email_content %}
+
+<h1 class="text-2xl font-bold mb-6">🤖 Automatisierungen</h1>
+<p class="text-gray-600 mb-6">
+  Hier kannst du automatische E-Mail-Regeln erstellen. Beispiel: sende eine
+  E-Mail, wenn ein Kunde erstellt wird, wenn eine Rechnung fällig ist oder wenn
+  ein Ticket geschlossen wird.
+</p>
+
+<!-- CARD -->
+<div class="space-y-8">
+  <!-- EXISTING AUTOMATIONS -->
+  <div class="crm-card">
+    <h2 class="text-xl font-semibold mb-4">Bestehende Regeln</h2>
+
+    {% if automations|length == 0 %}
+    <p class="text-gray-500">Noch keine Automatisierungen erstellt.</p>
+    {% else %}
+    <ul class="divide-y">
+      {% for a in automations %}
+      <li class="py-4 flex justify-between items-center">
+        <div>
+          <strong class="text-lg">{{ a.title }}</strong><br />
+          <span class="text-gray-500 text-sm">{{ a.trigger }}</span>
+        </div>
+
+        <a
+          href="/dashboard/email/automation/{{ a.id }}/delete"
+          class="text-red-600 hover:underline"
+        >
+          Entfernen
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <!-- NEW AUTOMATION -->
+  <div class="crm-card">
+    <h2 class="text-xl font-semibold mb-4">Neue Automatisierung erstellen</h2>
+
+    <form
+      method="POST"
+      action="/dashboard/email/automation/new"
+      class="space-y-5"
+    >
+      <div>
+        <label>Regelname</label>
+        <input
+          name="title"
+          class="crm-input"
+          placeholder="z.B. Kunde erstellt – Begrüßungsmail"
+          required
+        />
+      </div>
+
+      <div>
+        <label>Auslöser (Trigger)</label>
+        <select name="trigger" class="crm-input">
+          <option value="customer_created">Kunde wurde erstellt</option>
+          <option value="invoice_due">Rechnung fällig</option>
+          <option value="ticket_closed">Ticket geschlossen</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Nachricht</label>
+        <textarea
+          name="message"
+          class="crm-input"
+          rows="6"
+          placeholder="Automatische Nachricht..."
+          required
+        ></textarea>
+      </div>
+
+      <button class="crm-btn-primary">🤖 Automatisierung speichern</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

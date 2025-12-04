@@ -21,7 +21,7 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 @router.get("/", response_class=HTMLResponse)
 def list_integrations(request: Request, db: Session = Depends(get_db)):
     """Liste aller Integrationen mit Filter, Suche & Pagination"""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

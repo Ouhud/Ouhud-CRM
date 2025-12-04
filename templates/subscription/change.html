@@ -1,0 +1,64 @@
+{% extends "base_dashboard.html" %} {% block title %}Abo ändern – Ouhud CRM{%
+endblock %} {% block content %}
+<div class="max-w-4xl mx-auto p-8">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">
+    🔄 Abo ändern (Upgrade / Downgrade)
+  </h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- BASIC -->
+    <form
+      method="POST"
+      action="/dashboard/subscription/change"
+      class="border rounded-xl p-6 shadow bg-white flex flex-col"
+    >
+      <h2 class="text-xl font-semibold mb-2">Basic</h2>
+      <p class="text-gray-500 mb-4">Kleine Teams – bis 3 Benutzer</p>
+
+      <input type="hidden" name="new_plan" value="basic" />
+
+      <button
+        class="mt-auto bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+      >
+        Wechseln zu Basic
+      </button>
+    </form>
+
+    <!-- PRO -->
+    <form
+      method="POST"
+      action="/dashboard/subscription/change"
+      class="border rounded-xl p-6 shadow bg-white flex flex-col"
+    >
+      <h2 class="text-xl font-semibold mb-2">Pro</h2>
+      <p class="text-gray-500 mb-4">Wachsende Firmen – bis 15 Benutzer</p>
+
+      <input type="hidden" name="new_plan" value="pro" />
+
+      <button
+        class="mt-auto bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+      >
+        Wechseln zu Pro
+      </button>
+    </form>
+
+    <!-- PROFESSIONAL -->
+    <form
+      method="POST"
+      action="/dashboard/subscription/change"
+      class="border rounded-xl p-6 shadow bg-white flex flex-col"
+    >
+      <h2 class="text-xl font-semibold mb-2">Professional</h2>
+      <p class="text-gray-500 mb-4">Unbegrenzte Benutzer + Premium Support</p>
+
+      <input type="hidden" name="new_plan" value="professional" />
+
+      <button
+        class="mt-auto bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+      >
+        Wechseln zu Professional
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

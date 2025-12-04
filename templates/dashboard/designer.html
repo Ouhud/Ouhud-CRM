@@ -1,0 +1,207 @@
+{% extends "base_dashboard.html" %} {% block title %}🧭 Prozess-Designer{%
+endblock %} {% block content %}
+
+<div class="designer-container">
+  <div class="designer-header">
+    <h1>🧭 Prozess-Designer</h1>
+    <p>
+      Erstelle visuelle Automationen für dein CRM – Trigger, E-Mails, Webhooks
+      und mehr.
+    </p>
+  </div>
+
+  <div class="designer-content">
+    <!-- Workflow Liste & Neuer Workflow -->
+    <div class="workflow-section">
+      <div class="workflow-card">
+        <div class="workflow-header-row">
+          <h3>⚙️ Workflows verwalten</h3>
+          <button class="btn-primary" onclick="openNewWorkflowDialog()">
+            + Neuer Workflow
+          </button>
+        </div>
+
+        {% if workflows %}
+        <ul class="workflow-list">
+          {% for w in workflows %}
+          <li class="workflow-item">
+            <a href="/dashboard/automation/designer/{{ w.id }}">
+              {{ w.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-gray">Keine Workflows gefunden.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Designer -->
+    <div class="canvas-section">
+      <div class="canvas-card">
+        <h3>🛠 Visueller Workflow-Builder</h3>
+
+        <p class="text-gray mb-3">
+          Ziehe Aktionen in den Designer, um deinen Ablauf zu erstellen.
+        </p>
+
+        <!-- Palette -->
+        <div class="palette">
+          <div onclick="addNode('trigger')" class="palette-item">
+            ⚡ Trigger
+          </div>
+          <div onclick="addNode('email')" class="palette-item">📧 E-Mail</div>
+          <div onclick="addNode('wait')" class="palette-item">⏱ Warten</div>
+          <div onclick="addNode('webhook')" class="palette-item">
+            🔗 Webhook
+          </div>
+        </div>
+
+        <!-- Canvas Bereich -->
+        <div id="nodes_area" class="canvas-area">
+          <!-- Nodes kommen über JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Speichern -->
+    <form
+      id="save_form"
+      method="post"
+      action="{% if workflow %}/dashboard/automation/designer/{{ workflow.id }}/save{% else %}/dashboard/automation/designer/save{% endif %}"
+    >
+      <input type="hidden" id="json_data" name="json_data" />
+      <input type="hidden" id="wf_name" name="name" />
+      <input type="hidden" id="wf_desc" name="description" />
+    </form>
+  </div>
+</div>
+
+<script src="/static/js/automation_designer.js"></script>
+
+<style>
+  :root {
+    --primary: #0d2a78;
+    --primary-dark: #1e40af;
+    --secondary: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --success: #10b981;
+    --danger: #ef4444;
+    --hover: #f9fafb;
+  }
+
+  .designer-container {
+    min-height: calc(100vh - 120px);
+    background: var(--bg);
+    padding: 2rem 1rem;
+  }
+
+  .designer-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .designer-header h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .designer-header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+  }
+
+  .designer-content {
+    max-width: 1250px;
+    margin: auto;
+    display: grid;
+    gap: 2rem;
+  }
+
+  /* Workflow List */
+  .workflow-card {
+    background: #fff;
+    padding: 1.8rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .workflow-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .workflow-list {
+    margin-top: 1rem;
+  }
+
+  .workflow-item {
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 0.4rem 0;
+    background: var(--hover);
+    transition: 0.2s;
+  }
+
+  .workflow-item:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* Canvas */
+  .canvas-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .palette {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .palette-item {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    transition: background 0.2s;
+  }
+
+  .palette-item:hover {
+    background: var(--primary-dark);
+  }
+
+  .canvas-area {
+    width: 100%;
+    height: 600px;
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Node Styling */
+  .node {
+    position: absolute;
+    background: var(--primary);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: grab;
+    user-select: none;
+  }
+</style>
+
+{% endblock %}

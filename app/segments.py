@@ -29,7 +29,7 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 @router.get("/", response_class=HTMLResponse)
 def list_segments(request: Request, db: Session = Depends(get_db)):
     """Zeigt Segmentliste mit Filter-, Such- und Paginierungsoptionen an."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -104,7 +104,7 @@ def create_segment(
 @router.get("/edit/{segment_id}", response_class=HTMLResponse)
 def edit_segment_page(segment_id: int, request: Request, db: Session = Depends(get_db)):
     """Zeigt die Bearbeitungsseite für ein Segment an."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

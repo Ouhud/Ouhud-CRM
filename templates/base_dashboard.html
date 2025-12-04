@@ -1,6 +1,4 @@
-{% extends "base.html" %}
-{% block title %}Dashboard – Ouhud CRM{% endblock %}
-
+{% extends "base.html" %} {% block title %}Dashboard – Ouhud CRM{% endblock %}
 {% block content %}
 <style>
   .dashboard-header {
@@ -12,7 +10,7 @@
     height: auto;
     border-radius: 10px;
     margin-bottom: 0.5rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
   .dashboard-header h1 {
     margin: 0;
@@ -45,12 +43,12 @@
     border-radius: 12px;
     padding: 1.2rem;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s, box-shadow 0.2s;
   }
   .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
   }
   .stat-card h3 {
     font-size: 1.1rem;
@@ -72,12 +70,12 @@
     background: white;
     border-radius: 1rem;
     padding: 1.5rem;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
   }
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
   }
 
   /* 🟢 Diese zwei Abschnitte sind wichtig für sichtbare Diagramme */
@@ -99,13 +97,16 @@
 
 <div class="dashboard-header">
   {% if company and company.logo_path %}
-    <img src="{{ company.logo_path }}" alt="Logo {{ company.company_name }}" class="logo">
-  {% endif %}
-  {% if company %}
-    <h1>{{ company.company_name }}</h1>
-    <p>{{ company.city }}</p>
+  <img
+    src="{{ company.logo_path }}"
+    alt="Logo {{ company.company_name }}"
+    class="logo"
+  />
+  {% endif %} {% if company %}
+  <h1>{{ company.company_name }}</h1>
+  <p>{{ company.city }}</p>
   {% else %}
-    <h1>🏢 Willkommen bei Ouhud CRM</h1>
+  <h1>🏢 Willkommen bei Ouhud CRM</h1>
   {% endif %}
 </div>
 
@@ -145,7 +146,7 @@
   </div>
 </div>
 
-<div class="dashboard-grid" style="margin-top:2rem;">
+<div class="dashboard-grid" style="margin-top: 2rem">
   <div class="card chart-card">
     <h3>Kundenübersicht</h3>
     <canvas id="kundenChart"></canvas>
@@ -161,86 +162,89 @@
     <canvas id="leadsChart"></canvas>
   </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-function initDashboardCharts() {
-  const kundenChartEl = document.getElementById("kundenChart");
-  const umsatzChartEl = document.getElementById("umsatzChart");
-  const leadsChartEl  = document.getElementById("leadsChart");
-  if (!kundenChartEl || !umsatzChartEl || !leadsChartEl) return;
+  function initDashboardCharts() {
+    const kundenChartEl = document.getElementById("kundenChart");
+    const umsatzChartEl = document.getElementById("umsatzChart");
+    const leadsChartEl = document.getElementById("leadsChart");
+    if (!kundenChartEl || !umsatzChartEl || !leadsChartEl) return;
 
-  // 🔵 Donut (Kundenübersicht)
-  new Chart(kundenChartEl, {
-    type: "doughnut",
-    data: {
-      labels: ["Aktiv", "Neu", "Inaktiv"],
-      datasets: [{
-        data: [120, 30, 15],
-        backgroundColor: ["#0D2A78", "#1E40AF", "#93C5FD"],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      cutout: "70%",
-      plugins: { legend: { position: "bottom" } }
-    }
+    // 🔵 Donut (Kundenübersicht)
+    new Chart(kundenChartEl, {
+      type: "doughnut",
+      data: {
+        labels: ["Aktiv", "Neu", "Inaktiv"],
+        datasets: [
+          {
+            data: [120, 30, 15],
+            backgroundColor: ["#0D2A78", "#1E40AF", "#93C5FD"],
+            borderWidth: 0,
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
+        cutout: "70%",
+        plugins: { legend: { position: "bottom" } },
+      },
+    });
+
+    // 📈 Umsatzentwicklung
+    new Chart(umsatzChartEl, {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun"],
+        datasets: [
+          {
+            label: "Umsatz (CHF)",
+            data: [5000, 7200, 6400, 8800, 10200, 9700],
+            borderColor: "#0D2A78",
+            backgroundColor: "rgba(13,42,120,0.08)",
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { position: "bottom" } },
+      },
+    });
+
+    // 🟣 Leads nach Status
+    new Chart(leadsChartEl, {
+      type: "bar",
+      data: {
+        labels: ["Neu", "In Kontakt", "Verhandelt", "Abgeschlossen"],
+        datasets: [
+          {
+            label: "Leads",
+            data: [25, 40, 18, 12],
+            backgroundColor: "#0D2A78",
+            borderRadius: 6,
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } },
+        plugins: { legend: { position: "bottom" } },
+      },
+    });
+  }
+
+  // ✅ Initialisierung (mit leichter Verzögerung für HTMX)
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(initDashboardCharts, 300);
   });
-
-  // 📈 Umsatzentwicklung
-  new Chart(umsatzChartEl, {
-    type: "line",
-    data: {
-      labels: ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun"],
-      datasets: [{
-        label: "Umsatz (CHF)",
-        data: [5000, 7200, 6400, 8800, 10200, 9700],
-        borderColor: "#0D2A78",
-        backgroundColor: "rgba(13,42,120,0.08)",
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { position: "bottom" } }
-    }
+  document.body.addEventListener("htmx:afterSwap", (e) => {
+    if (window.location.pathname === "/dashboard")
+      setTimeout(initDashboardCharts, 300);
   });
-
-  // 🟣 Leads nach Status
-  new Chart(leadsChartEl, {
-    type: "bar",
-    data: {
-      labels: ["Neu", "In Kontakt", "Verhandelt", "Abgeschlossen"],
-      datasets: [{
-        label: "Leads",
-        data: [25, 40, 18, 12],
-        backgroundColor: "#0D2A78",
-        borderRadius: 6
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { position: "bottom" } }
-    }
-  });
-}
-
-// ✅ Initialisierung (mit leichter Verzögerung für HTMX)
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(initDashboardCharts, 300);
-});
-document.body.addEventListener("htmx:afterSwap", (e) => {
-  if (window.location.pathname === "/dashboard") setTimeout(initDashboardCharts, 300);
-});
-
-
 </script>
 {% endblock %}

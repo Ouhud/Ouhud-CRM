@@ -1,4 +1,5 @@
 # app/dashboard_users.py
+
 import os
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User, Role
-from app.auth import require_login
+from app.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/dashboard/users", tags=["Benutzerverwaltung"])
 
@@ -16,42 +17,63 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 
-# 📋 Benutzerliste anzeigen (nur für Admins)
+# ============================================================
+# 📋 Benutzerliste anzeigen (Admin)
+# ============================================================
 @router.get("/", response_class=HTMLResponse)
-def list_users(request: Request, db: Session = Depends(get_db)):
-    current_user = require_login(request, db)
+def list_users(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Nicht eingeloggt → Login
     if not current_user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    # ✅ Admin-Prüfung: Nutzerrolle abrufen
+    # Nur Admin
     if not current_user.role or current_user.role.name != "admin":
         return RedirectResponse(url="/dashboard/", status_code=303)
 
-    # 📄 Alle Benutzer + Rollen abrufen
+    # Benutzer + Rollen laden
     users = db.query(User).all()
     roles = db.query(Role).all()
 
     return templates.TemplateResponse(
-        "admin/users.html",   # ⬅️ z. B. templates/admin/users.html
+        "admin/users.html",
         {
             "request": request,
+            "current_user": current_user,
             "users": users,
-            "roles": roles
-        }
+            "roles": roles,
+        },
     )
 
 
-# ✏️ Rolle eines Benutzers ändern
+# ============================================================
+# ✏️ Benutzer-Rolle ändern (nur Admin)
+# ============================================================
 @router.post("/edit-role")
 def edit_role(
+    request: Request,
     user_id: int = Form(...),
     role_id: int = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    # Auth prüfen
+    if not current_user:
+        return RedirectResponse(url="/auth/login", status_code=303)
+
+    # Admin prüfen
+    if not current_user.role or current_user.role.name != "admin":
+        return RedirectResponse(url="/dashboard/", status_code=303)
+
+    # Rolle ändern
     user = db.query(User).filter(User.id == user_id).first()
     if user:
         new_role = db.query(Role).filter(Role.id == role_id).first()
         if new_role:
             user.role = new_role
             db.commit()
+
     return RedirectResponse(url="/dashboard/users", status_code=303)

@@ -1,0 +1,23 @@
+{% extends "base_dashboard.html" %} {% block title %}Abo starten{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-6 py-10">
+  <h1 class="text-3xl font-bold mb-6">🎉 Willkommen bei Ouhud CRM!</h1>
+
+  <p class="mb-4">
+    Du hast den <strong>{{ plan|capitalize }}</strong> Tarif gewählt.
+  </p>
+
+  <p>
+    Die Testphase (14 Tage) startet sofort. Danach erhältst du automatisch 3
+    Monate gratis.
+  </p>
+
+  <form method="POST">
+    <button
+      class="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-xl shadow hover:bg-indigo-700"
+    >
+      📦 Testphase starten
+    </button>
+  </form>
+</div>
+{% endblock %}

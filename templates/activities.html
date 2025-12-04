@@ -1,0 +1,283 @@
+{% extends "base_dashboard.html" %} {% block title %}📋 Aktivitäten{% endblock
+%} {% block content %}
+<div class="activities-container">
+  <h1>📋 Aktivitäten</h1>
+  <p class="subtitle">
+    Verwalten, erstellen und verfolgen Sie sämtliche Kundenaktivitäten.
+  </p>
+
+  <!-- ➕ Neue Aktivität -->
+  <form method="post" action="/dashboard/activities/create" class="create-form">
+    <input
+      type="text"
+      name="title"
+      placeholder="Titel der Aktivität"
+      required
+    />
+    <input
+      type="text"
+      name="description"
+      placeholder="Beschreibung (optional)"
+    />
+    <button type="submit" class="btn-success">➕ Erstellen</button>
+  </form>
+
+  <!-- 📊 Statistik-Karten -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <p>Gesamt</p>
+      <h2>{{ activities|length }}</h2>
+    </div>
+
+    <div class="stat-card">
+      <p>Letzte Aktivität</p>
+      <h3>
+        {% if activities and activities|length > 0 %} {{
+        activities[0].created_at.strftime('%d.%m.%Y %H:%M') }} {% else %} Keine
+        Daten {% endif %}
+      </h3>
+    </div>
+
+    <div class="stat-card">
+      <p>Aktivitäten heute</p>
+      <h3>0</h3>
+      <!-- kann später dynamisch ergänzt werden -->
+    </div>
+  </div>
+
+  <!-- 📋 Tabelle -->
+  <div class="table-wrapper">
+    <table id="activity-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="title">Titel</th>
+          <th>Beschreibung</th>
+          <th class="sortable" data-sort="created">Erstellt am</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% if activities %} {% for a in activities %}
+        <tr>
+          <td>{{ a.title }}</td>
+          <td>{{ a.description or '-' }}</td>
+          <td>{{ a.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="3" class="empty-row">
+            📭 Noch keine Aktivitäten vorhanden
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 🧭 Pagination -->
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- 🎨 STYLES -->
+<style>
+  :root {
+    --primary: #0d2a78;
+    --primary-dark: #1e40af;
+    --success: #10b981;
+    --danger: #dc2626;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+    --text: #1f2937;
+  }
+
+  .activities-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle {
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  /* Formular */
+  .create-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .create-form input {
+    flex: 1 1 220px;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .btn-success {
+    background: var(--success);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-success:hover {
+    background: #059669;
+  }
+
+  /* Statistik */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-card p {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-card h2,
+  .stat-card h3 {
+    font-size: 1.4rem;
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* Tabelle */
+  .table-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+  }
+
+  th,
+  td {
+    padding: 0.75rem 0.9rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead {
+    background: #f3f4f6;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  .empty-row {
+    text-align: center;
+    padding: 1rem;
+    color: #6b7280;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    gap: 0.4rem;
+  }
+
+  .pagination button {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .pagination button.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  @media (max-width: 700px) {
+    .create-form {
+      flex-direction: column;
+    }
+    table {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<!-- 📅 SORTIERUNG & PAGINATION -->
+<script>
+  // Sortierbare Spalten
+  document.querySelectorAll("th.sortable").forEach((th) => {
+    th.addEventListener("click", () => {
+      const table = document.getElementById("activity-table");
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const asc = th.classList.toggle("asc");
+      const idx = th.cellIndex;
+      rows.sort((a, b) => {
+        const va = a.children[idx].innerText.trim();
+        const vb = b.children[idx].innerText.trim();
+        return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+      });
+      rows.forEach((r) => tbody.appendChild(r));
+    });
+  });
+
+  // Pagination
+  const rowsPerPage = 10;
+  const tbody = document.querySelector("#activity-table tbody");
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const pagination = document.getElementById("pagination");
+
+  function showPage(page) {
+    rows.forEach((r, i) => {
+      r.style.display =
+        i >= (page - 1) * rowsPerPage && i < page * rowsPerPage ? "" : "none";
+    });
+    pagination.querySelectorAll("button").forEach((btn, idx) => {
+      btn.classList.toggle("active", idx + 1 === page);
+    });
+  }
+
+  function setupPagination() {
+    const pageCount = Math.ceil(rows.length / rowsPerPage);
+    pagination.innerHTML = "";
+    for (let i = 1; i <= pageCount; i++) {
+      const btn = document.createElement("button");
+      btn.innerText = i;
+      btn.addEventListener("click", () => showPage(i));
+      pagination.appendChild(btn);
+    }
+    if (pageCount > 0) showPage(1);
+  }
+  setupPagination();
+</script>
+{% endblock %}

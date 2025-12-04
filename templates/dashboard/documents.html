@@ -1,0 +1,383 @@
+// {% extends "base_dashboard.html" %}
+{% block title %}📑 Dokumente verwalten{% endblock %}
+
+{% block content %}
+<div class="documents-container">
+  <div class="documents-header">
+    <h1>📑 Dokumente verwalten</h1>
+    <p>Organisiere und verwalte deine CRM-Dokumente. Lade neue Dateien hoch und verknüpfe sie mit Kunden oder Leads.</p>
+  </div>
+
+  <div class="documents-content">
+    <!-- Upload-Bereich -->
+    <div class="upload-section">
+      <div class="upload-card">
+        <h3>📎 Neue Dokumente hochladen</h3>
+        <form id="upload-form" action="/dashboard/documents/upload" enctype="multipart/form-data" method="post">
+          <div class="drop-zone" id="drop-zone">
+            <p>📂 Ziehe Dateien hierher oder <label for="file-input" class="file-label">klicke zum Auswählen</label></p>
+            <input type="file" id="file-input" name="file" multiple style="display: none;" />
+          </div>
+          <div class="upload-options">
+            <div class="form-group">
+              <label for="category">🏷️ Kategorie</label>
+              <select id="category" name="category">
+                <option value="">Keine</option>
+                <option value="Vertrag">Vertrag</option>
+                <option value="Rechnung">Rechnung</option>
+                <option value="Angebot">Angebot</option>
+                <option value="Sonstiges">Sonstiges</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="customer_id">👤 Kunde verknüpfen (optional)</label>
+              <select id="customer_id" name="customer_id">
+                <option value="">Kein Kunde</option>
+                {% for cust in customers %}
+                  <option value="{{ cust.id }}">{{ cust.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="lead_id">🎯 Lead verknüpfen (optional)</label>
+              <select id="lead_id" name="lead_id">
+                <option value="">Kein Lead</option>
+                {% for lead in leads %}
+                  <option value="{{ lead.id }}">{{ lead.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" id="upload-btn">⬆️ Hochladen</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Filter und Suche -->
+    <div class="filter-section">
+      <form method="get" class="filter-form">
+        <input type="text" name="search" placeholder="🔍 Nach Dateiname suchen..." value="{{ search or '' }}" />
+        <select name="category" onchange="this.form.submit()">
+          <option value="">Alle Kategorien</option>
+          <option value="Vertrag" {% if category == "Vertrag" %}selected{% endif %}>Vertrag</option>
+          <option value="Rechnung" {% if category == "Rechnung" %}selected{% endif %}>Rechnung</option>
+          <option value="Angebot" {% if category == "Angebot" %}selected{% endif %}>Angebot</option>
+          <option value="Sonstiges" {% if category == "Sonstiges" %}selected{% endif %}>Sonstiges</option>
+        </select>
+        <button type="submit" class="btn-secondary">Filtern</button>
+      </form>
+    </div>
+
+    <!-- Dokumente-Liste -->
+    <div class="documents-list">
+      {% for doc in documents %}
+      <div class="document-item">
+        <div class="document-icon">
+          {% if doc.filename.endswith('.pdf') %}📄{% elif doc.filename.endswith(('.jpg', '.png', '.jpeg')) %}🖼️{% else %}📎{% endif %}
+        </div>
+        <div class="document-info">
+          <h4>{{ doc.filename }}</h4>
+          <p>Kategorie: {{ doc.category or "Keine" }} | Hochgeladen: {{ doc.created_at or "Unbekannt" }}</p>
+          {% if doc.customer %} <small>👤 Verknüpft mit Kunde: {{ doc.customer.name }}</small> {% endif %}
+          {% if doc.lead %} <small>🎯 Verknüpft mit Lead: {{ doc.lead.name }}</small> {% endif %}
+        </div>
+        <div class="document-actions">
+          <a href="/dashboard/documents/download/{{ doc.id }}" class="btn-sm btn-success" title="Download">⬇️</a>
+          <a href="/dashboard/documents/delete/{{ doc.id }}" class="btn-sm btn-danger" title="Löschen" onclick="return confirm('Dokument wirklich löschen?')">🗑️</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="?page={{ page - 1 }}&search={{ search or '' }}&category={{ category or '' }}" class="btn-secondary">⬅️ Zurück</a>
+      {% endif %}
+      <span>Seite {{ page }} von {{ pages }}</span>
+      {% if page < pages %}
+        <a href="?page={{ page + 1 }}&search={{ search or '' }}&category={{ category or '' }}" class="btn-secondary">Weiter ➡️</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  // Drag-and-Drop für Upload
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-over');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      dropZone.innerHTML = `<p>📂 ${files.length} Datei(en) ausgewählt</p>`;
+    }
+  });
+
+  fileInput.addEventListener('change', () => {
+    const files = fileInput.files;
+    if (files.length > 0) {
+      dropZone.innerHTML = `<p>📂 ${files.length} Datei(en) ausgewählt</p>`;
+    }
+  });
+</script>
+
+<style>
+  :root {
+    --primary: #0D2A78;
+    --primary-dark: #1E40AF;
+    --secondary: #6B7280;
+    --border: #e5e7eb;
+    --bg: #f4f6f8;
+    --text: #1f2937;
+    --success: #10B981;
+    --danger: #EF4444;
+    --hover: #f9fafb;
+  }
+
+  .documents-container {
+    min-height: calc(100vh - 120px);
+    background: var(--bg);
+    padding: 2rem 1rem;
+  }
+
+  .documents-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .documents-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .documents-header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+  }
+
+  .documents-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .upload-section {
+    margin-bottom: 2rem;
+  }
+
+  .upload-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    animation: fadeIn 0.4s ease;
+  }
+
+  .upload-card h3 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg);
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+  }
+
+  .drop-zone.drag-over {
+    border-color: var(--primary);
+    background: rgba(13,42,120,0.05);
+  }
+
+  .file-label {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .upload-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group select, .filter-form input, .filter-form select {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .filter-section {
+    margin-bottom: 2rem;
+  }
+
+  .filter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .documents-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .document-item {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .document-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+
+  .document-icon {
+    font-size: 2rem;
+  }
+
+  .document-info h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+
+  .document-info p {
+    margin: 0.5rem 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  .document-info small {
+    color: var(--secondary);
+  }
+
+  .document-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-sm {
+    padding: 0.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #059669;
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .btn-secondary {
+    background: var(--secondary);
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: #4b5563;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .documents-list {
+      grid-template-columns: 1fr;
+    }
+
+    .upload-options {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+{% endblock %}

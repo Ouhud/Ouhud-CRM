@@ -118,3 +118,37 @@ def init_db():
     import app.models
     Base.metadata.create_all(bind=engine)
     print("📦 Datenbanktabellen erstellt (ohne Alembic)")
+
+# ------------------------------------------------------------
+#  AUTOMATISIERUNGEN – Datenbankfunktionen
+# ------------------------------------------------------------
+
+from sqlalchemy import select
+from app.models import EmailAutomation
+from app.database import SessionLocal   # falls nicht vorhanden, hinzufügen
+
+
+def get_automations_from_db():
+    """
+    Holt alle Automatisierungsregeln aus der Tabelle email_automations.
+    """
+    with SessionLocal() as db:
+        stmt = select(EmailAutomation)
+        result = db.execute(stmt).scalars().all()
+        return result
+
+
+def save_automation_to_db(title: str, trigger: str, message: str):
+    """
+    Speichert eine neue Automatisierungsregel.
+    """
+    with SessionLocal() as db:
+        new_item = EmailAutomation(
+            title=title,
+            trigger=trigger,
+            message=message
+        )
+        db.add(new_item)
+        db.commit()
+        db.refresh(new_item)
+        return new_item

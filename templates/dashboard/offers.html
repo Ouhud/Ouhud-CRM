@@ -1,0 +1,298 @@
+{% extends "base_dashboard.html" %} {% block title %}📝 Angebote – Ouhud CRM{%
+endblock %} {% block content %}
+
+<style>
+  :root {
+    --brand-blue: #4f46e5;
+    --brand-blue-dark: #4338ca;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f9fafb;
+    --border-light: #e5e7eb;
+  }
+
+  body {
+    background: var(--bg-light);
+  }
+
+  .page-wrapper {
+    padding: 1rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: system-ui;
+  }
+
+  .tab-menu {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 1.2rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .tab-btn.active {
+    background: var(--brand-blue);
+    color: white;
+  }
+
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  th,
+  td {
+    padding: 0.9rem;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.95rem;
+  }
+
+  th {
+    background: #eef2ff;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  tr:hover {
+    background: #f3f4f6;
+  }
+
+  .btn-primary {
+    background: var(--brand-blue);
+    color: white !important;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .btn-primary:hover {
+    background: var(--brand-blue-dark);
+  }
+
+  .status-badge {
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+  }
+
+  .status-offen {
+    background: #6366f1;
+  }
+  .status-versendet {
+    background: #0ea5e9;
+  }
+  .status-akzeptiert {
+    background: #22c55e;
+  }
+  .status-abgelehnt {
+    background: #ef4444;
+  }
+
+  form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    margin-bottom: 1rem;
+  }
+</style>
+
+<div class="page-wrapper">
+  <h1 class="text-3xl font-bold text-gray-900">📝 Angebote</h1>
+
+  <!-- Tabs -->
+  <div class="tab-menu">
+    <button class="tab-btn active" data-tab="list">📄 Übersicht</button>
+    <button class="tab-btn" data-tab="create">➕ Neu erstellen</button>
+    <button
+      class="tab-btn"
+      data-tab="view"
+      style="display: none"
+      id="tabViewBtn"
+    >
+      👁️ Angebot ansehen
+    </button>
+    <button
+      class="tab-btn"
+      data-tab="edit"
+      style="display: none"
+      id="tabEditBtn"
+    >
+      ✏️ Bearbeiten
+    </button>
+  </div>
+
+  <!-- LIST -->
+  <div id="tab-list" class="tab-content active">
+    <table>
+      <tr>
+        <th>Titel</th>
+        <th>Kunde</th>
+        <th>Betrag</th>
+        <th>Status</th>
+        <th>Erstellt am</th>
+        <th>Aktion</th>
+      </tr>
+
+      {% for offer in offers %}
+      <tr>
+        <td>{{ offer.title }}</td>
+        <td>
+          {% if offer.customer %} {{ offer.customer.first_name }} {{
+          offer.customer.last_name }} {% else %} — {% endif %}
+        </td>
+        <td>{{ "%.2f"|format(offer.amount) }} €</td>
+
+        <td>
+          <span class="status-badge status-{{ offer.status }}">
+            {{ offer.status|capitalize }}
+          </span>
+        </td>
+
+        <td>{{ offer.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+
+        <td>
+          <button class="btn-primary" onclick="openOffer('{{ offer.id }}')">
+            Öffnen
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <!-- CREATE -->
+  <div id="tab-create" class="tab-content">
+    <h2 class="text-xl font-bold mb-3">➕ Neues Angebot erstellen</h2>
+
+    <form action="/dashboard/offers/create" method="post">
+      <label>Titel *</label>
+      <input type="text" name="title" required />
+
+      <label>Beschreibung</label>
+      <textarea name="description" rows="5"></textarea>
+
+      <label>Betrag (€) *</label>
+      <input type="number" name="amount" step="0.01" required />
+
+      <label>Kunde *</label>
+      <select name="customer_id" required>
+        <option value="">Bitte wählen…</option>
+        {% for c in customers %}
+        <option value="{{ c.id }}">
+          {{ c.first_name }} {{ c.last_name }} ({{ c.email }})
+        </option>
+        {% endfor %}
+      </select>
+
+      <button class="btn-primary">Speichern</button>
+    </form>
+  </div>
+
+  <!-- VIEW (Dynamic load via JS) -->
+  <div id="tab-view" class="tab-content">
+    <h2>👁️ Angebot anzeigen</h2>
+    <div id="viewContent">Bitte Angebot auswählen…</div>
+  </div>
+
+  <!-- EDIT (Dynamic load via JS) -->
+  <div id="tab-edit" class="tab-content">
+    <h2>✏️ Angebot bearbeiten</h2>
+    <div id="editContent">Bitte Angebot auswählen…</div>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(".tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      document
+        .querySelectorAll(".tab-content")
+        .forEach((t) => t.classList.remove("active"));
+
+      btn.classList.add("active");
+      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // Load offer via AJAX (simple)
+  async function openOffer(id) {
+    const res = await fetch("/dashboard/offers/" + id + "/json");
+    const data = await res.json();
+
+    document.getElementById("tabViewBtn").style.display = "inline-block";
+    document.getElementById("tabEditBtn").style.display = "inline-block";
+
+    // Fill VIEW
+    document.getElementById("viewContent").innerHTML = `
+      <p><strong>Titel:</strong> ${data.title}</p>
+      <p><strong>Betrag:</strong> ${data.amount} €</p>
+      <p><strong>Status:</strong> ${data.status}</p>
+      <p><strong>Beschreibung:</strong><br>${data.description || "-"}</p>
+    `;
+
+    // Fill EDIT
+    document.getElementById("editContent").innerHTML = `
+      <form action="/dashboard/offers/${id}/edit" method="post">
+        <label>Titel</label>
+        <input name="title" value="${data.title}" />
+
+        <label>Beschreibung</label>
+        <textarea name="description">${data.description || ""}</textarea>
+
+        <label>Betrag (€)</label>
+        <input name="amount" value="${data.amount}" type="number" step="0.01"/>
+
+        <label>Status</label>
+        <select name="status">
+          <option>offen</option>
+          <option>versendet</option>
+          <option>akzeptiert</option>
+          <option>abgelehnt</option>
+        </select>
+
+        <button class="btn-primary">Speichern</button>
+      </form>
+    `;
+
+    // Switch to view tab
+    document.querySelector("[data-tab='view']").click();
+  }
+</script>
+
+{% endblock %}

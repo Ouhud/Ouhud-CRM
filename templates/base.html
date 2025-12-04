@@ -1,296 +1,310 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>{% block title %}Ouhud CRM{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Ouhud CRM{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    :root {
-      --brand-indigo: #0D2A78;
-      --brand-indigo-dark: #182E6C;
-      --brand-light: #F4F6F8;
-      --text-dark: #1E293B;
-      --text-light: #F9FAFB;
-    }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    /* 🌐 Grundlayout */
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--brand-light);
-      color: var(--text-dark);
-      display: flex;
-      min-height: 100vh;
-    }
+    <style>
+      :root {
+        --brand-indigo: #0d2a78;
+        --brand-indigo-dark: #182e6c;
+        --brand-light: #f4f6f8;
+        --text-dark: #1e293b;
+        --text-light: #f9fafb;
+      }
 
-    /* 🟦 SIDEBAR */
-    .sidebar {
-      width: 250px;
-      background: linear-gradient(180deg, var(--brand-indigo) 0%, var(--brand-indigo-dark) 100%);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      overflow-y: auto;
-      box-shadow: 4px 0 12px rgba(0,0,0,0.08);
-    }
+      /* 🌐 Grundlayout */
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--brand-light);
+        color: var(--text-dark);
+        display: flex;
+        min-height: 100vh;
+      }
 
-    /* 🏢 LOGO */
-    .sidebar .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      font-size: 1.1rem;
-      font-weight: bold;
-      padding: 1.6rem 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.05);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .sidebar .logo img {
-      height: 34px;
-      width: auto;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-    }
-
-    /* 🧭 NAVIGATION */
-    .sidebar nav {
-      display: flex;
-      flex-direction: column;
-      padding: 1rem 0.8rem;
-      flex-grow: 1;
-    }
-
-    .sidebar nav .section-title {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      opacity: 0.6;
-      margin: 1rem 0 0.25rem 0.4rem;
-      letter-spacing: 0.5px;
-    }
-
-    .sidebar nav a {
-      color: var(--text-light);
-      text-decoration: none;
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.7rem;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-    }
-
-    .sidebar nav a:hover {
-      background-color: rgba(255,255,255,0.15);
-      transform: translateX(2px);
-    }
-
-    .sidebar nav a.active {
-      background-color: rgba(255,255,255,0.25);
-      font-weight: 600;
-    }
-
-    /* 👤 BENUTZERBEREICH */
-    .user-box {
-      margin-top: auto;
-      padding: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.25);
-      background: rgba(255,255,255,0.05);
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .user-avatar {
-      background: white;
-      color: var(--brand-indigo);
-      font-weight: bold;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    .user-info strong {
-      display: block;
-      font-size: 0.95rem;
-      color: white;
-    }
-
-    .user-info a {
-      color: #cbd5e1;
-      font-size: 0.8rem;
-      text-decoration: none;
-    }
-
-    .user-info a:hover {
-      color: white;
-      text-decoration: underline;
-    }
-
-    .logout-link {
-      display: block;
-      color: #fca5a5;
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: color 0.2s;
-    }
-
-    .logout-link:hover {
-      color: white;
-    }
-
-    /* 📄 MAIN CONTENT */
-    .main-content {
-      flex: 1;
-      margin-left: 250px;
-      padding: 2rem;
-      width: calc(100% - 250px);
-    }
-
-    /* 📱 RESPONSIVE */
-    @media (max-width: 850px) {
+      /* 🟦 SIDEBAR */
       .sidebar {
-        width: 64px;
+        width: 250px;
+        background: linear-gradient(
+          180deg,
+          var(--brand-indigo) 0%,
+          var(--brand-indigo-dark) 100%
+        );
+        color: white;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        overflow-y: auto;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
       }
-      .sidebar .logo span,
-      .sidebar nav .section-title {
-        display: none;
-      }
-      .sidebar nav a {
+
+      /* 🏢 LOGO */
+      .sidebar .logo {
+        display: flex;
+        align-items: center;
         justify-content: center;
-        font-size: 0;
+        gap: 0.6rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        padding: 1.6rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
-      .sidebar nav a::before {
-        font-size: 1.4rem;
+
+      .sidebar .logo img {
+        height: 34px;
+        width: auto;
+        filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
       }
-      .main-content {
-        margin-left: 64px;
+
+      /* 🧭 NAVIGATION */
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0.8rem;
+        flex-grow: 1;
+      }
+
+      .sidebar nav .section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin: 1rem 0 0.25rem 0.4rem;
+        letter-spacing: 0.5px;
+      }
+
+      .sidebar nav a {
+        color: var(--text-light);
+        text-decoration: none;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.7rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .sidebar nav a:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateX(2px);
+      }
+
+      .sidebar nav a.active {
+        background-color: rgba(255, 255, 255, 0.25);
+        font-weight: 600;
+      }
+
+      /* 👤 BENUTZERBEREICH */
+      .user-box {
+        margin-top: auto;
         padding: 1rem;
-        width: calc(100% - 64px);
+        border-top: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.05);
       }
-      .user-info strong,
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .user-avatar {
+        background: white;
+        color: var(--brand-indigo);
+        font-weight: bold;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      .user-info strong {
+        display: block;
+        font-size: 0.95rem;
+        color: white;
+      }
+
       .user-info a {
-        display: none;
+        color: #cbd5e1;
+        font-size: 0.8rem;
+        text-decoration: none;
       }
-    }
 
-  </style>
-</head>
+      .user-info a:hover {
+        color: white;
+        text-decoration: underline;
+      }
 
-<body>
-  <!-- 🟦 Sidebar -->
-  <aside class="sidebar">
-    <div class="logo">
-      <img src="/static/logo_ouhud.png" alt="Ouhud Logo">
-      <span>Ouhud CRM</span>
-    </div>
+      .logout-link {
+        display: block;
+        color: #fca5a5;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: color 0.2s;
+      }
 
-    <nav>
-      <!-- 🏠 Dashboard -->
-      <a href="/dashboard/" {% if request.url.path == '/dashboard/' %}class="active"{% endif %}>🏠 Dashboard</a>
+      .logout-link:hover {
+        color: white;
+      }
 
-      <div class="section-title">Kunden & Vertrieb</div>
-      <a href="/dashboard/customers">🧑‍💼 Kontakte</a>
-      <a href="/dashboard/leads">🚀 Leads & Opportunities</a>
-      <a href="/dashboard/history">📜 Kundenhistorie</a>
+      /* 📄 MAIN CONTENT */
+      .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 2rem;
+        width: calc(100% - 250px);
+      }
 
-      <div class="section-title">Marketing</div>
-      <a href="/dashboard/campaigns">📢 Kampagnen & Newsletter</a>
-      <a href="/dashboard/segments">🎯 Zielgruppen</a>
-      <a href="/dashboard/forms">📝 Formulare</a>
+      /* 📱 RESPONSIVE */
+      @media (max-width: 850px) {
+        .sidebar {
+          width: 64px;
+        }
+        .sidebar .logo span,
+        .sidebar nav .section-title {
+          display: none;
+        }
+        .sidebar nav a {
+          justify-content: center;
+          font-size: 0;
+        }
+        .sidebar nav a::before {
+          font-size: 1.4rem;
+        }
+        .main-content {
+          margin-left: 64px;
+          padding: 1rem;
+          width: calc(100% - 64px);
+        }
+        .user-info strong,
+        .user-info a {
+          display: none;
+        }
+      }
+    </style>
+  </head>
 
-      <div class="section-title">Planung</div>
-      <a href="/dashboard/calendar">📅 Kalender & Aufgaben</a>
+  <body>
+    <!-- 🟦 Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="/static/logo_ouhud.png" alt="Ouhud Logo" />
+        <span>Ouhud CRM</span>
+      </div>
 
-      <div class="section-title">Produkte & Finanzen</div>
-      <a href="/dashboard/products">📦 Produkte</a>
-      <a href="/dashboard/orders">🛍 Bestellungen</a>
-      <a href="/dashboard/invoices">🧾 Rechnungen</a>
-      <a href="/dashboard/payments/">💳 Zahlungen</a>
-      <a href="/dashboard/invoices/reminders">⏰ Mahnungen</a>
+      <nav>
+        <!-- 🏠 Dashboard -->
+        <a
+          href="/dashboard/"
+          class="{% if request.url.path == '/dashboard/' %}active{% endif %}"
+        >
+          🏠 Dashboard
+        </a>
 
-      <div class="section-title">Analyse & Kommunikation</div>
-      <a href="/dashboard/reports">📈 Berichte</a>
-      <a href="/dashboard/inbox">📨 Kommunikation</a>
-      <a href="/dashboard/chat" {% if request.url.path.startswith('/dashboard/chat') %}class="active"{% endif %}>💬 Interner Chat</a>
-      <a href="/dashboard/whatsapp" {% if request.url.path.startswith('/dashboard/whatsapp') %}class="active"{% endif %}>📲 WhatsApp</a>
-      <a href="/dashboard/calls">📞 Anrufhistorie</a>
+        <!-- Kunden & Vertrieb -->
+        <div class="section-title">Kunden & Vertrieb</div>
+        <a href="/dashboard/company_accounts">🏢 Firmen / Accounts</a>
+        <a href="/dashboard/customers">🧑‍💼 Kontakte</a>
+        <a href="/dashboard/leads">🚀 Leads & Opportunities</a>
+        <a href="/dashboard/offers">📝 Angebote</a>
+        <a href="/dashboard/activities">🗂️ Aktivitäten</a>
+        <a href="/dashboard/history">📜 Kundenhistorie</a>
 
-      <div class="section-title">Automatisierung</div>
-      <a href="/dashboard/workflows">🛠 Workflows</a>
-      <a href="/dashboard/automation/designer">🧭 Prozess-Designer</a>
-      <a href="/dashboard/documents">📑 Dokumente</a>
+        <!-- Marketing -->
+        <div class="section-title">Marketing</div>
+        <a href="/dashboard/campaigns">📢 Kampagnen & Newsletter</a>
+        <a href="/dashboard/segments">🎯 Zielgruppen</a>
+        <a href="/dashboard/forms">📝 Formulare</a>
 
-      <div class="section-title">System & Verwaltung</div>
-      <a href="/dashboard/users">👥 Benutzer & Rollen</a>
-      <a href="/dashboard/audit">📝 Audit-Logs</a>
-      <a href="/dashboard/integrations">🔌 Integrationen & API</a>
-      <a href="/dashboard/privacy">🔐 Datenschutz</a>
-      <a href="/dashboard/settings">🌍 Einstellungen</a>
-      <a href="/admin/">⚡ Administration</a>
+        <!-- Planung -->
+        <div class="section-title">Planung</div>
+        <a href="/dashboard/calendar">📅 Kalender & Aufgaben</a>
 
-      <div class="section-title">Ouhud KI</div>
+        <!-- Finanzen -->
+        <div class="section-title">Finanzen</div>
+        <a href="/dashboard/invoices">🧾 Rechnungen</a>
+        <a href="/dashboard/payments">💳 Zahlungen</a>
+        <a href="/dashboard/invoices/reminders">⏰ Mahnungen</a>
 
-<a href="/dashboard/ai/settings"
-   {% if request.url.path.startswith('/dashboard/ai/settings') %}class="active"{% endif %}>
-   ⚙️ AI Einstellungen
-</a>
+        <!-- Analyse & Kommunikation -->
+        <div class="section-title">Analyse & Kommunikation</div>
+        <a href="/dashboard/reports">📈 Berichte</a>
+        <a href="/dashboard/inbox">📨 Kommunikation</a>
+        <a href="/dashboard/chat">💬 Interner Chat</a>
+        <a href="/dashboard/whatsapp">📲 WhatsApp</a>
+        <a href="/dashboard/calls">📞 Anrufhistorie</a>
 
-<a href="/dashboard/ai/leads"
-   {% if request.url.path.startswith('/dashboard/ai/leads') %}class="active"{% endif %}>
-   📈 Lead Scoring
-</a>
+        <!-- Automatisierung -->
+        <div class="section-title">Automatisierung</div>
+        <a href="/dashboard/workflows">🛠 Workflows</a>
+        <a href="/dashboard/automation/designer">🧭 Prozess-Designer</a>
+        <a href="/dashboard/documents">📑 Dokumente</a>
 
-<a href="/dashboard/ai/assistant"
-   {% if request.url.path.startswith('/dashboard/ai/assistant') %}class="active"{% endif %}>
-   🤖 KI-Assistent
-</a>
-    </nav>
+        <!-- Ouhud KI -->
+        <div class="section-title">Ouhud KI</div>
+        <a href="/dashboard/ai/settings">⚙️ AI Einstellungen</a>
+        <a href="/dashboard/ai/leads">📈 Lead Scoring</a>
+        <a href="/dashboard/ai/assistant">🤖 KI-Assistent</a>
 
-    <!-- 👤 Benutzer -->
-    <div class="user-box">
-      {% if user %}
+        <!-- System -->
+        <div class="section-title">System & Verwaltung</div>
+        <a href="/dashboard/users">👥 Benutzer & Rollen</a>
+        <a href="/dashboard/audit">📝 Audit-Logs</a>
+        <a href="/dashboard/integrations">🔌 Integrationen & API</a>
+        <a href="/dashboard/email">📧 E-Mail Einstellungen</a>
+        <a href="/dashboard/privacy">🔐 Datenschutz</a>
+        <a href="/dashboard/settings">🌍 Einstellungen</a>
+        <a href="/admin/">⚡ Administration</a>
+
+        <!-- 💳 Abos & Tarife -->
+        <div class="section-title">Abrechnung</div>
+        <a href="/dashboard/subscription">💳 Abonnement & Tarife</a>
+      </nav>
+
+      <!-- 👤 Benutzer -->
+      <div class="user-box">
+        {% if user %}
         <div class="user-info">
-          <div class="user-avatar">{{ user.username[0]|upper if user.username else "?" }}</div>
+          <div class="user-avatar">
+            {{ user.username[0]|upper if user.username else "?" }}
+          </div>
           <div>
             <strong>{{ user.username.split('@')[0] }}</strong>
             <a href="/dashboard/settings">⚙️ Profil</a>
           </div>
         </div>
         <a href="/auth/logout" class="logout-link">🚪 Logout</a>
-      {% else %}
+        {% else %}
         <a href="/auth/login" class="logout-link">🔐 Login</a>
-      {% endif %}
-    </div>
-  </aside>
+        {% endif %}
+      </div>
+    </aside>
 
-  <!-- 📄 Hauptinhalt -->
-  <main class="main-content">
-    {% block content %}{% endblock %}
-   </main>
+    <!-- 📄 Hauptinhalt -->
+    <main class="main-content">{% block content %}{% endblock %}</main>
 
-  <!-- 📊 Chart.js global laden -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 📊 Chart.js global laden -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- 📦 Platz für Seiten-spezifische Skripte (z. B. Dashboard) -->
-  {% block scripts %}{% endblock %}
-</body>
+    <!-- 📦 Platz für Seiten-spezifische Skripte (z. B. Dashboard) -->
+    {% block scripts %}{% endblock %}
+  </body>
 </html>

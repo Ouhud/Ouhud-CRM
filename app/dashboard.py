@@ -42,7 +42,7 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 @router.get("/", response_class=HTMLResponse)
 def dashboard_home(request: Request, db: Session = Depends(get_db)):
     # ✅ Login prüfen
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -67,7 +67,7 @@ def dashboard_home(request: Request, db: Session = Depends(get_db)):
     }
     
     # 🏢 Firmendaten
-    company = db.query(CompanySettings).first()
+    company = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
 
     # 📈 Umsatzentwicklung (pro Monat) – MySQL-kompatibel
     from sqlalchemy import func
@@ -131,7 +131,7 @@ def dashboard_home(request: Request, db: Session = Depends(get_db)):
 # ➕ Kunde erstellen (Form)
 @router.get("/customers/create", response_class=HTMLResponse)
 def customer_create_form(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
     return templates.TemplateResponse(
@@ -187,7 +187,7 @@ def customer_create(
 # ✏️ Kunde bearbeiten
 @router.get("/customers/edit/{customer_id}", response_class=HTMLResponse)
 def customer_edit_form(customer_id: int, request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
     customer = db.query(Customer).get(customer_id)
@@ -242,12 +242,12 @@ def get_next_invoice_number(db: Session) -> str:
 # 📄 Rechnungsübersicht
 @router.get("/invoices", response_class=HTMLResponse)
 def invoices_list(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    invoices = db.query(Invoice).order_by(Invoice.due_date.desc()).all()
-    company_settings = db.query(CompanySettings).first()
+    invoices = db.query(Invoice).filter(Invoice.company_id == request.state.company.id).order_by(Invoice.due_date.desc()).all()
+    company_settings = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
 
     return templates.TemplateResponse(
         "admin/invoices.html",
@@ -263,12 +263,12 @@ def invoices_list(request: Request, db: Session = Depends(get_db)):
 # ➕ Neue Rechnung erstellen (Formular)
 @router.get("/invoices/create", response_class=HTMLResponse)
 def invoice_create_form(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
-    customers = db.query(Customer).all()
-    company = db.query(CompanySettings).first()
+    customers = db.query(Customer).filter(Customer.company_id == request.state.company.id).all()
+    company = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
 
     # 🔢 Nächste Rechnungsnummer (nur aktuelles Jahr)
     year = date.today().year
@@ -312,7 +312,7 @@ def invoice_create(
     tax_rate: float = Form(19.0),
     db: Session = Depends(get_db),
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -364,12 +364,12 @@ def invoice_create(
 # ✏️ Rechnung bearbeiten
 @router.get("/invoices/edit/{invoice_id}", response_class=HTMLResponse)
 def invoice_edit_form(invoice_id: int, request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
-    invoice = db.query(Invoice).get(invoice_id)
-    customers = db.query(Customer).all()
-    company = db.query(CompanySettings).first()
+    invoice = db.query(Invoice).filter(Invoice.company_id == request.state.company.id).get(invoice_id)
+    customers = db.query(Customer).filter(Customer.company_id == request.state.company.id).all()
+    company = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
     return templates.TemplateResponse(
         "admin/invoices_edit.html",
         {"request": request, "invoice": invoice, "customers": customers, "company": company, "user": user}
@@ -452,10 +452,10 @@ def invoice_pdf(invoice_id: int, db: Session = Depends(get_db)):
 # 🏢 Firmeninfos bearbeiten
 @router.get("/company", response_class=HTMLResponse)
 def company_settings_form(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
-    settings = db.query(CompanySettings).first()
+    settings = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
     return templates.TemplateResponse(request, "admin/company_settings.html", {"request": request, "settings": settings})
 
 # 🏢 Firmeninfos speichern (inkl. Währung & Logo)
@@ -583,7 +583,7 @@ async def bank_import_upload(
     # 📄 Überfällige Rechnungen anzeigen
 @router.get("/invoices/overdue", response_class=HTMLResponse)
 def overdue_invoices(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -601,7 +601,7 @@ def overdue_invoices(request: Request, db: Session = Depends(get_db)):
 # 📄 Mahnungen anzeigen
 @router.get("/invoices/reminders", response_class=HTMLResponse)
 def reminder_invoices(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -619,7 +619,7 @@ def reminder_invoices(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/chat/history")
 async def chat_history(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -635,7 +635,7 @@ async def chat_history(request: Request, db: Session = Depends(get_db)):
     # 📋 Kundenübersicht (Liste)
 @router.get("/customers", response_class=HTMLResponse)
 def customers_list(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

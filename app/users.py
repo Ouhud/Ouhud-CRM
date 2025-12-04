@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory="app/templates")
 # 👤 Profilseite anzeigen
 @router.get("/settings", response_class=HTMLResponse)
 def settings_page(request: Request, db: Session = Depends(get_db)):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -36,7 +36,7 @@ def update_settings(
     password: str = Form(None),
     db: Session = Depends(get_db)
 ):
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

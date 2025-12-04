@@ -25,7 +25,7 @@ def calendar_page(request: Request, db: Session = Depends(get_db)):
     """
     📅 Kalender- und Aufgabenübersicht anzeigen.
     """
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

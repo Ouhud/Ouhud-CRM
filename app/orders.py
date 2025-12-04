@@ -34,7 +34,7 @@ def orders_page(
     db: Session = Depends(get_db)
 ):
     """Zeigt eine Liste aller Bestellungen an."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -64,7 +64,7 @@ def create_order(
     db: Session = Depends(get_db)
 ):
     """Erstellt eine neue Bestellung."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
@@ -94,7 +94,7 @@ def delete_order(
     db: Session = Depends(get_db)
 ):
     """Löscht eine bestehende Bestellung."""
-    user = require_login(request, db)
+    user = request.state.user
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 

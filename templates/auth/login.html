@@ -1,150 +1,201 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>🔐 Anmeldung | Ouhud CRM</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/static/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ouhud CRM – Login & Registrierung</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    :root {
-      --brand-blue: #0D2A78;
-      --brand-blue-dark: #061f5c;
-      --brand-light: #f4f6f8;
-      --accent-green: #10B981;
-    }
+    <style>
+      :root {
+        --blue: #0d2a78;
+        --blue-dark: #061f5c;
+        --bg: #f3f4f6;
+      }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(135deg, var(--brand-blue-dark), var(--brand-blue));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+      body {
+        margin: 0;
+        background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+        font-family: system-ui, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        color: #111;
+      }
 
-    .login-container {
-      background: white;
-      padding: 2.2rem;
-      border-radius: 18px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-      animation: fadeIn 0.5s ease;
-    }
+      .container {
+        background: white;
+        padding: 2rem 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 480px;
+        animation: fadeIn 0.4s ease;
+      }
 
-    .login-container img {
-      height: 70px;
-      margin-bottom: 1rem;
-    }
+      img {
+        height: 60px;
+        display: block;
+        margin: 0 auto 1rem;
+      }
 
-    h1 {
-      color: var(--brand-blue);
-      margin-bottom: 0.3rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
+      h2 {
+        color: var(--blue);
+        text-align: center;
+        margin-bottom: 1rem;
+      }
 
-    p.desc {
-      font-size: 0.9rem;
-      color: #444;
-      margin-bottom: 1.8rem;
-    }
+      .tabs {
+        display: flex;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #eee;
+      }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
+      .tab {
+        flex: 1;
+        padding: 0.7rem;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        color: #555;
+      }
 
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 0.7rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 0.95rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
+      .tab.active {
+        color: var(--blue);
+        border-bottom: 3px solid var(--blue);
+      }
 
-    input:focus {
-      border-color: var(--brand-blue);
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(13, 42, 120, 0.2);
-    }
+      form {
+        display: none;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
 
-    button {
-      background-color: var(--brand-blue);
-      color: white;
-      border: none;
-      padding: 0.8rem;
-      width: 100%;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: background 0.25s;
-    }
+      form.active {
+        display: flex;
+      }
 
-    button:hover {
-      background-color: var(--brand-blue-dark);
-    }
+      input {
+        padding: 0.7rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+      }
 
-    a {
-      display: block;
-      margin-top: 1rem;
-      font-size: 0.85rem;
-      color: var(--brand-blue);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
+      button {
+        background: var(--blue);
+        color: white;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 0.4rem;
+      }
 
-    a:hover {
-      color: var(--brand-blue-dark);
-      text-decoration: underline;
-    }
+      button:hover {
+        background: var(--blue-dark);
+      }
 
-    /* 🔴 Fehlermeldung */
-    .error-box {
-      background-color: #fee2e2;
-      color: #b91c1c;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      text-align: center;
-      font-size: 0.9rem;
-      animation: fadeIn 0.3s ease;
-    }
+      .error {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
 
-<body>
-  <div class="login-container">
-    <img src="/static/logo_ouhud.png" alt="Ouhud Logo">
-    <h1>Willkommen bei Ouhud CRM</h1>
-    <p class="desc">Melden Sie sich an, um Kunden, Rechnungen und Praxisdaten sicher zu verwalten.</p>
+  <body>
+    <div class="container">
+      <img src="/static/logo_ouhud.png" alt="Logo" />
 
-    <!-- 🔴 FEHLERMELDUNG ANZEIGEN -->
-    {% if error_message %}
-    <div class="error-box">
-      {{ error_message }}
+      <!-- FEHLERMELDUNG -->
+      {% if error_message %}
+      <div class="error">{{ error_message }}</div>
+      {% endif %}
+
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('login')">Anmelden</div>
+        <div class="tab" onclick="showTab('register')">Registrieren</div>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="login" class="active" method="post" action="/auth/login">
+        <input
+          name="username"
+          type="text"
+          placeholder="E-Mail oder Benutzername"
+          required
+        />
+        <input
+          name="password"
+          type="password"
+          placeholder="Passwort"
+          required
+        />
+        <button type="submit">Anmelden</button>
+        <a
+          href="/auth/forgot"
+          style="text-align: center; margin-top: 10px; color: var(--blue)"
+          >Passwort vergessen?</a
+        >
+      </form>
+
+      <!-- REGISTER -->
+      <form id="register" method="post" action="/auth/register">
+        <input
+          name="company_name"
+          type="text"
+          placeholder="Firmenname"
+          required
+        />
+        <input
+          name="username"
+          type="text"
+          placeholder="Benutzername"
+          required
+        />
+        <input name="email" type="email" placeholder="E-Mail" required />
+        <input
+          name="password"
+          type="password"
+          placeholder="Passwort"
+          required
+        />
+        <button type="submit">Konto erstellen</button>
+      </form>
     </div>
-    {% endif %}
 
-    <!-- 📝 LOGIN-FORMULAR -->
-    <form method="post" action="/auth/login">
-      <input type="text" name="username" placeholder="E-Mail oder Benutzername" required>
-      <input type="password" name="password" placeholder="Passwort" required>
-      <button type="submit">Anmelden</button>
-    </form>
+    <script>
+      function showTab(tabName) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll("form")
+          .forEach((f) => f.classList.remove("active"));
 
-    <a href="/auth/forgot-password">🔑 Passwort vergessen?</a>
-  </div>
-</body>
+        document
+          .querySelector(`.tab[onclick="showTab('${tabName}')"]`)
+          .classList.add("active");
+        document.getElementById(tabName).classList.add("active");
+      }
+    </script>
+  </body>
 </html>
