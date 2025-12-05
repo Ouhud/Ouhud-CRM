@@ -83,7 +83,7 @@
         </div>
         <div class="document-actions">
           <a href="/dashboard/documents/download/{{ doc.id }}" class="btn-sm btn-success" title="Download">⬇️</a>
-          <a href="/dashboard/documents/delete/{{ doc.id }}" class="btn-sm btn-danger" title="Löschen" onclick="return confirm('Dokument wirklich löschen?')">🗑️</a>
+          <button onclick="deleteDoc({{ doc.id }})" class="btn-sm btn-danger" title="Löschen">🗑️</button>
         </div>
       </div>
       {% endfor %}
@@ -104,36 +104,132 @@
   </div>
 </div>
 
+
+
 <script>
-  // Drag-and-Drop für Upload
-  const dropZone = document.getElementById('drop-zone');
-  const fileInput = document.getElementById('file-input');
+/* ---------------------------------------------------------
+   📂 Drag-and-Drop + File Input Upload
+--------------------------------------------------------- */
 
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
+const dropZone = document.getElementById("drop-zone");
+const fileInput = document.getElementById("file-input");
 
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-  });
+// Hover-Effekt
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("drag-over");
+});
 
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      fileInput.files = files;
-      dropZone.innerHTML = `<p>📂 ${files.length} Datei(en) ausgewählt</p>`;
+dropZone.addEventListener("dragleave", () => {
+  dropZone.classList.remove("drag-over");
+});
+
+// Dateien im Drop-Bereich abgelegt
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("drag-over");
+
+  const files = e.dataTransfer.files;
+
+  if (files.length > 0) {
+    fileInput.files = files;
+    updateDropZoneText(files);
+  }
+});
+
+// Dateien per Klick ausgewählt
+fileInput.addEventListener("change", () => {
+  const files = fileInput.files;
+  if (files.length > 0) {
+    updateDropZoneText(files);
+  }
+});
+
+// Anzeige aktualisieren
+function updateDropZoneText(files) {
+  if (files.length === 1) {
+    dropZone.innerHTML = `<p>📂 1 Datei ausgewählt: <strong>${files[0].name}</strong></p>`;
+  } else {
+    dropZone.innerHTML = `<p>📂 ${files.length} Dateien ausgewählt</p>`;
+  }
+}
+
+/* ---------------------------------------------------------
+   🎯 FIX: Leere Dropdown-Werte NICHT als "" senden
+--------------------------------------------------------- */
+
+document.querySelectorAll("select").forEach((select) => {
+  select.addEventListener("change", () => {
+    if (select.value === "") {
+      select.value = null;
     }
   });
+});
 
-  fileInput.addEventListener('change', () => {
-    const files = fileInput.files;
-    if (files.length > 0) {
-      dropZone.innerHTML = `<p>📂 ${files.length} Datei(en) ausgewählt</p>`;
+/* ---------------------------------------------------------
+   🚀 AJAX Upload + Professionelle Erfolgsmeldung
+--------------------------------------------------------- */
+
+document.getElementById("upload-form").addEventListener("submit", async function(e) {
+    e.preventDefault(); // verhindert JSON-Ausgabe
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const response = await fetch(form.action, {
+        method: "POST",
+        body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.ok) {
+        showToast(result.message);
+        // Seite neu laden → neues Dokument sofort sichtbar
+        setTimeout(() => window.location.reload(), 1200);
+    } else {
+        showToast("Fehler beim Upload", true);
     }
+});
+
+/* ---------------------------------------------------------
+   🗑 AJAX Dokument löschen
+--------------------------------------------------------- */
+
+async function deleteDoc(id) {
+  if (!confirm("Dokument wirklich löschen?")) {
+    return;
+  }
+
+  const response = await fetch(`/dashboard/documents/delete/${id}`, {
+    method: "POST"
   });
+
+  const result = await response.json();
+
+  if (result.status === "deleted") {
+    showToast("Dokument gelöscht");
+    setTimeout(() => window.location.reload(), 800);
+  } else {
+    showToast("Fehler beim Löschen", true);
+  }
+}
+
+/* ---------------------------------------------------------
+   ✔ Erfolgs-/Fehler-Toast anzeigen
+--------------------------------------------------------- */
+
+function showToast(message, error = false) {
+    const toast = document.getElementById("toast");
+    const msg = document.getElementById("toast-message");
+
+    msg.innerText = message;
+    toast.style.background = error ? "#EF4444" : "#10B981";
+
+    toast.classList.add("show");
+
+    setTimeout(() => toast.classList.remove("show"), 2500);
+}
 </script>
 
 <style>
@@ -364,6 +460,32 @@
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  .toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #10B981;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity .3s, transform .3s;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast-icon {
+  font-size: 1.4rem;
+}
 
   @media (max-width: 768px) {
     .documents-list {

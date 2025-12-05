@@ -32,19 +32,21 @@ def settings_page(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Zeigt die Benutzereinstellungen an."""
+    # Benutzer aus dem Middleware-Kontext holen
     user = request.state.user
+
+    # Wenn nicht eingeloggt → weiterleiten
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
 
+    # Template rendern
     return templates.TemplateResponse(
         "dashboard/settings.html",
         {
             "request": request,
-            "current_user": user
+            "user": user,            # ⬅️ Hauptvariable für alle Templates
         }
     )
-
 
 # ============================================================
 # 📝 POST: Benutzereinstellungen aktualisieren
@@ -54,7 +56,6 @@ def update_settings(
     request: Request,
     email: str = Form(...),
     password: str = Form(None),
-    language: str = Form("de"),
     db: Session = Depends(get_db)
 ):
     """

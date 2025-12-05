@@ -16,13 +16,16 @@ from app import activities
 from typing import Callable, Awaitable
 from app.tenants.tenant_middleware import TenantMiddleware
 from app.subscription_routes import router as subscription_router
-
+from app.utils.filters import format_currency
+from jinja2 import Environment
 
 # Auth
 from app.auth_utils import get_user_from_token
 
 # DB
 from app.database import init_db
+
+from typing import cast
 
 # Router-Module
 from app import (
@@ -68,6 +71,8 @@ from app.automation_designer import router as automation_designer_router
 # ─────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+
+# Nur EINMAL initialisieren!
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 app = FastAPI(
@@ -76,17 +81,30 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Templates global verfügbar machen
 app.state.templates = templates
 
-# DB Tables
-init_db()
+# Jinja2 Filter sauber registrieren (mit korrektem Typ für Pylance)
 
+from typing import cast
+from jinja2 import Environment
+
+env = cast(Environment, templates.env)
+env.filters["format_currency"] = format_currency
+# ─────────────────────────────
+# DATABASE INITIALIZATION
+# ─────────────────────────────
+init_db()   # Erstellt Tabellen (falls nicht vorhanden)
+
+# ─────────────────────────────
+# MULTI-TENANT MIDDLEWARE
+# ─────────────────────────────
 app.add_middleware(TenantMiddleware)
 
-
-# Static Files
+# ─────────────────────────────
+# STATIC FILES
+# ─────────────────────────────
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
 
 # ─────────────────────────────
 # LOGIN REDIRECT
@@ -193,48 +211,36 @@ async def auth_middleware(
     
     path = request.url.path
 
-    # 🌍 Öffentlich zugängliche Routen (kein Login nötig)
-    PUBLIC_PATHS = [
-        "/",                    # Landing Page
-        "/pricing",             # Tarife
-        "/register",            # Registrierung
-        "/auth/login",
-        "/auth/token",
-        "/auth/forgot-password",
-        "/auth/reset-password",
-    ]
+    PUBLIC_PATHS = {
+        "/", "/pricing", "/register",
+        "/auth/login", "/auth/token",
+        "/auth/forgot-password", "/auth/reset-password",
+    }
 
-    # 🟦 Wenn die Route öffentlich ist → Weiter ohne Authentifizierung
     if (
         path in PUBLIC_PATHS
         or path.startswith("/static")
         or path.startswith("/public")
-        or path.startswith("/auth")   # erlaubt alle /auth/* Routen
+        or path.startswith("/auth")
     ):
         return await call_next(request)
 
-    # 🔐 Token prüfen
     token = request.cookies.get("access_token")
 
     if not token:
         return RedirectResponse("/auth/login", status_code=302)
 
-    # 🧑 Benutzer anhand Token laden
     user = await get_user_from_token(token)
 
     if not user:
-        # Token ungültig → löschen & zurück zum Login
         resp = RedirectResponse("/auth/login", status_code=302)
         resp.delete_cookie("access_token")
         return resp
 
-    # ✔️ User speichern für Sidebar / Templates / Rollen
     request.state.user = user
 
-    # Anfrage verarbeiten
     response = await call_next(request)
 
-    # Falls jemand auf geschützten Bereich kommt ohne Berechtigung
     if response.status_code == 401:
         return RedirectResponse("/auth/login", status_code=302)
 

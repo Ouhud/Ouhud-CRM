@@ -230,6 +230,21 @@ class PaymentLog(Base):
     def __repr__(self):
         return f"<PaymentLog invoice={self.invoice_id} amount={self.amount}>"
     
+    
+    
+# ─────────────────────────────
+# 🏷️ Kategorien
+# ─────────────────────────────
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+
+    # Beziehung: Eine Kategorie → viele Produkte
+    products = relationship("Product", back_populates="category")
+    
 # ─────────────────────────────
 # 🛍️ Produkte
 # ─────────────────────────────
@@ -246,11 +261,14 @@ class Product(Base):
     description = Column(String(500))
     price = Column(Float, nullable=False)
 
+    # Kategorie-Beziehung
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    category = relationship("Category", back_populates="products")
+
     active = Column(Boolean, default=True)
 
     def __repr__(self):
         return f"<Product {self.name} price={self.price}>"
-    
 # ─────────────────────────────
 # 🛍 Bestellungen (Orders)
 # ─────────────────────────────
@@ -671,7 +689,7 @@ class Role(Base):
         return f"<Role(name='{self.name}', company={self.company_id})>"
     
 # ─────────────────────────────
-# 👤 Benutzer (SaaS-ready)
+# 👤 Benutzer (SaaS-ready + Avatar + Status)
 # ─────────────────────────────
 
 class User(Base):
@@ -694,6 +712,10 @@ class User(Base):
     phone = Column(String(50), nullable=True)
     address = Column(String(255), nullable=True)
     birthday = Column(Date, nullable=True)
+
+    # ⭐ Avatar + Status (NEU)
+    avatar_url = Column(String(500), nullable=True)
+    status = Column(String(50), default="online")  # online, away, focus, offline
 
     # 🔑 Passwort-Reset (legacy Felder)
     reset_token = Column(String(100), nullable=True, index=True)
@@ -720,7 +742,7 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
-    # 🔑 Passwort-Reset-Token MODEL-BEZIEHUNG (NEU / WICHTIG!)
+    # 🔑 Passwort-Reset-Token MODEL-BEZIEHUNG
     password_reset_tokens = relationship(
         "PasswordResetToken",
         back_populates="user",
@@ -796,6 +818,8 @@ class AIChatMessage(Base):
 
     def __repr__(self):
         return f"<AIChatMessage user={self.user_id} role={self.role}>"
+    
+    
 # ─────────────────────────────
 # ⚙️ KI Einstellungen (Tenant + User)
 # ─────────────────────────────
@@ -1138,3 +1162,47 @@ class Subscription(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    
+# ───────────────────────────────────────────────
+# 💬 AI Chat Logs – Speicherung KI-Verlauf
+# ───────────────────────────────────────────────
+class AIMessageLog(Base):
+    __tablename__ = "ai_message_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Tenant / User Bezug
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+
+    provider = Column(String(50), nullable=False)
+    model = Column(String(150), nullable=False)
+
+    # Inhalte
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+
+    # Statistik
+    tokens_used = Column(Integer, default=0)
+    cost_usd = Column(Float, default=0.0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Beziehungen
+    user = relationship("User")
+    company = relationship("Company")
+
+    def __repr__(self):
+        return f"<AIMessageLog user={self.user_id} provider={self.provider} tokens={self.tokens_used}>"
+    
+    
+class AIChatHistory(Base):
+    __tablename__ = "ai_chat_history"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    company_id = Column(Integer, ForeignKey("companies.id"))
+
+    role = Column(String(50))     # "user" oder "assistant"
+    message = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)

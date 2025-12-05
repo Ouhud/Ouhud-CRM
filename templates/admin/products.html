@@ -1,247 +1,364 @@
-{% extends "base_dashboard.html" %}
-{% block title %}📦 Produktverwaltung | Ouhud CRM{% endblock %}
-
-{% block content %}
-<div class="product-container">
-  <h1>📦 Produktverwaltung</h1>
-  <p class="subtitle">Hier kannst du Produkte hinzufügen, bearbeiten und verwalten.</p>
-
-  <!-- ✅ Neues Produkt -->
-  <section class="card">
-    <h2>➕ Neues Produkt hinzufügen</h2>
-    <form method="post" action="/dashboard/products/create" class="product-form">
-      <div class="field">
-        <label>Produktname</label>
-        <input type="text" name="name" placeholder="Produktname" required>
-      </div>
-
-      <div class="field">
-        <label>Beschreibung</label>
-        <input type="text" name="description" placeholder="Beschreibung">
-      </div>
-
-      <div class="field">
-        <label>Preis</label>
-        <input type="number" step="0.01" name="price" placeholder="0.00" required>
-      </div>
-
-      <div class="field">
-        <label>Währung</label>
-        <select name="currency" required>
-          <option value="EUR">€ EUR</option>
-          <option value="CHF">CHF</option>
-          <option value="USD">$ USD</option>
-          <option value="GBP">£ GBP</option>
-        </select>
-      </div>
-
-      <div class="field checkbox">
-        <label><input type="checkbox" name="active" checked> Aktiv</label>
-      </div>
-
-      <div class="actions">
-        <button type="submit" class="btn-primary">➕ Erstellen</button>
-      </div>
-    </form>
-  </section>
-
-  <!-- 📃 Produktliste -->
-  {% if products|length == 0 %}
-    <div class="empty-box">📭 Noch keine Produkte vorhanden.</div>
-  {% else %}
-    <div class="table-wrap">
-      <table class="product-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Beschreibung</th>
-            <th>Preis</th>
-            <th>Währung</th>
-            <th>Status</th>
-            <th>Aktionen</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in products %}
-          <tr>
-            <td>{{ p.id }}</td>
-            <td>{{ p.name }}</td>
-            <td>{{ p.description or '—' }}</td>
-            <td>{{ "%.2f"|format(p.price) }}</td>
-            <td>{{ p.currency or 'EUR' }}</td>
-            <td>
-              {% if p.active %}
-                <span class="badge badge-active">Aktiv</span>
-              {% else %}
-                <span class="badge badge-inactive">Inaktiv</span>
-              {% endif %}
-            </td>
-            <td class="actions">
-              <form method="post" action="/dashboard/products/edit/{{ p.id }}" class="inline-edit">
-                <input type="text" name="name" value="{{ p.name }}" required>
-                <input type="number" step="0.01" name="price" value="{{ "%.2f"|format(p.price) }}" required>
-                <select name="currency">
-                  <option value="EUR" {% if p.currency=='EUR' %}selected{% endif %}>EUR</option>
-                  <option value="CHF" {% if p.currency=='CHF' %}selected{% endif %}>CHF</option>
-                  <option value="USD" {% if p.currency=='USD' %}selected{% endif %}>USD</option>
-                  <option value="GBP" {% if p.currency=='GBP' %}selected{% endif %}>GBP</option>
-                </select>
-                <input type="checkbox" name="active" {% if p.active %}checked{% endif %}>
-                <button type="submit" class="btn-save">💾</button>
-              </form>
-              <a href="/dashboard/products/delete/{{ p.id }}" class="btn-delete" onclick="return confirm('Produkt wirklich löschen?')">🗑</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% endif %}
-</div>
+{% extends "base_dashboard.html" %} {% block title %}📦 Produkte – Ouhud CRM{%
+endblock %} {% block content %}
 
 <style>
-  .product-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.5rem;
+  :root {
+    --brand-blue: #4f46e5;
+    --brand-blue-dark: #4338ca;
+    --brand-green: #10b981;
+    --brand-red: #ef4444;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+    --text-dark: #1f2937;
+    --text-muted: #6b7280;
   }
 
-  h1 {
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  .subtitle {
-    color: #6b7280;
+  /* ===========================
+       Header & Actions
+    =========================== */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
     margin-bottom: 1.5rem;
   }
 
-  .card {
-    background: #fff;
+  .page-header h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--brand-blue);
+  }
+
+  .btn-new {
+    background: var(--brand-green);
+    color: white;
+    padding: 0.75rem 1.1rem;
     border-radius: 10px;
-    padding: 1.2rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    margin-bottom: 2rem;
-  }
-
-  .card h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.2rem;
-    color: #374151;
-  }
-
-  .product-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-
-  .field label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 0.3rem;
-    color: #374151;
-  }
-
-  .field input, .field select {
-    width: 100%;
-    padding: 0.55rem 0.7rem;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 0.95rem;
-  }
-
-  .field.checkbox label {
+    text-decoration: none;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-top: 1.4rem;
+  }
+
+  .btn-new:hover {
+    background: #059669;
+  }
+
+  /* ===========================
+       Filterleiste
+    =========================== */
+  .filters {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filters input,
+  .filters select {
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    min-width: 200px;
+  }
+
+  /* ===========================
+       Empty State
+    =========================== */
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+  }
+
+  .empty-state img {
+    width: 180px;
+    opacity: 0.8;
+  }
+
+  .empty-state p {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+  }
+
+  /* ===========================
+       Produkt-Kacheln
+    =========================== */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: 0.25s;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  }
+
+  .product-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+  }
+
+  .product-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--brand-blue);
+  }
+
+  .meta {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .status {
+    font-weight: 600;
+    margin-top: 0.3rem;
+  }
+
+  .status.active {
+    color: var(--brand-green);
+  }
+
+  .status.inactive {
+    color: var(--brand-red);
   }
 
   .actions {
-    grid-column: 1 / -1;
-    text-align: right;
+    margin-top: 0.8rem;
+    display: flex;
+    gap: 0.5rem;
   }
 
-  .btn-primary {
-    background: #4f46e5;
-    color: #fff;
-    border: none;
-    padding: 0.6rem 1.2rem;
+  .btn-small {
+    padding: 0.35rem 0.7rem;
+    background: #e5e7eb;
     border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.25s ease;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
   }
 
-  .btn-primary:hover { background: #4338ca; }
+  .btn-small:hover {
+    background: #d1d5db;
+  }
 
-  .table-wrap { overflow-x: auto; }
+  .btn-danger {
+    background: #fee2e2;
+    color: var(--brand-red) !important;
+  }
 
-  .product-table {
+  .btn-danger:hover {
+    background: #fecaca;
+  }
+
+  /* ===========================
+       Tabelle
+    =========================== */
+  .table-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 1rem 0;
+    color: var(--text-dark);
+  }
+
+  .table-wrap {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  table {
     width: 100%;
     border-collapse: collapse;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
 
-  th, td {
-    padding: 0.6rem 0.8rem;
-    text-align: left;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
-  thead th {
-    background: #f9fafb;
+  th {
+    background: #f3f4f6;
+    padding: 0.85rem 1rem;
+    color: var(--text-muted);
     font-weight: 600;
+    border-bottom: 1px solid var(--border);
   }
 
-  tr:hover { background: #f8faff; }
-
-  .inline-edit input, .inline-edit select {
-    width: auto;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.85rem;
+  td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dark);
   }
 
-  .btn-save {
-    background: #4f46e5;
-    color: white;
-    border: none;
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .btn-delete {
-    color: #dc2626;
-    text-decoration: none;
-    font-size: 1rem;
-    margin-left: 0.4rem;
+  tr:hover td {
+    background: #f9fafb;
   }
 
   .badge {
-    display: inline-block;
-    padding: 0.25rem 0.55rem;
-    border-radius: 999px;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 700;
   }
 
-  .badge-active { background: #dcfce7; color: #065f46; }
-  .badge-inactive { background: #fee2e2; color: #991b1b; }
+  .badge-active {
+    background: #dcfce7;
+    color: #065f46;
+  }
 
-  .empty-box {
-    background: #fff;
-    padding: 1.2rem;
-    border-radius: 10px;
-    text-align: center;
-    color: #6b7280;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  .badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
   }
 </style>
-{% endblock %}
+
+<!-- =========================== -->
+<!-- HEADER -->
+<!-- =========================== -->
+<div class="page-header">
+  <h1>📦 Produkte</h1>
+  <a href="/dashboard/products/create" class="btn-new">➕ Neues Produkt</a>
+</div>
+
+<!-- =========================== -->
+<!-- FILTER -->
+<!-- =========================== -->
+<div class="filters">
+  <input id="searchBox" type="text" placeholder="🔍 Produkt suchen…" />
+
+  <select id="categoryFilter">
+    <option value="">Kategorie…</option>
+    {% for category in categories %}
+    <option value="{{ category.id }}">{{ category.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select id="statusFilter">
+    <option value="">Status…</option>
+    <option value="active">Aktiv</option>
+    <option value="inactive">Inaktiv</option>
+  </select>
+</div>
+
+<!-- =========================== -->
+<!-- PRODUKT-KACHELN -->
+<!-- =========================== -->
+{% if products|length == 0 %}
+
+<div class="empty-state">
+  <img src="/static/empty_products.svg" alt="Keine Produkte" />
+  <p>📭 Noch keine Produkte vorhanden.</p>
+  <a href="/dashboard/products/create" class="btn-new">Produkt anlegen</a>
+</div>
+
+{% else %}
+
+<div class="product-grid">
+  {% for product in products %}
+  <div
+    class="product-card"
+    data-name="{{ product.name | lower }}"
+    data-category="{{ product.category_id }}"
+    data-status="{{ 'active' if product.active else 'inactive' }}"
+  >
+    <img
+      src="{{ product.image_url or '/static/no_image.png' }}"
+      class="product-image"
+    />
+
+    <h3 class="product-title">{{ product.name }}</h3>
+
+    <p class="price">{{ "%.2f"|format(product.price) }} EUR</p>
+
+    <p class="meta">
+      {{ product.category.name if product.category else "— Keine Kategorie —" }}
+    </p>
+
+    <p class="status {{ 'active' if product.active else 'inactive' }}">
+      ● {{ "Aktiv" if product.active else "Inaktiv" }}
+    </p>
+
+    <div class="actions">
+      <a href="/dashboard/products/edit/{{ product.id }}" class="btn-small"
+        >✏️ Bearbeiten</a
+      >
+      <a
+        href="/dashboard/products/delete/{{ product.id }}"
+        onclick="return confirm('Produkt löschen?')"
+        class="btn-danger btn-small"
+        >🗑 Löschen</a
+      >
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %}
+
+<!-- =========================== -->
+<!-- TABELLE -->
+<!-- =========================== -->
+<h2 class="table-title">Tabellarische Übersicht</h2>
+
+{% if products|length > 0 %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Kategorie</th>
+        <th>Preis</th>
+        <th>Status</th>
+        <th>Aktionen</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ p.name }}</td>
+        <td>{{ p.category.name if p.category else "—" }}</td>
+        <td>{{ "%.2f"|format(p.price) }} EUR</td>
+        <td>
+          {% if p.active %}
+          <span class="badge badge-active">Aktiv</span>
+          {% else %}
+          <span class="badge badge-inactive">Inaktiv</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="/dashboard/products/edit/{{ p.id }}" class="btn-small">✏️</a>
+          <a
+            href="/dashboard/products/delete/{{ p.id }}"
+            class="btn-danger btn-small"
+            >🗑</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %} {% endblock %}

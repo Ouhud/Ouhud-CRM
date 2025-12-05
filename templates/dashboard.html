@@ -1,226 +1,471 @@
-{% extends "base_dashboard.html" %}
-{% block title %}Dashboard – Ouhud CRM{% endblock %}
+{% extends "base_dashboard.html" %} {% block title %}Dashboard – Ouhud CRM{%
+endblock %} {% block content %}
 
-{% block content %}
-<h1 style="color:#0D2A78;margin-bottom:0.5rem;">Dashboard</h1>
-<p>Willkommen im Ouhud CRM – Überblick über aktuelle Kennzahlen und Entwicklungen.</p>
+<!-- =========================================================
+   GLOBAL CHART.JS IMPROVEMENTS (Perfect Fonts & Axes)
+========================================================= -->
+<script>
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 13;
+  Chart.defaults.color = "#1e293b"; // neutrale Textfarbe
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.pointStyle = "circle";
 
-<!-- 🌟 KPI-Karten -->
-<div class="kpi-grid">
-  <div class="kpi-card"><h3>Gesamtumsatz</h3><p>{{ stats.total_sum | round(2) }} {{ company.currency_code or 'EUR' }}</p></div>
-  <div class="kpi-card"><h3>Kunden</h3><p>{{ stats.customers }}</p></div>
-  <div class="kpi-card"><h3>Rechnungen</h3><p>{{ stats.invoices }}</p></div>
-  <div class="kpi-card"><h3>Überfällig</h3><p>{{ stats.overdue }}</p></div>
+  Chart.defaults.scale.ticks.maxRotation = 0; // keine gedrehte Schrift
+  Chart.defaults.scale.ticks.minRotation = 0;
+  Chart.defaults.scale.ticks.font = { size: 12 };
+
+  Chart.defaults.aspectRatio = 2;
+</script>
+
+<!-- =========================================================
+   HERO
+========================================================= -->
+<div class="hero-pro">
+  <h1><i class="fas fa-chart-line"></i> Dashboard</h1>
+  <p>
+    Professionelle Einblicke in Finanzen, Leads, Verkäufe und Kundenperformance.
+  </p>
 </div>
 
-<!-- 🧩 Dashboard-Gitter -->
-<div class="dashboard-grid">
-  <div class="card chart-card">
+<!-- =========================================================
+   KPI GRID
+========================================================= -->
+<div class="kpi-grid-pro">
+  <div class="kpi-card-pro">
+    <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+    <h3>Gesamtumsatz</h3>
+    <p>{{ stats.total_sum }}</p>
+  </div>
+  <div class="kpi-card-pro">
+    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+    <h3>Kunden</h3>
+    <p>{{ stats.customers }}</p>
+  </div>
+  <div class="kpi-card-pro">
+    <div class="kpi-icon"><i class="fas fa-file-invoice"></i></div>
+    <h3>Rechnungen</h3>
+    <p>{{ stats.invoices }}</p>
+  </div>
+  <div class="kpi-card-pro">
+    <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+    <h3>Überfällig</h3>
+    <p>{{ stats.overdue }}</p>
+  </div>
+</div>
+
+<!-- =========================================================
+   14 CHARTS — RESPONSIVE GRID
+========================================================= -->
+<div class="dashboard-grid-pro">
+  <!-- ---------- FINANZ ---------- -->
+  <div class="chart-card-pro">
     <h2>📈 Umsatzentwicklung</h2>
-    <canvas id="umsatzChart"></canvas>
+    <canvas id="chartRevenue"></canvas>
   </div>
 
-  <div class="card chart-card">
-    <h2>👥 Kundenübersicht</h2>
-    <canvas id="kundenChart"></canvas>
+  <div class="chart-card-pro">
+    <h2>📅 Umsatz pro Monat</h2>
+    <canvas id="chartMonthly"></canvas>
   </div>
 
-  <div class="card chart-card">
+  <div class="chart-card-pro">
+    <h2>📊 Umsatz Forecast (AI)</h2>
+    <canvas id="chartForecast"></canvas>
+  </div>
+
+  <div class="chart-card-pro">
+    <h2>💶 Umsatz pro Kunde (LTV)</h2>
+    <canvas id="chartLTV"></canvas>
+  </div>
+
+  <!-- ---------- SALES ---------- -->
+  <div class="chart-card-pro">
+    <h2>🧪 Lead Funnel</h2>
+    <canvas id="chartFunnel"></canvas>
+  </div>
+
+  <div class="chart-card-pro">
     <h2>🚀 Leads nach Status</h2>
-    <canvas id="leadsChart"></canvas>
+    <canvas id="chartLeadStatus"></canvas>
   </div>
 
-  <div class="card chart-card">
-    <h2>🧾 Offene Rechnungen nach Fälligkeit</h2>
-    <canvas id="invoiceChart"></canvas>
+  <div class="chart-card-pro">
+    <h2>📈 Pipeline nach Phase</h2>
+    <canvas id="chartPipeline"></canvas>
   </div>
 
-  <div class="card chart-card">
-    <h2>📦 Top-Produkte nach Umsatz</h2>
-    <canvas id="productChart"></canvas>
+  <div class="chart-card-pro">
+    <h2>🏆 Verkäufer Performance</h2>
+    <canvas id="chartSalesRep"></canvas>
   </div>
 
-  <div class="card chart-card">
-    <h2>💳 Zahlungseingänge pro Monat</h2>
-    <canvas id="paymentChart"></canvas>
+  <!-- ---------- KUNDEN ---------- -->
+  <div class="chart-card-pro">
+    <h2>👥 Kundenübersicht</h2>
+    <canvas id="chartCustomers"></canvas>
+  </div>
+
+  <div class="chart-card-pro">
+    <h2>📍 Kunden nach Region</h2>
+    <canvas id="chartRegion"></canvas>
+  </div>
+
+  <!-- ---------- PRODUKTE ---------- -->
+  <div class="chart-card-pro">
+    <h2>📦 Top-Produkte</h2>
+    <canvas id="chartProducts"></canvas>
+  </div>
+
+  <div class="chart-card-pro">
+    <h2>🧩 Produktkategorien</h2>
+    <canvas id="chartProductCategories"></canvas>
+  </div>
+
+  <!-- ---------- RECHNUNGEN ---------- -->
+  <div class="chart-card-pro">
+    <h2>🧾 Rechnungen (Aging)</h2>
+    <canvas id="chartInvoices"></canvas>
+  </div>
+
+  <div class="chart-card-pro">
+    <h2>💳 Zahlungsstatus</h2>
+    <canvas id="chartInvoiceStatus"></canvas>
   </div>
 </div>
 
+<!-- =========================================================
+   STYLES — V12 ULTRA
+========================================================= -->
 <style>
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-.kpi-card {
-  background: linear-gradient(135deg,#0D2A78,#1E40AF);
-  color: white;
-  padding: 1rem;
-  border-radius: 0.8rem;
-  text-align: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-}
-.kpi-card h3 {font-size:0.9rem;margin:0;}
-.kpi-card p {font-size:1.5rem;margin:0.3rem 0 0;font-weight:bold;}
+  :root {
+    --ouhud-blue: #0d2a78;
+    --ouhud-blue-light: #1e40af;
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.24);
+    --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-kpi: 0 10px 24px rgba(0, 0, 0, 0.08);
+  }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(340px,1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-.card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-}
-h2 {
-  font-size:1rem;
-  margin-bottom:0.8rem;
-  color:#0D2A78;
-}
-.chart-card {
-  height:320px;
-  display:flex;
-  flex-direction:column;
-}
-.chart-card canvas {
-  width:100%!important;
-  height:240px!important;
-}
+  /* HERO */
+  .hero-pro {
+    background: linear-gradient(
+      135deg,
+      var(--ouhud-blue),
+      var(--ouhud-blue-light)
+    );
+    padding: 2rem;
+    border-radius: 1.2rem;
+    color: white;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* KPI GRID */
+  .kpi-grid-pro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.4rem;
+    margin-bottom: 2rem;
+  }
+
+  .kpi-card-pro {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1.4rem;
+    border-radius: 1rem;
+    text-align: center;
+    backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-kpi);
+    transition: 0.25s;
+  }
+  .kpi-card-pro:hover {
+    transform: translateY(-4px);
+  }
+
+  .kpi-icon {
+    font-size: 2rem;
+    color: var(--ouhud-blue);
+  }
+
+  /* GRID FOR CHARTS */
+  .dashboard-grid-pro {
+    display: grid;
+    gap: 1.6rem;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 1250px) {
+    .dashboard-grid-pro {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 780px) {
+    .dashboard-grid-pro {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* CHART CARDS */
+  .chart-card-pro {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 1.2rem;
+    min-height: 420px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-card-pro h2 {
+    margin-bottom: 0.6rem;
+    color: var(--ouhud-blue);
+    font-weight: 700;
+  }
+  .chart-card-pro canvas {
+    flex-grow: 1;
+    width: 100% !important;
+    height: calc(100% - 40px) !important;
+  }
+
+  /* =========================================
+   KPI CARDS — Ouhud Blue Gradient Style
+========================================= */
+  .kpi-card-pro {
+    background: linear-gradient(
+      135deg,
+      var(--ouhud-blue),
+      var(--ouhud-blue-light)
+    );
+    border: none;
+    color: white;
+    padding: 1.6rem;
+    border-radius: 1.2rem;
+    text-align: center;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(6px);
+    transition: 0.25s;
+  }
+
+  .kpi-card-pro:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+  }
+
+  /* KPI ICON (weiß, größer, modern) */
+  .kpi-icon {
+    font-size: 2.4rem;
+    margin-bottom: 0.6rem;
+    color: #ffffff;
+  }
+
+  /* Text in KPI Cards */
+  .kpi-card-pro h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+  }
+
+  .kpi-card-pro p {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e2e8f0; /* sehr helles Grau für Werte */
+  }
 </style>
-{% endblock %}
-{% block scripts %}
-<!-- 📊 Chart.js laden -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- =========================================================
+   CHART.JS — INITIALISATION
+========================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-function renderDashboardCharts() {
-  console.log("📈 Dashboard Charts werden gerendert...");
+  document.addEventListener("DOMContentLoaded", () => {
 
-  // 🟢 1️⃣ Umsatzentwicklung
-  new Chart(document.getElementById("umsatzChart"), {
-    type: "line",
-    data: {
-      labels: {{ chart_data.months | tojson }},
-      datasets: [{
-        label: "Umsatz ({{ company.currency_code or 'EUR' }})",
-        data: {{ chart_data.revenues | tojson }},
-        borderColor: "#0D2A78",
-        backgroundColor: "rgba(13,42,120,0.1)",
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: "bottom" } },
-      scales: { y: { beginAtZero: true } }
-    }
+    /* --- Umsatzentwicklung --- */
+    new Chart(chartRevenue,{
+      type:"line",
+      data:{
+        labels:{{ chart_data.months|tojson }},
+        datasets:[{
+          label:"Umsatz",
+          data:{{ chart_data.revenues|tojson }},
+          borderColor:"#0d6efd",
+          backgroundColor:"rgba(13,110,253,0.25)",
+          fill:true, tension:.4
+        }]
+      }
+    });
+
+    /* --- Monatsumsatz --- */
+    new Chart(chartMonthly,{
+      type:"bar",
+      data:{
+        labels:{{ chart_data.months|tojson }},
+        datasets:[{
+          label:"Monatsumsatz",
+          data:{{ chart_data.revenues|tojson }},
+          backgroundColor:"#1e40af"
+        }]
+      }
+    });
+
+    /* --- Forecast --- */
+    new Chart(chartForecast,{
+      type:"line",
+      data:{
+        labels:["Heute","+30 Tage","+60 Tage"],
+        datasets:[{
+          label:"AI Prognose",
+          data:[12000,15000,18500],
+          borderColor:"#22c55e",
+          backgroundColor:"rgba(34,197,94,0.25)",
+          fill:true, tension:.4
+        }]
+      }
+    });
+
+    /* --- LTV --- */
+    new Chart(chartLTV,{
+      type:"bar",
+      data:{
+        labels:["A","B","C","D","E"],
+        datasets:[{
+          label:"Lifetime Value (€)",
+          data:[900,1200,500,1800,650],
+          backgroundColor:"#0d9488"
+        }]
+      }
+    });
+
+    /* --- Funnel --- */
+    new Chart(chartFunnel,{
+      type:"bar",
+      data:{
+        labels:["Leads","Qualifiziert","Angebot","Gewonnen"],
+        datasets:[{
+          label:"Funnel",
+          data:[280,190,110,40],
+          backgroundColor:["#003f88","#0056b3","#1f78ff","#84b4ff"]
+        }]
+      }
+    });
+
+    /* --- Lead Status --- */
+    new Chart(chartLeadStatus,{
+      type:"bar",
+      data:{
+        labels:Object.keys({{ chart_data.leads|tojson }}),
+        datasets:[{
+          label:"Leads",
+          data:Object.values({{ chart_data.leads|tojson }}),
+          backgroundColor:"#0d6efd"
+        }]
+      }
+    });
+
+    /* --- Pipeline --- */
+    new Chart(chartPipeline,{
+      type:"bar",
+      data:{
+        labels:["Kontakt","Demo","Angebot","Verhandlung","Abschluss"],
+        datasets:[{
+          label:"Pipeline €",
+          data:[4000,9000,15000,8000,3000],
+          backgroundColor:"#4f46e5"
+        }]
+      }
+    });
+
+    /* --- Verkäufer --- */
+    new Chart(chartSalesRep,{
+      type:"bar",
+      data:{
+        labels:["Hamza","Lina","Max","Sara"],
+        datasets:[{
+          label:"Umsatz (€)",
+          data:[18000,14000,22000,9000],
+          backgroundColor:"#0ea5e9"
+        }]
+      }
+    });
+
+    /* --- Kundenübersicht --- */
+    new Chart(chartCustomers,{
+      type:"doughnut",
+      data:{
+        labels:["Aktiv","Neu","Inaktiv"],
+        datasets:[{
+          data:[120,30,12],
+          backgroundColor:["#0d6efd","#1f78ff","#84b4ff"]
+        }]
+      }
+    });
+
+    /* --- Regionen --- */
+    new Chart(chartRegion,{
+      type:"bar",
+      data:{
+        labels:["DE","AT","CH","NL"],
+        datasets:[{
+          label:"Kunden",
+          data:[80,20,15,10],
+          backgroundColor:"#0284c7"
+        }]
+      }
+    });
+
+    /* --- Produkte --- */
+    new Chart(chartProducts,{
+      type:"bar",
+      data:{
+        labels:{{ chart_data.products|tojson }},
+        datasets:[{
+          label:"Umsatz",
+          data:{{ chart_data.product_sales|tojson }},
+          backgroundColor:"#14b8a6"
+        }]
+      }
+    });
+
+    /* --- Produktkategorien --- */
+    new Chart(chartProductCategories,{
+      type:"doughnut",
+      data:{
+        labels:["Software","Service","Add-ons"],
+        datasets:[{
+          data:[55,30,15],
+          backgroundColor:["#0ea5e9","#6366f1","#14b8a6"]
+        }]
+      }
+    });
+
+    /* --- Rechnungen --- */
+    new Chart(chartInvoices,{
+      type:"bar",
+      data:{
+        labels:["0–30T","31–60T","61–90T",">90T"],
+        datasets:[{
+          label:"Fällige Rechnungen",
+          data:[10,6,3,2],
+          backgroundColor:"#f59e0b"
+        }]
+      }
+    });
+
+    /* --- Zahlungsstatus --- */
+    new Chart(chartInvoiceStatus,{
+      type:"doughnut",
+      data:{
+        labels:["Bezahlt","Offen","Mahnung"],
+        datasets:[{
+          data:[65,25,10],
+          backgroundColor:["#22c55e","#0ea5e9","#ef4444"]
+        }]
+      }
+    });
+
   });
-
-  // 🟢 2️⃣ Kundenübersicht
-  new Chart(document.getElementById("kundenChart"), {
-    type: "doughnut",
-    data: {
-      labels: ["Aktiv", "Neu", "Inaktiv"],
-      datasets: [{
-        data: [120, 30, 15],
-        backgroundColor: ["#0D2A78", "#1E40AF", "#93C5FD"],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      cutout: "70%",
-      plugins: { legend: { position: "bottom" } }
-    }
-  });
-
-  // 🟢 3️⃣ Leads nach Status
-  new Chart(document.getElementById("leadsChart"), {
-    type: "bar",
-    data: {
-      labels: Object.keys({{ chart_data.leads | tojson }}),
-      datasets: [{
-        label: "Leads",
-        data: Object.values({{ chart_data.leads | tojson }}),
-        backgroundColor: "#0D2A78",
-        borderRadius: 6
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  // 🟢 4️⃣ Offene Rechnungen nach Fälligkeit
-  new Chart(document.getElementById("invoiceChart"), {
-    type: "bar",
-    data: {
-      labels: ["0–30 Tage", "31–60 Tage", "61–90 Tage", ">90 Tage"],
-      datasets: [{
-        label: "Rechnungen",
-        data: [10, 6, 3, 2],
-        backgroundColor: "#F59E0B",
-        borderRadius: 6
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { position: "bottom" } }
-    }
-  });
-
-  // 🟢 5️⃣ Top-Produkte nach Umsatz
-  new Chart(document.getElementById("productChart"), {
-    type: "bar",
-    data: {
-      labels: {{ chart_data.products | tojson }},
-      datasets: [{
-        label: "Umsatz ({{ company.currency_code or 'EUR' }})",
-        data: {{ chart_data.product_sales | tojson }},
-        backgroundColor: "#10B981"
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true } }
-    }
-  });
-
-  // 🟢 6️⃣ Zahlungseingänge pro Monat
-  new Chart(document.getElementById("paymentChart"), {
-    type: "line",
-    data: {
-      labels: {{ chart_data.payments["labels"] | tojson }},
-      datasets: [{
-        label: "Zahlungen ({{ company.currency_code or 'EUR' }})",
-        data: {{ chart_data.payments["values"] | tojson }},
-        borderColor: "#0D9488",
-        backgroundColor: "rgba(13,148,136,0.1)",
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: "bottom" } },
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-}
-
-// 🚀 Initialisierung nach Laden der Seite
-document.addEventListener("DOMContentLoaded", renderDashboardCharts);
 </script>
+
 {% endblock %}

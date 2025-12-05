@@ -39,14 +39,14 @@ def list_users(
     roles = db.query(Role).all()
 
     return templates.TemplateResponse(
-        "admin/users.html",
-        {
-            "request": request,
-            "current_user": current_user,
-            "users": users,
-            "roles": roles,
-        },
-    )
+    "admin/users.html",
+    {
+        "request": request,
+        "user": current_user,   #  🔥 WICHTIG!
+        "users": users,
+        "roles": roles,
+    },
+)
 
 
 # ============================================================

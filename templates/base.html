@@ -5,6 +5,9 @@
     <title>{% block title %}Ouhud CRM{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -199,6 +202,388 @@
           display: none;
         }
       }
+
+      .nav-group-title {
+        width: 100%;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 0.95rem;
+        padding: 0.55rem 0.7rem;
+        display: flex;
+        justify-content: space-between; /* Pfeil RECHTS */
+        align-items: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .nav-group-title:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      .arrow {
+        transition: transform 0.25s ease;
+      }
+
+      .nav-submenu {
+        margin-left: 1.9rem;
+        margin-top: 0.3rem;
+        margin-bottom: 0.4rem;
+        display: none;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .nav-submenu a {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: 6px;
+        color: #f1f5f9;
+      }
+
+      .nav-submenu a:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateX(4px);
+      }
+
+      .user-box {
+        margin-top: auto;
+        padding: 1.2rem 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .user-avatar {
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        background: white;
+        color: var(--brand-indigo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .user-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .user-role {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: -2px;
+      }
+
+      .user-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .user-actions a {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.6rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        color: #e2e8f0;
+        transition: 0.2s;
+      }
+
+      .user-actions a:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .logout-link-pro {
+        color: #fca5a5 !important;
+      }
+
+      .logout-link-pro:hover {
+        background: rgba(255, 100, 100, 0.25) !important;
+        color: white !important;
+      }
+
+      /* ==========================
+   USER V5 ULTRA
+========================== */
+
+      .user-box {
+        margin-top: auto;
+        padding: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+      }
+
+      /* ----- User Header ----- */
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+      }
+
+      .user-avatar {
+        height: 42px;
+        width: 42px;
+        border-radius: 50%;
+        background: white;
+        color: var(--brand-indigo);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 700;
+        font-size: 1rem;
+        position: relative;
+      }
+
+      /* Online Status Dot */
+      .status-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 10px;
+        width: 10px;
+        background: #22c55e;
+        border: 2px solid white;
+        border-radius: 50%;
+      }
+
+      .user-info-box {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .user-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: white;
+      }
+
+      .user-role {
+        font-size: 0.7rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 12px;
+        color: white;
+        display: inline-block;
+        margin-top: 2px;
+      }
+
+      /* ----- Popup Menu ----- */
+      .user-popup {
+        position: absolute;
+        bottom: 70px;
+        left: 10px;
+        width: 220px;
+        background: white;
+        color: #1e293b;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        padding: 0.7rem 0;
+        display: none;
+        flex-direction: column;
+        animation: fadeIn 0.2s ease;
+        z-index: 2000;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .user-popup a {
+        text-decoration: none;
+        padding: 0.55rem 1rem;
+        font-size: 0.87rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #1e293b;
+        transition: 0.15s;
+      }
+
+      .user-popup a:hover {
+        background: #f1f5f9;
+      }
+
+      .user-popup .logout {
+        color: #dc2626;
+      }
+
+      .user-popup .logout:hover {
+        background: #fee2e2;
+      }
+
+
+      /* USER HEADER */
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: 0.2s;
+}
+.user-header:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* AVATAR */
+.user-avatar-wrapper {
+  position: relative;
+}
+.user-avatar-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+/* Status Farben */
+.status-dot.online { background: #22c55e; }
+.status-dot.away { background: #f59e0b; }
+.status-dot.focus { background: #3b82f6; }
+.status-dot.offline { background: #6b7280; }
+
+/* Rollen-Badge */
+.user-role {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-top: 1px;
+  display: inline-block;
+  color: white;
+}
+.role-admin { background: #3b82f6; }
+.role-support { background: #10b981; }
+.role-vertrieb { background: #f97316; }
+
+/* POPUP MENU */
+.user-popup {
+  position: absolute;
+  left: 12px;
+  bottom: 80px;
+  width: 220px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  display: none;
+  flex-direction: column;
+  animation: fadeScale 0.25s ease;
+  z-index: 1000;
+}
+
+/* Animation */
+@keyframes fadeScale {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Popup Links */
+.user-popup a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  color: #1e293b;
+  text-decoration: none;
+}
+.user-popup a:hover {
+  color: #0d2a78;
+}
+
+/* Popup user info */
+.popup-user-info {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 0.6rem;
+}
+.popup-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+.popup-name {
+  font-weight: 600;
+}
+.popup-email {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Status Auswahl */
+.status-title {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-bottom: 0.3rem;
+}
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.status-option:hover {
+  color: #0d2a78;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Upload Button */
+.upload-btn {
+  margin-top: 0.4rem;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.upload-btn input {
+  display: none;
+}
+
     </style>
   </head>
 
@@ -210,92 +595,243 @@
         <span>Ouhud CRM</span>
       </div>
 
-      <nav>
-        <!-- 🏠 Dashboard -->
+      <nav class="sidebar-nav">
+        <!-- Dashboard -->
         <a
           href="/dashboard/"
-          class="{% if request.url.path == '/dashboard/' %}active{% endif %}"
+          class="nav-item {% if request.url.path == '/dashboard/' %}active{% endif %}"
         >
-          🏠 Dashboard
+          <i data-feather="home"></i> <span>Dashboard</span>
         </a>
 
-        <!-- Kunden & Vertrieb -->
-        <div class="section-title">Kunden & Vertrieb</div>
-        <a href="/dashboard/company_accounts">🏢 Firmen / Accounts</a>
-        <a href="/dashboard/customers">🧑‍💼 Kontakte</a>
-        <a href="/dashboard/leads">🚀 Leads & Opportunities</a>
-        <a href="/dashboard/offers">📝 Angebote</a>
-        <a href="/dashboard/activities">🗂️ Aktivitäten</a>
-        <a href="/dashboard/history">📜 Kundenhistorie</a>
+        <!-- CRM & Vertrieb -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('crmMenu')">
+            <div class="nav-left">
+              <i data-feather="briefcase"></i>
+              <span>CRM & Vertrieb</span>
+            </div>
+            <i class="arrow" id="crmMenuArrow" data-feather="chevron-down"></i>
+          </button>
 
-        <!-- Marketing -->
-        <div class="section-title">Marketing</div>
-        <a href="/dashboard/campaigns">📢 Kampagnen & Newsletter</a>
-        <a href="/dashboard/segments">🎯 Zielgruppen</a>
-        <a href="/dashboard/forms">📝 Formulare</a>
-
-        <!-- Planung -->
-        <div class="section-title">Planung</div>
-        <a href="/dashboard/calendar">📅 Kalender & Aufgaben</a>
-
-        <!-- Finanzen -->
-        <div class="section-title">Finanzen</div>
-        <a href="/dashboard/invoices">🧾 Rechnungen</a>
-        <a href="/dashboard/payments">💳 Zahlungen</a>
-        <a href="/dashboard/invoices/reminders">⏰ Mahnungen</a>
-
-        <!-- Analyse & Kommunikation -->
-        <div class="section-title">Analyse & Kommunikation</div>
-        <a href="/dashboard/reports">📈 Berichte</a>
-        <a href="/dashboard/inbox">📨 Kommunikation</a>
-        <a href="/dashboard/chat">💬 Interner Chat</a>
-        <a href="/dashboard/whatsapp">📲 WhatsApp</a>
-        <a href="/dashboard/calls">📞 Anrufhistorie</a>
-
-        <!-- Automatisierung -->
-        <div class="section-title">Automatisierung</div>
-        <a href="/dashboard/workflows">🛠 Workflows</a>
-        <a href="/dashboard/automation/designer">🧭 Prozess-Designer</a>
-        <a href="/dashboard/documents">📑 Dokumente</a>
-
-        <!-- Ouhud KI -->
-        <div class="section-title">Ouhud KI</div>
-        <a href="/dashboard/ai/settings">⚙️ AI Einstellungen</a>
-        <a href="/dashboard/ai/leads">📈 Lead Scoring</a>
-        <a href="/dashboard/ai/assistant">🤖 KI-Assistent</a>
-
-        <!-- System -->
-        <div class="section-title">System & Verwaltung</div>
-        <a href="/dashboard/users">👥 Benutzer & Rollen</a>
-        <a href="/dashboard/audit">📝 Audit-Logs</a>
-        <a href="/dashboard/integrations">🔌 Integrationen & API</a>
-        <a href="/dashboard/email">📧 E-Mail Einstellungen</a>
-        <a href="/dashboard/privacy">🔐 Datenschutz</a>
-        <a href="/dashboard/settings">🌍 Einstellungen</a>
-        <a href="/admin/">⚡ Administration</a>
-
-        <!-- 💳 Abos & Tarife -->
-        <div class="section-title">Abrechnung</div>
-        <a href="/dashboard/subscription">💳 Abonnement & Tarife</a>
-      </nav>
-
-      <!-- 👤 Benutzer -->
-      <div class="user-box">
-        {% if user %}
-        <div class="user-info">
-          <div class="user-avatar">
-            {{ user.username[0]|upper if user.username else "?" }}
-          </div>
-          <div>
-            <strong>{{ user.username.split('@')[0] }}</strong>
-            <a href="/dashboard/settings">⚙️ Profil</a>
+          <div id="crmMenu" class="nav-submenu">
+            <a href="/dashboard/company_accounts">🏢 Firmen / Accounts</a>
+            <a href="/dashboard/customers">👤 Kontakte</a>
+            <a href="/dashboard/leads">⚡ Leads</a>
+            <a href="/dashboard/opportunities">📈 Opportunities</a>
+            <a href="/dashboard/offers">📝 Angebote</a>
+            <a href="/dashboard/products">📦 Produkte</a>
+            <a href="/dashboard/contracts">📃 Verträge</a>
+            <a href="/dashboard/activities">🗂 Aktivitäten</a>
+            <a href="/dashboard/history">📜 Historie</a>
           </div>
         </div>
-        <a href="/auth/logout" class="logout-link">🚪 Logout</a>
-        {% else %}
-        <a href="/auth/login" class="logout-link">🔐 Login</a>
-        {% endif %}
+
+        <!-- Support -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('supportMenu')">
+            <i data-feather="headphones"></i>
+            <span>Support</span>
+            <i class="arrow" id="supportMenuArrow">▼</i>
+          </button>
+
+          <div id="supportMenu" class="nav-submenu">
+            <a href="/dashboard/tickets">🎧 Tickets</a>
+            <a href="/dashboard/knowledge">📚 Knowledge Base</a>
+          </div>
+        </div>
+
+        <!-- Marketing -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('marketingMenu')">
+            <i data-feather="target"></i>
+            <span>Marketing</span>
+            <i class="arrow" id="marketingMenuArrow">▼</i>
+          </button>
+
+          <div id="marketingMenu" class="nav-submenu">
+            <a href="/dashboard/campaigns">📢 Kampagnen</a>
+            <a href="/dashboard/segments">🎯 Segmente</a>
+            <a href="/dashboard/forms">📝 Formulare</a>
+            <a href="/dashboard/newsletter">✉️ Newsletter</a>
+          </div>
+        </div>
+
+        <!-- Projekte -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('projectMenu')">
+            <i data-feather="folder"></i>
+            <span>Projekte</span>
+            <i class="arrow" id="projectMenuArrow">▼</i>
+          </button>
+
+          <div id="projectMenu" class="nav-submenu">
+            <a href="/dashboard/projects">🗂 Projekte</a>
+            <a href="/dashboard/tasks">📝 Aufgaben</a>
+          </div>
+        </div>
+
+        <!-- Finanzen -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('financeMenu')">
+            <i data-feather="credit-card"></i>
+            <span>Finanzen</span>
+            <i class="arrow" id="financeMenuArrow">▼</i>
+          </button>
+
+          <div id="financeMenu" class="nav-submenu">
+            <a href="/dashboard/invoices">🧾 Rechnungen</a>
+            <a href="/dashboard/payments">💳 Zahlungen</a>
+            <a href="/dashboard/invoices/reminders">⏰ Mahnungen</a>
+            <a href="/dashboard/subscriptions">💼 Abos</a>
+          </div>
+        </div>
+
+        <!-- Automatisierung -->
+        <div class="nav-group">
+          <button
+            class="nav-group-title"
+            onclick="toggleMenu('automationMenu')"
+          >
+            <i data-feather="cpu"></i>
+            <span>Automatisierung</span>
+            <i class="arrow" id="automationMenuArrow">▼</i>
+          </button>
+
+          <div id="automationMenu" class="nav-submenu">
+            <a href="/dashboard/workflows">🛠 Workflows</a>
+            <a href="/dashboard/automation/designer">🧭 Designer</a>
+            <a href="/dashboard/documents">📑 Dokumente</a>
+          </div>
+        </div>
+
+        <!-- KI -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('aiMenu')">
+            <i data-feather="cpu"></i>
+            <span>Ouhud KI</span>
+            <i class="arrow" id="aiMenuArrow">▼</i>
+          </button>
+
+          <div id="aiMenu" class="nav-submenu">
+            <a href="/dashboard/ai/settings">⚙️ Einstellungen</a>
+            <a href="/dashboard/ai/leads">📈 Lead Scoring</a>
+            <a href="/dashboard/ai/assistant">🤖 Assistent</a>
+          </div>
+        </div>
+
+        <!-- System -->
+        <div class="nav-group">
+          <button class="nav-group-title" onclick="toggleMenu('systemMenu')">
+            <i data-feather="settings"></i>
+            <span>System</span>
+            <i
+              class="arrow"
+              id="systemMenuArrow"
+              data-feather="chevron-down"
+            ></i>
+          </button>
+
+          <div id="systemMenu" class="nav-submenu">
+            <a href="/dashboard/users">👥 Benutzer</a>
+            <a href="/dashboard/teams">🏢 Teams</a>
+            <a href="/dashboard/audit">📝 Audit Logs</a>
+            <a href="/dashboard/integrations">🔌 Integrationen</a>
+            <a href="/dashboard/email">📧 E-Mail</a>
+            <a href="/dashboard/privacy">🔐 Datenschutz</a>
+            <a href="/dashboard/settings">🌍 Einstellungen</a>
+            <a href="/admin/">⚡ Admin</a>
+          </div>
+        </div>
+
+        <!-- Abrechnung -->
+        <a href="/dashboard/subscription">
+          <i data-feather="dollar-sign"></i> <span>Abrechnung</span>
+        </a>
+      </nav>
+
+
+<!-- 👤 Benutzerbereich – V7 PRO -->
+<div class="user-box">
+
+  <!-- Benutzer Header -->
+  <div class="user-header" onclick="toggleUserMenu()">
+
+    <div class="user-avatar-wrapper">
+      <img 
+        src="{{ request.state.user.avatar_url or '/static/default_avatar.png' }}" 
+        class="user-avatar-img"
+        alt="Avatar"
+      >
+      <div class="status-dot {{ request.state.user.status or 'online' }}"></div>
+    </div>
+<div class="user-info-box">
+  <div class="user-name">{{ request.state.user.role.name }}</div>
+
+  <div class="user-role role-{{ user.role.name if user.role else 'admin' }}">
+    {{ (user.role.name if user.role else 'Administrator')|capitalize }}
+  </div>
+</div>
+  </div>
+
+  <!-- Popup Menü -->
+  <div id="userPopup" class="user-popup">
+
+    <!-- Benutzerinfo groß -->
+    <div class="popup-user-info">
+      <img 
+        src="{{ request.state.user.avatar_url or '/static/default_avatar.png' }}" 
+        class="popup-avatar"
+      >
+      <div>
+        <div class="popup-name">{{ user.role.name }}</div>
+        <div class="popup-email">{{ user.username }}</div>
       </div>
+    </div>
+
+    <hr>
+
+    <!-- Status Auswahl -->
+    <div class="status-section">
+      <div class="status-title">Status</div>
+
+      <div class="status-option" onclick="setStatus('online')">
+        <span class="dot online"></span> Online
+      </div>
+
+      <div class="status-option" onclick="setStatus('away')">
+        <span class="dot away"></span> Abwesend
+      </div>
+
+      <div class="status-option" onclick="setStatus('focus')">
+        <span class="dot focus"></span> Fokus
+      </div>
+
+      <div class="status-option" onclick="setStatus('offline')">
+        <span class="dot offline"></span> Offline
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Menü Optionen -->
+    <a href="/dashboard/settings"><i data-feather="user"></i> Profil</a>
+    <a href="/dashboard/company"><i data-feather="briefcase"></i> Mein Unternehmen</a>
+    <a href="/dashboard/api-keys"><i data-feather="key"></i> API Keys</a>
+    <a href="/dashboard/subscription"><i data-feather="credit-card"></i> Abrechnung</a>
+    <a href="/dashboard/settings"><i data-feather="settings"></i> Einstellungen</a>
+
+    <hr>
+
+    <!-- Avatar Upload -->
+    <label class="upload-btn">
+      <i data-feather="upload"></i> Avatar ändern
+      <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+    </label>
+
+    <a href="/auth/logout" class="logout"><i data-feather="log-out"></i> Logout</a>
+  </div>
+</div>
     </aside>
 
     <!-- 📄 Hauptinhalt -->
@@ -306,5 +842,58 @@
 
     <!-- 📦 Platz für Seiten-spezifische Skripte (z. B. Dashboard) -->
     {% block scripts %}{% endblock %}
-  </body>
+
+<!-- Sidebar Toggle + Feather Icons -->
+<script>
+  // Popup öffnen/schließen
+  function toggleUserMenu() {
+    const menu = document.getElementById("userPopup");
+    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+  }
+
+  // Popup schließen wenn man außerhalb des Benutzerbereichs klickt
+  document.addEventListener("click", function(e) {
+    const popup = document.getElementById("userPopup");
+    const trigger = document.querySelector(".user-header");
+
+    if (!popup.contains(e.target) && !trigger.contains(e.target)) {
+      popup.style.display = "none";
+    }
+  });
+
+  // Benutzerstatus setzen
+  function setStatus(status) {
+    document.querySelector(".status-dot").className = "status-dot " + status;
+  }
+
+  // Avatarvorschau (lokal)
+  function uploadAvatar(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const img = document.querySelector(".user-avatar-img");
+    img.src = URL.createObjectURL(file);
+  }
+
+  // ⭐⭐⭐ Sidebar-Menü auf/zu ⭐⭐⭐
+  function toggleMenu(id) {
+    const menu = document.getElementById(id);
+    const arrow = document.getElementById(id + "Arrow");
+
+    if (!menu || !arrow) return;
+
+    const isOpen = menu.style.display === "flex";
+
+    if (isOpen) {
+      menu.style.display = "none";
+      arrow.style.transform = "rotate(0deg)";
+    } else {
+      menu.style.display = "flex";
+      arrow.style.transform = "rotate(180deg)";
+    }
+  }
+
+  // Feather Icons laden
+  feather.replace();
+</script>
 </html>

@@ -41,7 +41,7 @@ def subscription_overview(
         .first()
     )
 
-    # Automatische Prüfung (Trial → Free Months → Paid)
+    # Automatische Prüfung
     if subscription:
         check_subscription_status(db, subscription)
 
@@ -52,6 +52,7 @@ def subscription_overview(
             "company": company,
             "subscription": subscription,
             "active_tab": "subscription",
+            "user": current_user,   # <<< WICHTIG! FIX
         }
     )
 

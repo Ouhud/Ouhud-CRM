@@ -1,103 +1,127 @@
-{% extends "base.html" %}
-{% block title %}⚙️ KI-Einstellungen – Ouhud CRM{% endblock %}
+{% extends "base_dashboard.html" %}
+{% block title %}⚙️ KI Einstellungen{% endblock %}
 
 {% block content %}
 
 <style>
-    .ai-wrapper {
-        max-width: 900px;
-        margin: 0 auto;
+    .ai-box {
+        max-width: 780px;
+        margin: 20px auto;
         background: #ffffff;
-        padding: 2rem 2.4rem;
-        border-radius: 14px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         border: 1px solid #e5e7eb;
-        animation: fadeIn 0.3s ease;
+        animation: fadeIn .35s ease-out;
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    .ai-title {
-        font-size: 1.9rem;
+    h1 {
+        font-size: 1.8rem;
         font-weight: 800;
-        color: #0D2A78;
         display: flex;
         align-items: center;
-        gap: 0.6rem;
-        margin-bottom: .5rem;
+        gap: 8px;
+        color: #0D2A78;
     }
 
-    .ai-desc {
+    .subtitle {
         color: #6b7280;
-        margin-bottom: 1.8rem;
-        font-size: 1rem;
+        margin-bottom: 1.6rem;
+        font-size: .98rem;
     }
 
-    .ai-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.4rem;
-    }
-
-    .ai-label {
+    /* Form elements */
+    label {
         font-weight: 600;
-        color: #1f2937;
-        margin-bottom: .2rem;
+        margin-top: 1rem;
         display: block;
     }
 
-    .ai-input,
-    .ai-select {
+    select, input[type="text"], input[type="password"] {
         width: 100%;
-        padding: 0.65rem 0.8rem;
+        padding: .7rem;
+        border-radius: 8px;
         border: 1px solid #d1d5db;
         background: #f9fafb;
-        border-radius: 8px;
+        margin-top: .3rem;
         font-size: 1rem;
-        transition: border .2s ease;
+        transition: .2s ease;
     }
 
-    .ai-input:focus,
-    .ai-select:focus {
-        outline: none;
+    select:focus, input:focus {
+        background: #ffffff;
         border-color: #0D2A78;
-        background: white;
+        outline: none;
     }
 
-    .ai-helper {
-        font-size: .85rem;
-        color: #64748b;
-        margin-top: -6px;
-    }
-
-    .ai-checkbox {
+    .api-field {
         display: flex;
+        gap: .6rem;
         align-items: center;
-        gap: 0.6rem;
-        margin-top: 0.5rem;
     }
 
-    .ai-btn-row {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
+    .api-field button {
+        padding: .6rem .8rem;
+        border-radius: 8px;
+        background: #e5e7eb;
+        border: none;
+        cursor: pointer;
     }
 
+    .api-field button:hover {
+        background: #d1d5db;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+        margin-left: 10px;
+    }
+    .switch input { display: none; }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        background: #cfcfcf;
+        border-radius: 30px;
+        top: 0; left: 0; right: 0; bottom: 0;
+        transition: .3s;
+    }
+    .slider:before {
+        content: "";
+        height: 26px;
+        width: 26px;
+        background: #ffffff;
+        position: absolute;
+        border-radius: 50%;
+        top: 2px; left: 2px;
+        transition: .3s;
+    }
+    input:checked + .slider {
+        background: #10B981;
+    }
+    input:checked + .slider:before {
+        transform: translateX(30px);
+    }
+
+    /* Buttons */
     .btn-primary {
         background: #0D2A78;
         color: white;
-        padding: 0.7rem 1.3rem;
+        padding: .75rem 1.2rem;
         border-radius: 8px;
-        text-decoration: none;
         border: none;
         cursor: pointer;
         font-weight: 600;
-        transition: background .2s ease;
+        margin-top: 1.5rem;
     }
-
     .btn-primary:hover {
         background: #1E40AF;
     }
@@ -105,109 +129,142 @@
     .btn-secondary {
         background: #059669;
         color: white;
-        padding: 0.7rem 1.3rem;
+        padding: .75rem 1.2rem;
         border-radius: 8px;
         border: none;
         cursor: pointer;
         font-weight: 600;
+        margin-top: 1rem;
     }
-
     .btn-secondary:hover {
         background: #047857;
     }
 
-    .test-output {
-        margin-top: 1.5rem;
+    /* Test result box */
+    #test-result {
+        margin-top: 1rem;
         padding: 1rem;
-        background: #f3f4f6;
         border-radius: 8px;
-        font-size: 0.9rem;
+        display: none;
+        font-size: .95rem;
         white-space: pre-wrap;
+        font-family: monospace;
+    }
+
+    .toast {
+        background: #10B981;
+        color: white;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        animation: fadeIn .3s ease;
     }
 </style>
 
 
 
-<div class="ai-wrapper">
+<div class="ai-box">
 
-    <div class="ai-title">⚙️ KI-Einstellungen</div>
-    <p class="ai-desc">
-        Konfiguriere deinen KI-Assistenten, wähle Provider, Modell und API-Key.  
-        Bei Ouhud CRM kannst du OpenAI, Gemini, Groq und OpenRouter flexibel nutzen.
-    </p>
+    {% if request.query_params.get("success") == "1" %}
+    <div class="toast">✔ Einstellungen gespeichert</div>
+    {% endif %}
 
-    <form class="ai-form" method="post" action="/dashboard/ai/settings/save">
+    <h1>⚙️ KI Einstellungen</h1>
+    <p class="subtitle">Wähle Provider, Modell, API-Key und aktiviere deinen AI-Assistenten.</p>
+
+    <form method="post" action="/dashboard/ai/settings/save">
 
         <!-- Name -->
-        <div>
-            <label class="ai-label">🤖 Assistent-Name</label>
-            <input type="text" name="assistant_name" class="ai-input"
-                   value="{{ settings.assistant_name }}">
-        </div>
+        <label>🤖 Assistentenname</label>
+        <input type="text" name="assistant_name" value="{{ settings.assistant_name }}" required>
 
         <!-- Provider -->
-        <div>
-            <label class="ai-label">🌐 Provider</label>
-            <select class="ai-select" name="provider">
-                {% for p in providers %}
-                    <option value="{{p}}" {% if settings.provider == p %}selected{% endif %}>
-                        {{ p | capitalize }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
+        <label>🌐 Anbieter</label>
+        <select name="provider" id="provider-select">
+            {% for p in providers.keys() %}
+                <option value="{{ p }}" {% if settings.provider == p %}selected{% endif %}>
+                    {{ p|capitalize }}
+                </option>
+            {% endfor %}
+        </select>
 
-        <!-- Modell -->
-        <div>
-            <label class="ai-label">🧬 Modell</label>
-            <input type="text" name="model" class="ai-input"
-                   placeholder="z. B. gpt-4.1, gpt-5.1, llama3-70b, gemini-1.5-pro"
-                   value="{{ settings.model }}">
-            <div class="ai-helper">
-                Beispiel je nach Provider:<br>
-                <strong>OpenAI:</strong> gpt-4.1, gpt-5.1<br>
-                <strong>Gemini:</strong> gemini-1.5-pro<br>
-                <strong>Groq:</strong> llama3-70b, mixtral-8x7b<br>
-                <strong>OpenRouter:</strong> externe Modelle
-            </div>
-        </div>
+        <!-- Model -->
+        <label>🧬 Modell</label>
+        <select name="model" id="model-select">
+            {% for m in providers[settings.provider] %}
+            <option value="{{ m }}" {% if settings.model == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
 
-        <!-- API KEY -->
-        <div>
-            <label class="ai-label">🔑 API-Key</label>
-            <input type="password" name="api_key" class="ai-input"
-                   value="{{ settings.api_key }}">
+        <!-- API Key -->
+        <label>🔑 API-Key</label>
+        <div class="api-field">
+            <input type="password" id="api_key" name="api_key" value="{{ settings.api_key }}">
+            <button type="button" id="toggle-key">👁</button>
         </div>
 
         <!-- Aktiv -->
-        <div class="ai-checkbox">
-            <input type="checkbox" name="active" {% if settings.active %}checked{% endif %}>
-            <label>AI aktivieren</label>
-        </div>
+        <label style="margin-top:1rem;">AI aktivieren
+            <label class="switch">
+                <input type="checkbox" name="active" {% if settings.active %}checked{% endif %}>
+                <span class="slider"></span>
+            </label>
+        </label>
 
-        <!-- Buttons -->
-        <div class="ai-btn-row">
-            <button type="submit" class="btn-primary">💾 Speichern</button>
-            <button type="button" class="btn-secondary" onclick="testAI()">⚡ API testen</button>
-        </div>
-
+        <button class="btn-primary">💾 Speichern</button>
     </form>
 
-    <div id="test-output" class="test-output" style="display:none;"></div>
+    <button class="btn-secondary" onclick="testConnection()">🔌 Verbindung testen</button>
+
+    <div id="test-result"></div>
 
 </div>
 
 
+
 <script>
-async function testAI() {
-    const output = document.getElementById("test-output");
-    output.style.display = "block";
-    output.innerHTML = "⏳ Test läuft ...";
+/* Toggle API Key visibility */
+document.getElementById("toggle-key").onclick = () => {
+    let f = document.getElementById("api_key");
+    f.type = (f.type === "password") ? "text" : "password";
+};
 
-    let r = await fetch("/dashboard/ai/settings/test", { method: "POST" });
-    let j = await r.json();
+/* Provider → update model list dynamically */
+document.getElementById("provider-select").addEventListener("change", function () {
+    const provider = this.value;
+    const models = {{ providers | tojson }};
+    const select = document.getElementById("model-select");
 
-    output.innerHTML = JSON.stringify(j, null, 2);
+    select.innerHTML = "";
+    models[provider].forEach(m => {
+        select.innerHTML += `<option value="${m}">${m}</option>`;
+    });
+});
+
+/* Test the connection to AI Provider */
+async function testConnection() {
+    const api_key = document.getElementById("api_key").value;
+    const provider = document.getElementById("provider-select").value;
+
+    const form = new FormData();
+    form.append("api_key", api_key);
+    form.append("provider", provider);
+
+    const box = document.getElementById("test-result");
+    box.style.display = "block";
+    box.style.background = "#f3f4f6";
+    box.innerText = "⏳ Test läuft...";
+
+    let res = await fetch("/dashboard/ai/settings/test", { method: "POST", body: form });
+    let result = await res.json();
+
+    if (result.ok) {
+        box.style.background = "#D1FAE5";
+        box.innerText = "✔ " + result.message;
+    } else {
+        box.style.background = "#FECACA";
+        box.innerText = "❌ " + result.message;
+    }
 }
 </script>
 

@@ -1,273 +1,305 @@
-{% extends "base_dashboard.html" %}
-{% block title %}🤖 Ouhud KI-Assistent | CRM{% endblock %}
+{% extends "base_dashboard.html" %} {% block title %}🤖 KI-Assistent | Ouhud
+CRM{% endblock %} {% block content %}
 
-{% block content %}
-<div class="ai-chat-container">
-  <div class="ai-card">
-
-    <!-- 🧭 Header -->
-    <header class="ai-header">
-      <div class="ai-header-left">
-        <img src="/static/logo-assistant.png" alt="AI" class="ai-logo">
+<div class="ai-wrapper">
+  <!-- HEADER -->
+  <header class="ai-header">
+    <div class="ai-left">
+      <img src="/static/img/ai-avatar.png" class="ai-avatar" alt="AI" />
+      <div>
         <h1>Ouhud KI-Assistent</h1>
-        <span class="ai-badge">Beta</span>
+        <span class="ai-provider-badge" id="provider-badge">⚡ KI aktiv</span>
       </div>
-      <a href="/dashboard/ai/settings" class="ai-settings-btn">⚙️ Einstellungen</a>
-    </header>
+    </div>
 
-    <!-- 💬 Chatbereich -->
-    <main id="chat" class="ai-chat-body">
-      {% if error %}
-        <div class="ai-system-error">⚠️ {{ error }}</div>
-      {% else %}
-        <div class="ai-system-intro">
-          👋 Hallo! Ich bin dein Ouhud KI-Assistent.<br>
-          Stelle mir Fragen rund um CRM, Kunden, Rechnungen oder Automatisierungen.
-        </div>
-      {% endif %}
-    </main>
+    <a href="/dashboard/ai/settings" class="ai-settings-btn"
+      >⚙️ Einstellungen</a
+    >
+  </header>
 
-    <!-- 📝 Eingabebereich -->
-    <footer class="ai-footer">
-      <textarea id="input" placeholder="Nachricht eingeben…" rows="2"></textarea>
-      <button id="send">Senden</button>
-    </footer>
+  <!-- QUICK TOOLS -->
+  <div class="ai-tools-grid">
+    <button onclick="preset('Bitte diesen Text professionell umschreiben: ')">
+      ✍️ Umschreiben
+    </button>
+    <button onclick="preset('Bitte folgende Inhalte zusammenfassen: ')">
+      📄 Zusammenfassen
+    </button>
+    <button onclick="preset('Bitte erstelle eine professionelle E-Mail: ')">
+      💼 E-Mail erstellen
+    </button>
+    <button onclick="preset('Bitte generiere eine Antwort für einen Kunden: ')">
+      💬 Kundenantwort
+    </button>
+    <button onclick="preset('Erkläre diese Rechnung: ')">
+      📊 Rechnung erklären
+    </button>
+    <button onclick="preset('Bitte korrigiere Grammatik und Formulierung: ')">
+      🧼 Text verbessern
+    </button>
   </div>
 
-  <p class="ai-tip">
-    💡 Tipp: Frage z.&nbsp;B. „Wie lege ich eine neue Rechnung an?“ oder „Zeig mir Ideen für Zahlungserinnerungen“.
-  </p>
+  <!-- CHAT -->
+  <main id="chat" class="ai-chat-body">
+    {% if error %}
+    <div class="ai-system-error">⚠️ {{ error }}</div>
+    {% else %}
+    <div class="ai-welcome">
+      👋 Hallo {{ user.first_name or user.email }}! Ich bin dein persönlicher
+      KI-Assistent für Ouhud CRM.<br />
+      Stelle mir Fragen zu Kunden, Rechnungen, Automatisierungen oder
+      Geschäftsprozessen.
+    </div>
+    {% endif %}
+  </main>
+
+  <!-- INPUT -->
+  <footer class="ai-footer">
+    <textarea id="input" placeholder="Frage eingeben…" rows="2"></textarea>
+    <button id="send">Senden</button>
+  </footer>
+
+  <!-- TOKEN INFO -->
+  <div id="usage-info" class="ai-usage hidden">
+    <span id="usage-tokens"></span>
+    <span id="usage-cost"></span>
+  </div>
 </div>
 
+<!-- ======================================================================= -->
+<!-- CSS -->
+<!-- ======================================================================= -->
 <style>
   :root {
-    --primary: #0D2A78;
-    --primary-light: #eef2ff;
-    --primary-hover: #e0e7ff;
+    --blue: #0d2a78;
+    --blue-light: #eef3ff;
+    --blue-hover: #dfe7ff;
     --border: #e5e7eb;
     --bg: #fafafa;
-    --text: #1f2937;
   }
 
-  .ai-chat-container {
-    max-width: 960px;
+  .ai-wrapper {
+    max-width: 900px;
     margin: 2rem auto;
-    padding: 0 1rem;
-  }
-
-  .ai-card {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
+    height: 80vh;
     display: flex;
     flex-direction: column;
-    height: 75vh;
     overflow: hidden;
   }
 
-  /* Header */
+  /* HEADER */
   .ai-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.4rem;
     border-bottom: 1px solid var(--border);
-    background: #fff;
-  }
-
-  .ai-header-left {
     display: flex;
-    align-items: center;
-    gap: .75rem;
+    justify-content: space-between;
   }
-
-  .ai-logo {
-    width: 36px;
-    height: 36px;
+  .ai-left {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .ai-avatar {
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
   }
-
-  .ai-header h1 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary);
-    margin: 0;
-  }
-
-  .ai-badge {
-    background: var(--primary-light);
-    color: var(--primary);
-    font-size: .8rem;
-    padding: .2rem .6rem;
+  .ai-provider-badge {
+    background: var(--blue-light);
+    padding: 0.2rem 0.6rem;
     border-radius: 999px;
   }
-
   .ai-settings-btn {
-    display: inline-flex;
-    align-items: center;
-    background: var(--primary-light);
-    color: var(--primary);
-    padding: .4rem .8rem;
+    background: var(--blue-light);
+    padding: 0.5rem 0.8rem;
     border-radius: 8px;
-    font-size: .85rem;
     text-decoration: none;
-    transition: background .2s;
+    color: var(--blue);
+    font-weight: 600;
   }
 
-  .ai-settings-btn:hover {
-    background: var(--primary-hover);
+  /* QUICK TOOLS – GRID LAYOUT */
+  .ai-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    padding: 1rem;
+    background: #f7f8ff;
+    border-bottom: 1px solid var(--border);
   }
 
-  /* Chatbereich */
+  .ai-tools-grid button {
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #dce2ff;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: 0.25s;
+  }
+
+  .ai-tools-grid button:hover {
+    background: var(--blue-light);
+    border-color: var(--blue);
+    transform: translateY(-2px);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .ai-tools-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .ai-tools-grid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
+
+  /* CHAT */
   .ai-chat-body {
-    flex: 1;
+    padding: 1.2rem;
     background: var(--bg);
-    padding: 1rem 1.25rem;
+    flex: 1;
     overflow-y: auto;
-    scroll-behavior: smooth;
   }
-
-  .ai-system-intro,
-  .ai-system-error {
-    text-align: center;
-    font-size: .9rem;
-    color: #6b7280;
-    margin-top: 1rem;
-  }
-
-  .ai-system-error {
-    color: #b91c1c;
-  }
-
-  /* Nachrichten */
   .msg {
-    margin: .75rem 0;
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
   }
-
-  .msg .who {
-    font-size: .8rem;
-    color: #6b7280;
-    margin-bottom: .25rem;
-  }
-
   .msg .bubble {
-    display: inline-block;
-    padding: .65rem .9rem;
+    padding: 0.8rem 1rem;
     border-radius: 14px;
     max-width: 80%;
     white-space: pre-wrap;
-    word-wrap: break-word;
   }
-
   .msg.me .bubble {
     background: #e5e7eb;
     align-self: flex-end;
   }
-
   .msg.bot .bubble {
-    background: var(--primary-light);
-    color: var(--text);
+    background: var(--blue-light);
   }
 
-  /* Eingabe */
+  /* INPUT */
   .ai-footer {
     display: flex;
-    gap: .5rem;
-    padding: .8rem;
+    padding: 0.9rem;
+    gap: 0.6rem;
     border-top: 1px solid var(--border);
-    background: #fff;
   }
-
   .ai-footer textarea {
     flex: 1;
-    resize: none;
+    border-radius: 14px;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: .7rem;
-    font: inherit;
-    height: 56px;
+    padding: 0.7rem;
   }
-
   .ai-footer button {
-    background: var(--primary);
-    color: #fff;
+    background: var(--blue);
+    color: white;
+    border-radius: 14px;
+    padding: 0 1.2rem;
     border: none;
-    border-radius: 12px;
-    padding: 0 1.25rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background .2s;
   }
 
-  .ai-footer button:hover {
-    background: #1E3A8A;
+  /* TOKENS */
+  .ai-usage {
+    text-align: right;
+    padding: 0.4rem 1rem;
   }
-
-  /* Tipp */
-  .ai-tip {
-    font-size: .8rem;
-    text-align: center;
-    color: #6b7280;
-    margin-top: .75rem;
-  }
-
-  @media (max-width: 700px) {
-    .ai-card { height: 70vh; }
-    .ai-footer textarea { height: 48px; }
+  .hidden {
+    display: none;
   }
 </style>
 
-<!-- 💬 Chat Script -->
+<!-- ======================================================================= -->
+<!-- SCRIPT (Streaming) -->
+<!-- ======================================================================= -->
 <script>
-  const chat  = document.getElementById('chat');
-  const input = document.getElementById('input');
-  const send  = document.getElementById('send');
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
 
-  function escapeHtml(t) {
-    return t.replace(/[&<>"']/g, s => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    }[s]));
+  function preset(text) {
+    input.value = text;
+    input.focus();
   }
 
   function addMsg(role, text) {
-    const wrap = document.createElement('div');
-    wrap.className = 'msg ' + (role === 'user' ? 'me' : 'bot');
-    wrap.innerHTML = `
-      <div class="who">${role === 'user' ? 'Du' : 'Assistent'}</div>
-      <div class="bubble">${escapeHtml(text)}</div>
+    const el = document.createElement("div");
+    el.className = "msg " + (role === "user" ? "me" : "bot");
+    el.innerHTML = `
+        <div class="who">${role === "user" ? "Du" : "Assistent"}</div>
+        <div class="bubble">${text}</div>
     `;
-    chat.appendChild(wrap);
+    chat.appendChild(el);
     chat.scrollTop = chat.scrollHeight;
   }
 
   async function ask() {
     const message = input.value.trim();
     if (!message) return;
-    addMsg('user', message);
-    input.value = '';
-    send.disabled = true; send.textContent = '…';
 
-    try {
-      const res = await fetch('/dashboard/ai/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ message })
-      });
-      const data = await res.json();
-      addMsg('assistant', data.reply || '⚠️ Keine Antwort erhalten.');
-    } catch (e) {
-      addMsg('assistant', '⚠️ Netzwerkfehler: ' + e);
-    } finally {
-      send.disabled = false; send.textContent = 'Senden';
+    addMsg("user", message);
+    input.value = "";
+    send.disabled = true;
+
+    const wrap = document.createElement("div");
+    wrap.className = "msg bot";
+    wrap.innerHTML = `<div class="who">Assistent</div><div class="bubble" id="stream-bubble"></div>`;
+    chat.appendChild(wrap);
+    const target = document.getElementById("stream-bubble");
+
+    const res = await fetch("/dashboard/ai/stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    let full = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split("\n");
+
+      for (const l of lines) {
+        if (l.startsWith("data: ")) {
+          const part = l.replace("data: ", "");
+
+          if (part === "[STREAM_END]") {
+            send.disabled = false;
+            return;
+          }
+
+          full += part;
+          target.textContent = full;
+          chat.scrollTop = chat.scrollHeight;
+        }
+      }
     }
+
+    send.disabled = false;
   }
 
-  send.addEventListener('click', ask);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  send.addEventListener("click", ask);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       ask();
     }
   });
 </script>
+
 {% endblock %}

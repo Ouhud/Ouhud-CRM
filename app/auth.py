@@ -19,7 +19,7 @@ import uuid
 
 from app.database import get_db
 from app.models import User, Role, Company, PasswordResetToken
-
+from fastapi import File, UploadFile
 
 # ===============================
 # 🔐 JWT KONFIGURATION
@@ -139,9 +139,8 @@ def login_web(
     )
     return response
 
-
 # ===============================
-# 👤 Aktueller Benutzer – stabil + EAGER ROLE LOAD
+# 👤 Aktueller Benutzer – ORM VERSION (ENDGÜLTIG RICHTIG)
 # ===============================
 def get_current_user(
     db: Session = Depends(get_db),
@@ -158,9 +157,15 @@ def get_current_user(
     except JWTError:
         return None
 
-    # WICHTIG: Rolle eager laden → verhindert DetachedInstanceError
-    return db.query(User).options(joinedload(User.role)).filter(User.username == username).first()
+    # ORM User laden
+    user = (
+        db.query(User)
+        .options(joinedload(User.role), joinedload(User.company))
+        .filter(User.username == username)
+        .first()
+    )
 
+    return user
 
 # ===============================
 # 🔐 require_login – für HTML Seiten
@@ -182,15 +187,18 @@ def require_login(request: Request, db: Session = Depends(get_db)):
 
 
 # ===============================
-# 📝 Registrierung
+# 📝 Registrierung (POST)
 # ===============================
 @router.post("/register", response_class=HTMLResponse)
 def register_user(
     request: Request,
     company_name: str = Form(...),
+    website: str = Form(None),
+    plan: str = Form(...),
     username: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
+    logo: UploadFile = File(None),
     db: Session = Depends(get_db)
 ):
     clean = company_name.lower().replace(" ", "")
@@ -200,16 +208,28 @@ def register_user(
     existing_company = db.query(Company).filter(Company.subdomain == subdomain).first()
     if existing_company:
         return templates.TemplateResponse(
-            "auth/login.html",
+            "auth/register.html",
             {"request": request, "error_message": "❌ Diese Firma existiert bereits."}
         )
+
+    # Logo speichern (falls hochgeladen)
+    logo_path = None
+    if logo:
+        file_extension = logo.filename.split(".")[-1].lower()
+        logo_filename = f"{subdomain}_logo.{file_extension}"
+        logo_path = f"static/uploads/{logo_filename}"
+
+        with open(logo_path, "wb") as f:
+            f.write(logo.file.read())
 
     # Firma anlegen
     company = Company(
         name=company_name,
         subdomain=subdomain,
+        website=website,
+        plan=plan,
+        logo_path=logo_path,
         owner_email=email,
-        plan="pro",
         status="active"
     )
     db.add(company)
@@ -231,15 +251,8 @@ def register_user(
         is_active=True
     )
 
-    try:
-        db.add(new_user)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        return templates.TemplateResponse(
-            "auth/login.html",
-            {"request": request, "error_message": "❌ Benutzername oder E-Mail existiert bereits."}
-        )
+    db.add(new_user)
+    db.commit()
 
     # Weiterleiten
     token = create_access_token(data={"sub": new_user.username})
@@ -343,3 +356,14 @@ def require_admin(user: User = Depends(get_current_user)):
     if user.role.name != "admin":
         raise HTTPException(status_code=403, detail="Nur für Administratoren.")
     return user
+
+
+# ===============================
+# 🌐 Registrierung FORMULAR (GET)
+# ===============================
+@router.get("/register", response_class=HTMLResponse)
+def register_form(request: Request):
+    return templates.TemplateResponse(
+        "auth/register.html",
+        {"request": request}
+    )

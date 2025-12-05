@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Request, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 from fastapi.templating import Jinja2Templates
 
 from app.database import get_db
@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory="templates")
 # Router
 # -------------------------------------------------------
 router = APIRouter(
-    prefix="/dashboard/company_accounts",   # NEUE CRM-SEITE
+    prefix="/dashboard/company_accounts",
     tags=["Dashboard – Firmen & Kontakte"]
 )
 
@@ -35,13 +35,26 @@ def dashboard_company_home(
     current_user: User = Depends(get_current_user)
 ):
 
-    companies = db.query(CustomerCompany).all()
-    contacts = db.query(Customer).all()
+    # Optional: Permissions
+    require_role(current_user, ["admin", "mitarbeiter", "support"])
+
+    companies: List[CustomerCompany] = (
+        db.query(CustomerCompany)
+        .order_by(CustomerCompany.name.asc())
+        .all()
+    )
+
+    contacts: List[Customer] = (
+        db.query(Customer)
+        .order_by(Customer.first_name.asc())
+        .all()
+    )
 
     return templates.TemplateResponse(
-        "dashboard/company_contacts.html",   # WICHTIG: richtiger Pfad!
+        "dashboard/company_contacts.html",
         {
             "request": request,
+            "user": current_user,        # 🔥 WICHTIG für Sidebar / Avatar
             "companies": companies,
             "contacts": contacts
         }
@@ -55,17 +68,20 @@ def dashboard_company_home(
 def create_company(
     request: Request,
     name: str = Form(...),
-    address: str = Form(None),
-    city: str = Form(None),
-    country: str = Form(None),
-    phone: str = Form(None),
-    email: str = Form(None),
-    website: str = Form(None),
+    address: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    country: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
+    website: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
 
     require_role(current_user, ["admin", "mitarbeiter"])
+
+    if db.query(CustomerCompany).filter_by(name=name).first():
+        raise HTTPException(400, "Firma existiert bereits")
 
     company = CustomerCompany(
         name=name,
@@ -79,15 +95,11 @@ def create_company(
 
     db.add(company)
     db.commit()
-    db.refresh(company)
 
     log_action(db, current_user.id, f"Firma '{name}' erstellt")
 
-    # ✔ RICHTIGER Redirect
-    return RedirectResponse(
-    "/dashboard/company_accounts",
-    status_code=303
-)
+    return RedirectResponse("/dashboard/company_accounts", status_code=303)
+
 
 # -------------------------------------------------------
 # 3) Kontakt anlegen
@@ -98,8 +110,8 @@ def create_contact(
     first_name: str = Form(...),
     last_name: str = Form(...),
     email: str = Form(...),
-    phone: str = Form(None),
-    position: str = Form(None),
+    phone: Optional[str] = Form(None),
+    position: Optional[str] = Form(None),
     company_id: Optional[int] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -107,24 +119,24 @@ def create_contact(
 
     require_role(current_user, ["admin", "mitarbeiter"])
 
+    if db.query(Customer).filter_by(email=email).first():
+        raise HTTPException(400, "Kontakt mit dieser E-Mail existiert bereits")
+
+    full_name = f"{first_name} {last_name}"
+
     contact = Customer(
         first_name=first_name,
         last_name=last_name,
-        name=f"{first_name} {last_name}",
+        name=full_name,
         email=email,
         phone=phone,
         position=position,
-        company_id=company_id if company_id else None
+        company_id=company_id
     )
 
     db.add(contact)
     db.commit()
-    db.refresh(contact)
 
-    log_action(db, current_user.id, f"Kontakt '{contact.name}' erstellt")
+    log_action(db, current_user.id, f"Kontakt '{full_name}' erstellt")
 
-    # ✔ RICHTIGER Redirect
-    return RedirectResponse(
-        "/dashboard/company_accounts",
-        status_code=303
-    )
+    return RedirectResponse("/dashboard/company_accounts", status_code=303)

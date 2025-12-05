@@ -19,7 +19,6 @@ router = APIRouter(
     tags=["Angebote"]
 )
 
-
 # --------------------------------------------------------
 # LISTE ALLER ANGEBOTE  +  Formular anzeigen
 # --------------------------------------------------------
@@ -36,12 +35,12 @@ def list_offers(
         "dashboard/offers.html",
         {
             "request": request,
+            "user": current_user,        # ✅ FIX
             "mode": "list",
             "offers": offers,
             "customers": customers
         }
     )
-
 
 # --------------------------------------------------------
 # ERSTELLEN (FORMULAR)
@@ -58,11 +57,11 @@ def form_create_offer(
         "dashboard/offers.html",
         {
             "request": request,
+            "user": current_user,        # ✅ FIX
             "mode": "create",
             "customers": customers
         }
     )
-
 
 # --------------------------------------------------------
 # ERSTELLEN (POST)
@@ -91,8 +90,8 @@ def create_offer(
     db.refresh(offer)
 
     log_action(db, current_user.id, f"Angebot '{title}' erstellt")
-    return RedirectResponse("/dashboard/offers", status_code=303)
 
+    return RedirectResponse("/dashboard/offers", status_code=303)
 
 # --------------------------------------------------------
 # ANGEBOT ANZEIGEN
@@ -112,11 +111,11 @@ def view_offer(
         "dashboard/offers.html",
         {
             "request": request,
+            "user": current_user,        # ✅ FIX
             "mode": "view",
             "offer": offer
         }
     )
-
 
 # --------------------------------------------------------
 # BEARBEITEN (FORMULAR)
@@ -138,12 +137,12 @@ def edit_offer_form(
         "dashboard/offers.html",
         {
             "request": request,
+            "user": current_user,        # ✅ FIX
             "mode": "edit",
             "offer": offer,
             "customers": customers
         }
     )
-
 
 # --------------------------------------------------------
 # BEARBEITEN (POST)
@@ -173,8 +172,8 @@ def edit_offer(
     db.commit()
 
     log_action(db, current_user.id, f"Angebot '{title}' aktualisiert")
-    return RedirectResponse(f"/dashboard/offers/{offer_id}", status_code=303)
 
+    return RedirectResponse(f"/dashboard/offers/{offer_id}", status_code=303)
 
 # --------------------------------------------------------
 # LÖSCHEN
@@ -193,4 +192,5 @@ def delete_offer(
     db.commit()
 
     log_action(db, current_user.id, f"Angebot gelöscht: ID {offer_id}")
+
     return RedirectResponse("/dashboard/offers", status_code=303)

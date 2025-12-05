@@ -41,10 +41,12 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 @router.get("/", response_class=HTMLResponse)
-def admin_dashboard(request: Request, db: Session = Depends(get_db)):
+def admin_dashboard(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Übersicht für Administratoren mit Statistiken über Kunden & Rechnungen.
     """
+    require_role(current_user, ["admin"])
+
     customers_count = db.query(func.count(Customer.id)).scalar()
     invoices_count = db.query(func.count(Invoice.id)).scalar()
     total_sum = db.query(func.coalesce(func.sum(Invoice.total_amount), 0)).scalar()
@@ -69,7 +71,7 @@ def admin_dashboard(request: Request, db: Session = Depends(get_db)):
 
     return templates.TemplateResponse(
         "admin/dashboard.html",
-        {"request": request, "stats": stats}
+        {"request": request, "stats": stats, "user": current_user}
     )
 # ============================================================
 # 👥 Benutzerverwaltung – Übersicht

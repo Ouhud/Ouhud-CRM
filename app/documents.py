@@ -96,6 +96,8 @@ def documents_page(
             "total": total,
             "pages": (total + per_page - 1) // per_page,
             "current_user": current_user,
+            "user": current_user,       # ← 🔥 WICHTIG! Template braucht „user“
+
         },
     )
 
@@ -103,35 +105,85 @@ def documents_page(
 # -----------------------------------------------------
 # 2) Upload Dokument
 # -----------------------------------------------------
+from datetime import datetime
+import uuid
+
 @router.post("/upload")
 async def upload_document(
     request: Request,
     file: UploadFile = File(...),
     category: Optional[str] = Form(None),
-    customer_id: Optional[int] = Form(None),
-    lead_id: Optional[int] = Form(None),
+    customer_id: Optional[str] = Form(None),
+    lead_id: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # ---------------------------
+    # Validate file type
+    # ---------------------------
     if not file.filename or not is_allowed_file(file.filename):
         raise HTTPException(status_code=400, detail="Ungültiger Dateityp.")
 
-    if get_file_size(file) > MAX_FILE_SIZE:
+    # Validate content type (security)
+    allowed_mime = {
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    }
+    if file.content_type not in allowed_mime:
+        raise HTTPException(status_code=400, detail="Datei-Typ nicht erlaubt.")
+
+    # Validate file size
+    size = get_file_size(file)
+    if size > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="Datei zu groß (max. 10MB).")
 
-    filename = file.filename
-    filepath = UPLOAD_FOLDER / filename
+    # ---------------------------
+    # Normalize customer/lead
+    # ---------------------------
+    def clean_int(value):
+        return int(value) if value not in (None, "", "null", "undefined") else None
 
-    with open(filepath, "wb") as buffer:
+    customer_id = clean_int(customer_id)
+    lead_id = clean_int(lead_id)
+
+    # ---------------------------
+    # Create dynamic folder structure
+    # ---------------------------
+    now = datetime.utcnow()
+
+    user_folder = Path(
+        f"app/static/documents/{current_user.company_id}/{current_user.id}/{now.year}/{now.month}"
+    )
+    user_folder.mkdir(parents=True, exist_ok=True)
+
+    # ---------------------------
+    # Unique filename
+    # ---------------------------
+    ext = Path(file.filename).suffix
+    safe_name = Path(file.filename).stem.replace(" ", "_")
+
+    unique_name = f"{safe_name}_{uuid.uuid4().hex[:12]}{ext}"
+    full_path = user_folder / unique_name
+
+    # ---------------------------
+    # Save file
+    # ---------------------------
+    with open(full_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    # ---------------------------
+    # Create DB record
+    # ---------------------------
     doc = Document(
-        filename=filename,
-        path=str(filepath),
+        company_id=current_user.company_id,   # 🔥 WICHTIG!
+        filename=file.filename,
+        path=str(full_path),
         category=category,
         uploaded_by=current_user.id,
-        file_size=get_file_size(file),
-        file_type=Path(filename).suffix.lower(),
+        file_size=size,
+        file_type=ext,
         customer_id=customer_id,
         lead_id=lead_id,
     )
@@ -141,12 +193,12 @@ async def upload_document(
     db.refresh(doc)
 
     return {
-        "status": "ok",
-        "filename": filename,
-        "document_id": doc.id
-    }
-
-
+    "ok": True,
+    "message": "Dokument erfolgreich hochgeladen.",
+    "document_id": doc.id,
+    "filename": file.filename,
+    "saved_as": unique_name,
+}
 # -----------------------------------------------------
 # 3) Download
 # -----------------------------------------------------

@@ -456,7 +456,7 @@ def company_settings_form(request: Request, db: Session = Depends(get_db)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=303)
     settings = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
-    return templates.TemplateResponse(request, "admin/company_settings.html", {"request": request, "settings": settings})
+    return templates.TemplateResponse(request, "admin/company_settings.html", {"request": request, "user": user, "settings": settings})
 
 # 🏢 Firmeninfos speichern (inkl. Währung & Logo)
 @router.post("/company")

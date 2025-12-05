@@ -40,13 +40,14 @@ def list_providers(
         raise HTTPException(500, "Keine Firma konfiguriert.")
 
     providers = db.query(EmailProvider).filter(
-        EmailProvider.company_id == company.id
+        EmailProvider.customer_company_id == company.id
     ).order_by(EmailProvider.created_at.desc()).all()
 
     return templates.TemplateResponse(
         "email/settings.html",
         {
             "request": request,
+            "user": current_user,    # ← FIX !!!
             "company": company,
             "providers": providers
         }
@@ -89,7 +90,7 @@ def save_provider(
         raise HTTPException(500, "Keine Firma konfiguriert.")
 
     new_provider = EmailProvider(
-        company_id=company.id,
+        customer_company_id=company.id,  # <── FIX
         provider=provider,
 
         smtp_host=smtp_host,
@@ -133,13 +134,13 @@ def activate_provider(
 
     # Alles deaktivieren
     db.query(EmailProvider).filter(
-        EmailProvider.company_id == company.id
+        EmailProvider.customer_company_id == company.id  # <── FIX
     ).update({"is_active": 0})
 
     # Ausgewählten aktivieren
     provider = db.query(EmailProvider).filter(
         EmailProvider.id == provider_id,
-        EmailProvider.company_id == company.id
+        EmailProvider.customer_company_id == company.id  # <── FIX
     ).first()
 
     if not provider:
@@ -169,7 +170,7 @@ def test_provider_email(
         raise HTTPException(500, "Keine Firma konfiguriert.")
 
     provider = db.query(EmailProvider).filter(
-        EmailProvider.company_id == company.id,
+        EmailProvider.customer_company_id == company.id,  # <── FIX
         EmailProvider.is_active == True
     ).first()
 
@@ -180,9 +181,9 @@ def test_provider_email(
 
     # Logging
     log = EmailLog(
-        company_id=company.id,
+        customer_company_id=company.id,  # <── FIX
         provider_id=provider.id,
-        recipient=to_email,
+        to_email=to_email,               # FIX Feldname
         subject="Test-E-Mail",
         status="success" if success else "failed",
         error_message=None if success else message
@@ -200,21 +201,21 @@ def test_provider_email(
 
 
 # ---------------------------------------------------
-# 5) E-Mail schreiben (Compose)
+# 5) COMPOSE (E-Mail erstellen)
 # ---------------------------------------------------
 @router.get("/compose")
 def compose_email(request: Request,
                   db: Session = Depends(get_db),
                   current_user: User = Depends(get_current_user)):
-
     return templates.TemplateResponse("email/compose.html", {
         "request": request,
+        "user": current_user,
         "active_tab": "compose"
     })
-    
-    
+
+
 # ---------------------------------------------------
-# 6) Versand-Protokoll (Logs)
+# 6) E-Mail LOGS
 # ---------------------------------------------------
 @router.get("/logs")
 def email_logs(request: Request,
@@ -224,11 +225,12 @@ def email_logs(request: Request,
     company = db.query(CustomerCompany).first()
 
     logs = db.query(EmailLog).filter(
-        EmailLog.company_id == company.id
+        EmailLog.customer_company_id == company.id  # <── FIX
     ).order_by(EmailLog.created_at.desc()).all()
 
     return templates.TemplateResponse("email/logs.html", {
-        "request": request,
-        "logs": logs,
-        "active_tab": "logs"
-    })
+    "request": request,
+    "user": current_user,
+    "logs": logs,
+    "active_tab": "logs"
+})

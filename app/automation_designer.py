@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from fastapi.templating import Jinja2Templates
+
 from app.database import get_db
 from app.auth import get_current_user
-from app.models import AutomationDesigner
-from fastapi.templating import Jinja2Templates
+from app.models import AutomationDesigner, User
 
 router = APIRouter(prefix="/dashboard/automation", tags=["Automation Designer"])
 
 templates = Jinja2Templates(directory="templates")
+
 
 # ----------------------------------------------------------
 # 1) Designer-Hauptseite
@@ -17,17 +19,19 @@ templates = Jinja2Templates(directory="templates")
 def designer_page(
     request: Request,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    user: User = Depends(get_current_user)   # ✅ Typ hinzugefügt
 ):
     workflows = db.query(AutomationDesigner).all()
+
     return templates.TemplateResponse(
         "dashboard/designer.html",
         {
             "request": request,
-            "workflows": workflows,
-            "current_user": user
+            "user": user,             # template expects "user"
+            "workflows": workflows
         }
     )
+
 
 # ----------------------------------------------------------
 # 2) Neu speichern
@@ -38,28 +42,32 @@ async def designer_save(
     description: str = Form(""),
     json_data: str = Form(...),
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     workflow = AutomationDesigner(
         name=name,
         description=description,
         config_json=json_data
     )
+
     db.add(workflow)
     db.commit()
+
     return RedirectResponse("/dashboard/automation/designer", status_code=303)
 
+
 # ----------------------------------------------------------
-# 3) Laden eines Workflows
+# 3) Workflow laden
 # ----------------------------------------------------------
 @router.get("/designer/{workflow_id}")
 def designer_edit_page(
     workflow_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     wf = db.query(AutomationDesigner).filter_by(id=workflow_id).first()
+
     if not wf:
         raise HTTPException(status_code=404, detail="Workflow nicht gefunden")
 
@@ -67,13 +75,14 @@ def designer_edit_page(
         "dashboard/designer.html",
         {
             "request": request,
-            "workflow": wf,
-            "current_user": user
+            "user": user,
+            "workflow": wf
         }
     )
 
+
 # ----------------------------------------------------------
-# 4) Änderungen speichern
+# 4) Update speichern
 # ----------------------------------------------------------
 @router.post("/designer/{workflow_id}/save")
 async def designer_update(
@@ -82,9 +91,11 @@ async def designer_update(
     description: str = Form(""),
     json_data: str = Form(...),
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
+
     wf = db.query(AutomationDesigner).filter_by(id=workflow_id).first()
+
     if not wf:
         raise HTTPException(status_code=404, detail="Workflow nicht gefunden")
 
@@ -93,4 +104,5 @@ async def designer_update(
     wf.config_json = json_data
 
     db.commit()
+
     return RedirectResponse("/dashboard/automation/designer", status_code=303)
