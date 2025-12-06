@@ -75,6 +75,43 @@ class ActivityLog(Base):
         )
         
 # ─────────────────────────────
+# 👥 Teams (Multi-Tenant)
+# ─────────────────────────────
+
+# Many-to-many association table for users and teams
+user_teams = Table(
+    "user_teams",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("team_id", Integer, ForeignKey("teams.id"), primary_key=True)
+)
+
+class Team(Base):
+    __tablename__ = "teams"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # 🏢 TENANT Zugehörigkeit
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Many-to-many relationship with users
+    members = relationship(
+        "User",
+        secondary=user_teams,
+        back_populates="teams"
+    )
+
+    # Relationship to company
+    company = relationship("Company", backref="teams")
+
+    def __repr__(self):
+        return f"<Team {self.name} company={self.company_id}>"
+
+# ─────────────────────────────
 # 👥 Kunden
 # ─────────────────────────────
 class Customer(Base):
@@ -754,6 +791,13 @@ class User(Base):
         "AIChatMessage",
         back_populates="user",
         cascade="all, delete-orphan"
+    )
+
+    # 🔁 Teams (many-to-many)
+    teams = relationship(
+        "Team",
+        secondary=user_teams,
+        back_populates="members"
     )
 
     # 🔐 Token-Methoden

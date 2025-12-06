@@ -611,7 +611,7 @@
               <i data-feather="briefcase"></i>
               <span>CRM & Vertrieb</span>
             </div>
-            <i class="arrow" id="crmMenuArrow" data-feather="chevron-down"></i>
+            <i class="arrow" id="crmMenuArrow" >▼</i>
           </button>
 
           <div id="crmMenu" class="nav-submenu">
@@ -722,15 +722,11 @@
 
         <!-- System -->
         <div class="nav-group">
-          <button class="nav-group-title" onclick="toggleMenu('systemMenu')">
-            <i data-feather="settings"></i>
-            <span>System</span>
-            <i
-              class="arrow"
-              id="systemMenuArrow"
-              data-feather="chevron-down"
-            ></i>
-          </button>
+        <button class="nav-group-title" onclick="toggleMenu('systemMenu')">
+          <i data-feather="settings"></i>
+          <span>System</span>
+          <i class="arrow" id="systemMenuArrow">▼</i>
+    </button>
 
           <div id="systemMenu" class="nav-submenu">
             <a href="/dashboard/users">👥 Benutzer</a>
@@ -877,23 +873,49 @@
 
   // ⭐⭐⭐ Sidebar-Menü auf/zu ⭐⭐⭐
   function toggleMenu(id) {
-    const menu = document.getElementById(id);
-    const arrow = document.getElementById(id + "Arrow");
+  const menu = document.getElementById(id);
+  const arrow = document.getElementById(id + "Arrow");
 
-    if (!menu || !arrow) return;
+  if (!menu || !arrow) return;
 
-    const isOpen = menu.style.display === "flex";
+  const isOpen = menu.style.display === "flex";
 
-    if (isOpen) {
-      menu.style.display = "none";
-      arrow.style.transform = "rotate(0deg)";
-    } else {
-      menu.style.display = "flex";
-      arrow.style.transform = "rotate(180deg)";
-    }
+  if (isOpen) {
+    menu.style.display = "none";
+    arrow.style.transform = "rotate(0deg)";
+    localStorage.removeItem("menu_open_" + id);
+  } else {
+    menu.style.display = "flex";
+    arrow.style.transform = "rotate(180deg)";
+    localStorage.setItem("menu_open_" + id, "1");
   }
+}
 
   // Feather Icons laden
   feather.replace();
+  // Menü-Zustände beim Reload wiederherstellen
+document.addEventListener("DOMContentLoaded", function() {
+  const groups = [
+    "crmMenu",
+    "supportMenu",
+    "marketingMenu",
+    "projectMenu",
+    "financeMenu",
+    "automationMenu",
+    "aiMenu",
+    "systemMenu"
+  ];
+
+  groups.forEach(id => {
+    const isOpen = localStorage.getItem("menu_open_" + id);
+    const menu = document.getElementById(id);
+    const arrow = document.getElementById(id + "Arrow");
+
+    if (isOpen && menu && arrow) {
+      menu.style.display = "flex";
+      arrow.style.transform = "rotate(180deg)";
+    }
+  });
+});
 </script>
 </html>

@@ -81,7 +81,7 @@ def create_company(
     require_role(current_user, ["admin", "mitarbeiter"])
 
     if db.query(CustomerCompany).filter_by(name=name).first():
-        raise HTTPException(400, "Firma existiert bereits")
+        return RedirectResponse(f"/dashboard/company_accounts?error=company_exists", status_code=303)
 
     company = CustomerCompany(
         name=name,

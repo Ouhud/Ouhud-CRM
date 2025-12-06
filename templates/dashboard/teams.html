@@ -1,0 +1,113 @@
+{% extends "base_dashboard.html" %} {% block title %}Teams – Ouhud CRM{%
+endblock %} {% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">Teams</h1>
+
+  <a href="/dashboard/teams/create" class="btn btn-primary">
+    <i class="fas fa-plus me-1"></i> Neues Team
+  </a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    {% if teams|length == 0 %}
+    <div class="p-4 text-center text-muted">
+      <i class="fas fa-users fa-2x mb-2"></i>
+      <p class="mb-0">Noch keine Teams vorhanden.</p>
+    </div>
+    {% else %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 25%">Name</th>
+            <th style="width: 40%">Beschreibung</th>
+            <th style="width: 20%">Mitglieder</th>
+            <th style="width: 15%">Aktionen</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for team in teams %}
+          <tr>
+            <td>
+              <strong>{{ team.name }}</strong>
+            </td>
+
+            <td class="text-muted">{{ team.description or '-' }}</td>
+
+            <td>
+              {% if team.members|length == 0 %}
+              <span class="badge bg-secondary">Keine Mitglieder</span>
+              {% else %} {% for member in team.members[:3] %}
+              <span class="badge bg-info text-dark me-1">
+                {{ member.first_name }} {{ member.last_name }}
+              </span>
+              {% endfor %} {% if team.members|length > 3 %}
+              <span class="badge bg-primary">
+                +{{ team.members|length - 3 }}
+              </span>
+              {% endif %} {% endif %}
+            </td>
+
+            <td>
+              <div class="btn-group">
+                <a
+                  href="/dashboard/teams/{{ team.id }}"
+                  class="btn btn-sm btn-outline-primary"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+
+                <a
+                  href="/dashboard/teams/edit/{{ team.id }}"
+                  class="btn btn-sm btn-outline-warning"
+                >
+                  <i class="fas fa-edit"></i>
+                </a>
+
+                <a
+                  href="/dashboard/teams/delete/{{ team.id }}"
+                  class="btn btn-sm btn-outline-danger"
+                  onclick="return confirm('Möchtest du dieses Team wirklich löschen?');"
+                >
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  /* Einheitlicher Abstand zwischen Header und Inhalt */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.4rem;
+  }
+
+  /* Badges optisch moderner */
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  /* Mobile Optimierung */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+  }
+</style>
+
+{% endblock %}

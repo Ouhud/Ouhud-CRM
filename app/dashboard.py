@@ -7,13 +7,14 @@ from pathlib import Path
 from fastapi import (
     APIRouter, Request, Depends, Form, UploadFile
 )
+from typing import Optional
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.auth import require_login
 from app.database import get_db
-from app.models import Customer, Invoice, InvoiceItem, CompanySettings
+from app.models import Customer, Invoice, InvoiceItem, CompanySettings, Company
 from app.utils.pdf_utils import generate_invoice_pdf
 
 from fastapi.background import BackgroundTasks
@@ -457,6 +458,53 @@ def company_settings_form(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/auth/login", status_code=303)
     settings = db.query(CompanySettings).filter(CompanySettings.company_id == request.state.company.id).first()
     return templates.TemplateResponse(request, "admin/company_settings.html", {"request": request, "user": user, "settings": settings})
+
+# ➕ Neues Unternehmen (Tenant) erstellen
+@router.post("/company/create")
+def create_company(
+    name: str = Form(...),
+    subdomain: Optional[str] = Form(None),
+    custom_domain: Optional[str] = Form(None),
+    owner_email: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),  # Fallback für alte Formulare
+    plan: str = Form("free"),
+    db: Session = Depends(get_db)
+):
+    # Verwende email als owner_email, falls owner_email nicht angegeben
+    if not owner_email:
+        owner_email = email
+    if not owner_email:
+        raise HTTPException(400, "E-Mail-Adresse erforderlich")
+    # Generiere Subdomain aus Name, falls nicht angegeben
+    if not subdomain:
+        subdomain = name.lower().replace(" ", "-").replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
+        # Stelle sicher, dass sie einzigartig ist
+        base_subdomain = subdomain
+        counter = 1
+        while db.query(Company).filter(Company.subdomain == subdomain).first():
+            subdomain = f"{base_subdomain}-{counter}"
+            counter += 1
+
+    # Prüfe, ob Subdomain oder Custom Domain bereits existiert
+    if db.query(Company).filter(Company.subdomain == subdomain).first():
+        raise HTTPException(400, "Subdomain existiert bereits")
+    if custom_domain and db.query(Company).filter(Company.custom_domain == custom_domain).first():
+        raise HTTPException(400, "Custom Domain existiert bereits")
+
+    # Erstelle neues Unternehmen
+    company = Company(
+        name=name,
+        subdomain=subdomain,
+        custom_domain=custom_domain,
+        owner_email=owner_email,
+        plan=plan,
+        status="active"
+    )
+
+    db.add(company)
+    db.commit()
+
+    return RedirectResponse(url="/dashboard/company", status_code=303)
 
 # 🏢 Firmeninfos speichern (inkl. Währung & Logo)
 @router.post("/company")

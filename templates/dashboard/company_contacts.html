@@ -145,6 +145,7 @@ Ouhud CRM{% endblock %} {% block content %}
     <div class="tab" data-target="contacts">👥 Kontakte</div>
     <div class="tab" data-target="create_company">➕ Firma erstellen</div>
     <div class="tab" data-target="create_contact">👤 Kontakt erstellen</div>
+    <div class="tab" data-target="create_tenant">🏢 Tenant erstellen</div>
   </div>
 
   <!-- ================================= -->
@@ -215,7 +216,7 @@ Ouhud CRM{% endblock %} {% block content %}
   <section id="create_company">
     <h2 class="text-xl font-bold">🏢 Neue Firma anlegen</h2>
     <div class="form-card">
-      <form action="/dashboard/company/create" method="post">
+      <form action="/dashboard/company_accounts/create" method="post">
         <label>Firmenname *</label>
         <input type="text" name="name" required />
 
@@ -248,7 +249,7 @@ Ouhud CRM{% endblock %} {% block content %}
   <section id="create_contact">
     <h2 class="text-xl font-bold">👤 Neuen Kontakt anlegen</h2>
     <div class="form-card">
-      <form action="/dashboard/company/create_contact" method="post">
+      <form action="/dashboard/company_accounts/create_contact" method="post">
         <label>Vorname *</label>
         <input type="text" name="first_name" required />
 

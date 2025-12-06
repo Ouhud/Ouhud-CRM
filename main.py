@@ -32,6 +32,7 @@ from app import (
     auth,
     dashboard,
     dashboard_users,
+    dashboard_teams,
     users,
     customers,
     admin,
@@ -121,6 +122,7 @@ app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(admin.router)
 app.include_router(dashboard_users.router)
+app.include_router(dashboard_teams.router)
 
 # Kernmodule
 app.include_router(users.router)
